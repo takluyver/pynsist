@@ -42,6 +42,15 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
     except FileNotFoundError:
         logger.warn("GPG not available - could not check signature of {0}".format(target))
 
+def copy_extra_files(filelist, files_dir):
+    for file in filelist:
+        file = file.rstrip('/\\')
+        if os.path.isdir(file):
+            target_name = pjoin(files_dir, os.path.basename(file))
+            shutil.copytree(file, target_name)
+        else:
+            shutil.copy2(file, files_dir)
+
 def write_nsis_file(nsi_file, definitions):
     with open(nsi_file, 'w') as f:
         for name, value in definitions.items():
@@ -53,9 +62,9 @@ def write_nsis_file(nsi_file, definitions):
 def run_nsis(nsi_file):
     call(['makensis', nsi_file])
 
-def all_steps(appname, version, script, packages=None, icon=DEFAULT_ICON,
-                py_version=DEFAULT_PY_VERSION, py_bitness=DEFAULT_BITNESS,
-                build_dir=DEFAULT_BUILD_DIR,
+def all_steps(appname, version, script, icon=DEFAULT_ICON, packages=None,
+                extra_files=None, py_version=DEFAULT_PY_VERSION,
+                py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=DEFAULT_INSTALLER_NAME):
     os.makedirs(build_dir, exist_ok=True)
     fetch_python(version=py_version, bitness=py_bitness, destination=build_dir)
@@ -71,6 +80,13 @@ def all_steps(appname, version, script, packages=None, icon=DEFAULT_ICON,
     else:
         os.mkdir(build_pkg_dir)
     copy_modules(packages or [], build_pkg_dir)
+    
+    # Extra files
+    files_dir = pjoin(build_dir, 'files')
+    if os.path.isdir(files_dir):
+        shutil.rmtree(files_dir)
+    os.mkdir(files_dir)
+    copy_extra_files(extra_files or [], files_dir)
 
     nsi_file = pjoin(build_dir, 'installer.nsi')
     definitions = {'PRODUCT_NAME': appname,
@@ -107,6 +123,7 @@ def main(argv=None):
         script = appcfg['script'],
         icon = appcfg.get('icon', DEFAULT_ICON),
         packages = cfg.get('Include', 'packages', fallback='').splitlines(),
+        extra_files = cfg.get('Include', 'files', fallback='').splitlines(),
         py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
         py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
         build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
