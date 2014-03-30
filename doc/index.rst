@@ -9,7 +9,7 @@ Quickstart
 ----------
 
 1. Get the tools. Install `NSIS <http://nsis.sourceforge.net/Download>`_, and
-   install pynsis from PyPI by running ``pip install pynsis``.
+   then install pynsis from PyPI by running ``pip install pynsis``.
 
 2. Add this code to the top of your script, above any other imports::
 
@@ -46,6 +46,8 @@ Quickstart
 4. Run ``pynsis installer.cfg`` to generate your installer. If ``pynsis`` isn't
    found, you can use ``python -m nsisbuilder installer.cfg`` instead.
 
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
