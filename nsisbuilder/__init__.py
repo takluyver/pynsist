@@ -66,3 +66,18 @@ def all_steps(appname, version, script, packages=None, icon=DEFAULT_ICON,
                   }
     write_nsis_file(nsi_file, definitions)
     run_nsis(nsi_file)
+
+def main(argv=None):
+    import argparse
+    argp = argparse.ArgumentParser(prog='pynsis')
+    argp.add_argument('config_file')
+    options = argp.parse_argv(argv)
+    
+    import configparser
+    cfg = configparser.ConfigParser()
+    cfg.read(options.config_file)
+    
+    #TODO:
+
+if __name__ == '__main__':
+    main()
