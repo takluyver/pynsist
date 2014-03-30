@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 from subprocess import check_output, call
+import sys
 from urllib.request import urlretrieve
 
 from .copymodules import copy_modules
@@ -14,7 +15,6 @@ _PKGDIR = os.path.dirname(__file__)
 DEFAULT_PY_VERSION = '3.3.2'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
-DEFAULT_INSTALLER_NAME = 'pynsis_installer.exe'
 if os.name == 'nt' and sys.maxsize == (2**63)-1:
     DEFAULT_BITNESS = 64
 else:
@@ -61,6 +61,10 @@ def copy_extra_files(filelist, build_dir):
             results.append((basename, False))
     return results
 
+def make_installer_name(appname, version):
+    s = appname + '_' + version + '.exe'
+    return s.replace(' ', '_')
+
 def _write_extra_files_install(f, extra_files, indent):
     for file, is_dir in extra_files:
         if is_dir:
@@ -99,7 +103,9 @@ def run_nsis(nsi_file):
 def all_steps(appname, version, script, icon=DEFAULT_ICON, packages=None,
                 extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
-                installer_name=DEFAULT_INSTALLER_NAME):
+                installer_name=None):
+    installer_name = installer_name or make_installer_name(appname, version)
+
     os.makedirs(build_dir, exist_ok=True)
     fetch_python(version=py_version, bitness=py_bitness, destination=build_dir)
     shutil.copy2(script, build_dir)
@@ -129,6 +135,8 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, packages=None,
                   }
     write_nsis_file(nsi_file, definitions, extra_files_copied)
     run_nsis(nsi_file)
+    
+    logger.info('Installer written to %s', pjoin(build_dir, installer_name))
 
 def main(argv=None):
     logger.setLevel(logging.INFO)
@@ -157,5 +165,5 @@ def main(argv=None):
         py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
         py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
         build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
-        installer_name = cfg.get('Build', 'installer_name', fallback=DEFAULT_INSTALLER_NAME),
+        installer_name = cfg.get('Build', 'installer_name', fallback=None),
     )
