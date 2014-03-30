@@ -28,8 +28,8 @@ Section -SETTINGS
 SectionEnd
 
 Section "Python ${PY_VERSION}" sec_py
-  File "python-${PY_VERSION}.msi"
-  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}.msi" /qb ALLUSERS=1'
+  File "python-${PY_VERSION}${ARCH_TAG}.msi"
+  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}{$ARCH_TAG}.msi" /qb ALLUSERS=1'
   Delete $INSTDIR\python-${PY_VERSION}.msi
 SectionEnd
 
