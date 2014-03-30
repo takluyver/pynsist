@@ -1,3 +1,4 @@
+import logging
 import os
 import shutil
 from subprocess import check_output, call
@@ -6,6 +7,7 @@ from urllib.request import urlretrieve
 from .copymodules import copy_modules
 
 pjoin = os.path.join
+logger = logging.getLogger(__name__)
 
 _PKGDIR = os.path.dirname(__file__)
 DEFAULT_PY_VERSION = '3.3.2'
@@ -28,7 +30,9 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
     url = 'http://python.org/ftp/python/{0}/python-{0}{1}.msi'.format(version, arch_tag)
     target = pjoin(destination, 'python-{0}{1}.msi'.format(version, arch_tag))
     if os.path.isfile(target):
+        logger.info('Python MSI already in build directory.')
         return
+    logger.info('Downloading Python MSI...')
     urlretrieve(url, target)
     urlretrieve(url+'.asc', target+'.asc')
     try:
@@ -36,7 +40,7 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
         check_output(['gpg', '--import', keys_file])
         check_output(['gpg', '--verify', target+'.asc'])
     except FileNotFoundError:
-        print("GPG not available - could not check signature of {0}".format(target))
+        logger.warn("GPG not available - could not check signature of {0}".format(target))
 
 def write_nsis_file(nsi_file, definitions):
     with open(nsi_file, 'w') as f:
@@ -81,14 +85,21 @@ def all_steps(appname, version, script, packages=None, icon=DEFAULT_ICON,
     run_nsis(nsi_file)
 
 def main(argv=None):
+    logger.setLevel(logging.INFO)
+    logger.addHandler(logging.StreamHandler())
+    
     import argparse
     argp = argparse.ArgumentParser(prog='pynsis')
     argp.add_argument('config_file')
     options = argp.parse_args(argv)
     
+    dirname, config_file = os.path.split(options.config_file)
+    if dirname:
+        os.chdir(dirname)
+    
     import configparser
     cfg = configparser.ConfigParser()
-    cfg.read(options.config_file)
+    cfg.read(config_file)
     appcfg = cfg['Application']
     all_steps(
         appname = appcfg['name'],

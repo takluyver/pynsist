@@ -29,7 +29,7 @@ SectionEnd
 
 Section "Python ${PY_VERSION}" sec_py
   File "python-${PY_VERSION}${ARCH_TAG}.msi"
-  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}{$ARCH_TAG}.msi" /qb ALLUSERS=1'
+  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi" /qb ALLUSERS=1'
   Delete $INSTDIR\python-${PY_VERSION}.msi
 SectionEnd
 
@@ -37,6 +37,7 @@ Section "!${PRODUCT_NAME}" sec_app
   SectionIn RO
   File ${SCRIPT}
   File ${PRODUCT_ICON}
+  File /r "pkgs\*"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}.lnk" "pyw" '"$INSTDIR\${SCRIPT}"' \
       "$INSTDIR\${PRODUCT_ICON}"
   WriteUninstaller $INSTDIR\uninstall.exe

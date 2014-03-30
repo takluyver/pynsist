@@ -10,6 +10,8 @@ class ModuleCopier:
     
     def copy(self, modname, target):
         loader = importlib.find_loader(modname, self.path)
+        if loader is None:
+            raise ImportError('Could not find %s' % modname)
         pkg = loader.is_package(modname)
         file = loader.get_filename(modname)
         if isinstance(loader, importlib.abc.FileLoader):
