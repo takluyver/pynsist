@@ -48,7 +48,7 @@ Quickstart
 .. toctree::
    :maxdepth: 2
 
-
+   cfgfile
 
 Indices and tables
 ==================
