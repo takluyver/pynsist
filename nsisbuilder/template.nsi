@@ -37,10 +37,11 @@ Section "!${PRODUCT_NAME}" sec_app
   SectionIn RO
   File ${SCRIPT}
   File ${PRODUCT_ICON}
-  File /r "files\*.*"
   SetOutPath "$INSTDIR\pkgs"
   File /r "pkgs\*.*"
   SetOutPath "$INSTDIR"
+  ;EXTRA_FILES_INSTALL
+  ;-------------------
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}.lnk" "pyw" '"$INSTDIR\${SCRIPT}"' \
       "$INSTDIR\${PRODUCT_ICON}"
   WriteUninstaller $INSTDIR\uninstall.exe
@@ -64,6 +65,8 @@ Section "Uninstall"
   Delete "$INSTDIR\${SCRIPT}"
   Delete "$INSTDIR\${PRODUCT_ICON}"
   RMDir /r "$INSTDIR\pkgs"
+  ;EXTRA_FILES_UNINSTALL
+  ;---------------------
   Delete "$SMPROGRAMS\${PRODUCT_NAME}.lnk"
   RMDir $INSTDIR
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"

@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import shutil
 from subprocess import check_output, call
 from urllib.request import urlretrieve
@@ -42,22 +43,55 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
     except FileNotFoundError:
         logger.warn("GPG not available - could not check signature of {0}".format(target))
 
-def copy_extra_files(filelist, files_dir):
+def copy_extra_files(filelist, build_dir):
+    results = []  # name, is_directory
     for file in filelist:
         file = file.rstrip('/\\')
+        basename = os.path.basename(file)
         if os.path.isdir(file):
-            target_name = pjoin(files_dir, os.path.basename(file))
+            target_name = pjoin(build_dir, basename)
+            if os.path.isdir(target_name):
+                shutil.rmtree(target_name)
+            elif os.path.exists(target_name):
+                os.unlink(target_name)
             shutil.copytree(file, target_name)
+            results.append((basename, True))
         else:
-            shutil.copy2(file, files_dir)
+            shutil.copy2(file, build_dir)
+            results.append((basename, False))
+    return results
 
-def write_nsis_file(nsi_file, definitions):
+def _write_extra_files_install(f, extra_files, indent):
+    for file, is_dir in extra_files:
+        if is_dir:
+            f.write(indent+'SetOutPath "$INSTDIR\{}"\n'.format(file))
+            f.write(indent+'File /r "{}\*.*"\n'.format(file))
+            f.write(indent+'SetOutPath "$INSTDIR"\n')
+        else:
+            f.write(indent+'File "{}"\n'.format(file))
+
+def _write_extra_files_uninstall(f, extra_files, indent):
+    for file, is_dir in extra_files:
+        if is_dir:
+            f.write(indent+'RMDir /r "$INSTDIR\{}"\n'.format(file))
+        else:
+            f.write(indent+'Delete "$INSTDIR\{}"\n'.format(file))
+
+def write_nsis_file(nsi_file, definitions, extra_files):
     with open(nsi_file, 'w') as f:
         for name, value in definitions.items():
             f.write('!define {} "{}"\n'.format(name, value))
         
         with open(pjoin(_PKGDIR, 'template.nsi')) as f2:
-            f.write(f2.read())
+            for line in f2:
+                f.write(line)
+                if line.strip() == ';EXTRA_FILES_INSTALL':
+                    indent = re.match('\s*', line).group(0)
+                    _write_extra_files_install(f, extra_files, indent)
+                elif line.strip() == ';EXTRA_FILES_UNINSTALL':
+                    indent = re.match('\s*', line).group(0)
+                    _write_extra_files_uninstall(f, extra_files, indent)
+                    
 
 def run_nsis(nsi_file):
     call(['makensis', nsi_file])
@@ -82,11 +116,7 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, packages=None,
     copy_modules(packages or [], build_pkg_dir)
     
     # Extra files
-    files_dir = pjoin(build_dir, 'files')
-    if os.path.isdir(files_dir):
-        shutil.rmtree(files_dir)
-    os.mkdir(files_dir)
-    copy_extra_files(extra_files or [], files_dir)
+    extra_files_copied = copy_extra_files(extra_files or [], build_dir)
 
     nsi_file = pjoin(build_dir, 'installer.nsi')
     definitions = {'PRODUCT_NAME': appname,
@@ -97,7 +127,7 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, packages=None,
                    'INSTALLER_NAME': installer_name,
                    'ARCH_TAG': '.amd64' if (py_bitness==64) else ''
                   }
-    write_nsis_file(nsi_file, definitions)
+    write_nsis_file(nsi_file, definitions, extra_files_copied)
     run_nsis(nsi_file)
 
 def main(argv=None):
