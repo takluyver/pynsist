@@ -41,6 +41,8 @@ Quickstart
        files = LICENSE
            data_files/
 
+  See :doc:`cfgfile` for more details about this.
+
 4. Run ``pynsis installer.cfg`` to generate your installer. If ``pynsis`` isn't
    found, you can use ``python -m nsisbuilder installer.cfg`` instead.
 
@@ -49,6 +51,7 @@ Quickstart
    :maxdepth: 2
 
    cfgfile
+   faq
 
 Indices and tables
 ==================

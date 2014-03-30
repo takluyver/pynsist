@@ -10,7 +10,8 @@ Application section
 .. describe:: name
 
   The user-readable name of your application. This will be used for various
-  display purposes in the installer, and for shortcuts when installed.
+  display purposes in the installer, and for shortcuts and the folder in
+  'Program Files'.
 
 .. describe:: version
 
@@ -25,6 +26,8 @@ Application section
   Path to a ``.ico`` file to be used for shortcuts to your application. pynsis
   has a default generic icon, but you probably want to replace it.
 
+.. _cfg_python:
+
 Python section
 --------------
 
@@ -35,9 +38,9 @@ Python section
 
 .. describe:: bitness (optional)
 
-  Whether to use 32-bit (x86) or 64-bit (x64) Python. On Windows, this defaults
-  to the version you're using, so that compiled modules will match. On other
-  platforms, it defaults to 32-bit.
+  ``32`` or ``64``, to use 32-bit (x86) or 64-bit (x64) Python. On Windows, this
+  defaults to the version you're using, so that compiled modules will match. On
+  other platforms, it defaults to 32-bit.
 
 Include section
 ---------------
