@@ -3,3 +3,4 @@ __pycache__
 build/
 MANIFEST
 dist/
+doc/_build
