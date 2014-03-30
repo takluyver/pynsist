@@ -1,0 +1,3 @@
+#!/usr/bin/python3
+from nsisbuilder import main
+main()

@@ -6,7 +6,7 @@ import zipfile, zipimport
 
 class ModuleCopier:
     def __init__(self, path=None):
-        self.path = path if (path is not None) else sys.path
+        self.path = path if (path is not None) else ([''] + sys.path)
     
     def copy(self, modname, target):
         loader = importlib.find_loader(modname, self.path)
