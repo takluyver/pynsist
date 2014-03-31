@@ -11,7 +11,7 @@ Windows versions of these packages. There are two ways to do this:
 
 - Get the importable packages/modules, either from a Windows installation, or
   by extracting them from an installer. Copy them into a folder called
-  ``pynsis_pkgs``, next to your ``installer.cfg`` file. pynsis will
+  ``pynsist_pkgs``, next to your ``installer.cfg`` file. pynsist will
   copy everything in this folder to the build directory.
 - Include exe/msi installers for those modules, and modify the ``.nsi`` template
   to extract and run these during installation. This can make your installer

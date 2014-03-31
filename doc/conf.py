@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pynsis documentation build configuration file, created by
+# pynsist documentation build configuration file, created by
 # sphinx-quickstart on Sun Mar 30 13:33:08 2014.
 #
 # This file is execfile()d with the current directory set to its
@@ -47,7 +47,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pynsis'
+project = u'pynsist'
 copyright = u'2014, Thomas Kluyver'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -180,7 +180,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pynsisdoc'
+htmlhelp_basename = 'pynsistdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -200,7 +200,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'pynsis.tex', u'pynsis Documentation',
+  ('index', 'pynsist.tex', u'pynsist Documentation',
    u'Thomas Kluyver', 'manual'),
 ]
 
@@ -230,7 +230,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pynsis', u'pynsis Documentation',
+    ('index', 'pynsist', u'pynsist Documentation',
      [u'Thomas Kluyver'], 1)
 ]
 
@@ -244,8 +244,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'pynsis', u'pynsis Documentation',
-   u'Thomas Kluyver', 'pynsis', 'One line description of project.',
+  ('index', 'pynsist', u'pynsist Documentation',
+   u'Thomas Kluyver', 'pynsist', 'One line description of project.',
    'Miscellaneous'),
 ]
 

@@ -1,18 +1,18 @@
 from distutils.core import setup
 
-setup(name='pynsis',
+setup(name='pynsist',
       version='0.1',
       description='Build Windows installers for Python apps',
       author='Thomas Kluyver',
       author_email='thomas@kluyver.me.uk',
       url='https://github.com/takluyver/pynsis',
-      packages=['nsisbuilder'],
-      package_data={'nsisbuilder': ['template.nsi',
-                                    'python-pubkeys.txt',
-                                    'glossyorb.ico',
-                                    ]
+      packages=['nsist'],
+      package_data={'nsist': ['template.nsi',
+                              'python-pubkeys.txt',
+                              'glossyorb.ico',
+                             ]
                     },
-      scripts=['scripts/pynsis'],
+      scripts=['scripts/pynsist'],
       classifiers=[
           'Intended Audience :: Developers',
           'License :: OSI Approved :: MIT License',

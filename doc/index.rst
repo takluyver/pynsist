@@ -1,7 +1,7 @@
-pynsis |version|
-================
+pynsist |version|
+=================
 
-pynsis is a tool to build Windows installers for your Python applications. The
+pynsist is a tool to build Windows installers for your Python applications. The
 installers bundle Python itself, so you can distribute your application to
 people who don't have Windows installed.
 
@@ -9,7 +9,7 @@ Quickstart
 ----------
 
 1. Get the tools. Install `NSIS <http://nsis.sourceforge.net/Download>`_, and
-   then install pynsis from PyPI by running ``pip install pynsis``.
+   then install pynsist from PyPI by running ``pip install pynsist``.
 
 2. Add this code to the top of your script, above any other imports::
 
@@ -43,8 +43,8 @@ Quickstart
 
   See :doc:`cfgfile` for more details about this.
 
-4. Run ``pynsis installer.cfg`` to generate your installer. If ``pynsis`` isn't
-   found, you can use ``python -m nsisbuilder installer.cfg`` instead.
+4. Run ``pynsist installer.cfg`` to generate your installer. If ``pynsist`` isn't
+   found, you can use ``python -m nsist installer.cfg`` instead.
 
 Contents
 --------
