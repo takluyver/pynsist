@@ -100,8 +100,8 @@ def write_nsis_file(nsi_file, definitions, extra_files):
 def run_nsis(nsi_file):
     call(['makensis', nsi_file])
 
-def all_steps(appname, version, script, icon=DEFAULT_ICON, packages=None,
-                extra_files=None, py_version=DEFAULT_PY_VERSION,
+def all_steps(appname, version, script, icon=DEFAULT_ICON, console=False,
+                packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None):
     installer_name = installer_name or make_installer_name(appname, version)
@@ -131,7 +131,8 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, packages=None,
                    'SCRIPT': os.path.basename(script),
                    'PRODUCT_ICON': os.path.basename(icon),
                    'INSTALLER_NAME': installer_name,
-                   'ARCH_TAG': '.amd64' if (py_bitness==64) else ''
+                   'ARCH_TAG': '.amd64' if (py_bitness==64) else '',
+                   'PY_EXE': 'py' if console else 'pyw',
                   }
     write_nsis_file(nsi_file, definitions, extra_files_copied)
     run_nsis(nsi_file)
@@ -160,6 +161,7 @@ def main(argv=None):
         version = appcfg['version'],
         script = appcfg['script'],
         icon = appcfg.get('icon', DEFAULT_ICON),
+        console = appcfg.getboolean('console', fallback=False),
         packages = cfg.get('Include', 'packages', fallback='').splitlines(),
         extra_files = cfg.get('Include', 'files', fallback='').splitlines(),
         py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),

@@ -42,7 +42,7 @@ Section "!${PRODUCT_NAME}" sec_app
   SetOutPath "$INSTDIR"
   ;EXTRA_FILES_INSTALL
   ;-------------------
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}.lnk" "pyw" '"$INSTDIR\${SCRIPT}"' \
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}.lnk" "${PY_EXE}" '"$INSTDIR\${SCRIPT}"' \
       "$INSTDIR\${PRODUCT_ICON}"
   WriteUninstaller $INSTDIR\uninstall.exe
   ; Add ourselves to Add/remove programs

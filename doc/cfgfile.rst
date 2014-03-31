@@ -26,6 +26,12 @@ Application section
   Path to a ``.ico`` file to be used for shortcuts to your application. pynsis
   has a default generic icon, but you probably want to replace it.
 
+.. describe:: console (optional)
+
+   If ``true``, shortcuts will be created using the ``py`` launcher, which opens
+   a console for the process. If ``false``, or not specified, they will use the
+   ``pyw`` launcher, which doesn't create a console.
+
 .. _cfg_python:
 
 Python section
