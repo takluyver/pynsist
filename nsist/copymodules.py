@@ -50,3 +50,8 @@ def copy_modules(modnames, target, path=None):
             # Already there, no need to copy it.
             continue
         mc.copy(modname, target)
+    
+    if not modnames:
+        # NSIS abhors an empty folder, so give it a file to find.
+        with open(os.path.join(target, 'placeholder'), 'w') as f:
+            f.write('This file only exists so NSIS finds something in this directory.')

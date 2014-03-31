@@ -98,7 +98,7 @@ def write_nsis_file(nsi_file, definitions, extra_files):
                     
 
 def run_nsis(nsi_file):
-    call(['makensis', nsi_file])
+    return call(['makensis', nsi_file])
 
 def all_steps(appname, version, script, icon=DEFAULT_ICON, console=False,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
@@ -135,9 +135,10 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, console=False,
                    'PY_EXE': 'py' if console else 'pyw',
                   }
     write_nsis_file(nsi_file, definitions, extra_files_copied)
-    run_nsis(nsi_file)
+    exitcode = run_nsis(nsi_file)
     
-    logger.info('Installer written to %s', pjoin(build_dir, installer_name))
+    if not exitcode:
+        logger.info('Installer written to %s', pjoin(build_dir, installer_name))
 
 def main(argv=None):
     logger.setLevel(logging.INFO)
