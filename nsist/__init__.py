@@ -115,8 +115,8 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, packages=None,
     build_pkg_dir = pjoin(build_dir, 'pkgs')
     if os.path.isdir(build_pkg_dir):
         shutil.rmtree(build_pkg_dir)
-    if os.path.isdir('pynsis_pkgs'):
-        shutil.copytree('pynsis_pkgs', build_pkg_dir)
+    if os.path.isdir('pynsist_pkgs'):
+        shutil.copytree('pynsist_pkgs', build_pkg_dir)
     else:
         os.mkdir(build_pkg_dir)
     copy_modules(packages or [], build_pkg_dir)
@@ -143,7 +143,7 @@ def main(argv=None):
     logger.addHandler(logging.StreamHandler())
     
     import argparse
-    argp = argparse.ArgumentParser(prog='pynsis')
+    argp = argparse.ArgumentParser(prog='pynsist')
     argp.add_argument('config_file')
     options = argp.parse_args(argv)
     
