@@ -23,3 +23,33 @@ When running on non-Windows systems, pynsis will bundle a 32-bit version of
 Python by default, though you can override this :ref:`in the config file <cfg_python>`.
 Whichever method you use, compiled libraries must have the same bit-ness as
 the version of Python that's installed.
+
+Alternatives
+------------
+
+Other ways to distribute applications to users without Python installed include
+freeze tools, like `cx_Freeze <http://cx-freeze.sourceforge.net/>`_ and
+`PyInstaller <http://www.pyinstaller.org/>`_, and Python compilers like
+`Nuitka <http://nuitka.net/>`_.
+
+pynsist has some advantages:
+
+* Python code often does things—like using ``__file__`` to find its
+  location on disk, or :data:`sys.executable` to launch Python processes—which
+  don't work when it's run from a frozen exe. pynsist just installs Python files,
+  so it avoids all these problems.
+* It's quite easy to make Windows installers on other platforms, which is
+  difficult with other tools.
+
+And some disadvantages:
+
+* Installers tend to be bigger because you're bundling the whole Python standard
+  library.
+* You don't get an exe for your application, just a start menu shortcut to launch
+  it.
+* pynsist only makes Windows installers.
+
+Popular freeze tools also try to automatically detect what packages you're using.
+pynsist could do the same thing, but in my experience, it's complex and often
+misses things, so for now it expects an explicit list of the packages
+your application needs.
