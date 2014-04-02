@@ -1,12 +1,12 @@
 import logging
 import os
-import re
 import shutil
 from subprocess import check_output, call
 import sys
 from urllib.request import urlretrieve
 
 from .copymodules import copy_modules
+from .nsiswriter import NSISFileWriter
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
@@ -65,38 +65,6 @@ def make_installer_name(appname, version):
     s = appname + '_' + version + '.exe'
     return s.replace(' ', '_')
 
-def _write_extra_files_install(f, extra_files, indent):
-    for file, is_dir in extra_files:
-        if is_dir:
-            f.write(indent+'SetOutPath "$INSTDIR\{}"\n'.format(file))
-            f.write(indent+'File /r "{}\*.*"\n'.format(file))
-            f.write(indent+'SetOutPath "$INSTDIR"\n')
-        else:
-            f.write(indent+'File "{}"\n'.format(file))
-
-def _write_extra_files_uninstall(f, extra_files, indent):
-    for file, is_dir in extra_files:
-        if is_dir:
-            f.write(indent+'RMDir /r "$INSTDIR\{}"\n'.format(file))
-        else:
-            f.write(indent+'Delete "$INSTDIR\{}"\n'.format(file))
-
-def write_nsis_file(nsi_file, definitions, extra_files):
-    with open(nsi_file, 'w') as f:
-        for name, value in definitions.items():
-            f.write('!define {} "{}"\n'.format(name, value))
-        
-        with open(pjoin(_PKGDIR, 'template.nsi')) as f2:
-            for line in f2:
-                f.write(line)
-                if line.strip() == ';EXTRA_FILES_INSTALL':
-                    indent = re.match('\s*', line).group(0)
-                    _write_extra_files_install(f, extra_files, indent)
-                elif line.strip() == ';EXTRA_FILES_UNINSTALL':
-                    indent = re.match('\s*', line).group(0)
-                    _write_extra_files_uninstall(f, extra_files, indent)
-                    
-
 def run_nsis(nsi_file):
     return call(['makensis', nsi_file])
 
@@ -121,20 +89,23 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, console=False,
         os.mkdir(build_pkg_dir)
     copy_modules(packages or [], build_pkg_dir)
     
+    nsis_writer = NSISFileWriter(pjoin(_PKGDIR, 'template.nsi'),
+        definitions = {'PRODUCT_NAME': appname,
+                       'PRODUCT_VERSION': version,
+                       'PY_VERSION': py_version,
+                       'SCRIPT': os.path.basename(script),
+                       'PRODUCT_ICON': os.path.basename(icon),
+                       'INSTALLER_NAME': installer_name,
+                       'ARCH_TAG': '.amd64' if (py_bitness==64) else '',
+                       'PY_EXE': 'py' if console else 'pyw',
+                      }
+        )
     # Extra files
-    extra_files_copied = copy_extra_files(extra_files or [], build_dir)
+    nsis_writer.extra_files = copy_extra_files(extra_files or [], build_dir)
 
     nsi_file = pjoin(build_dir, 'installer.nsi')
-    definitions = {'PRODUCT_NAME': appname,
-                   'PRODUCT_VERSION': version,
-                   'PY_VERSION': py_version,
-                   'SCRIPT': os.path.basename(script),
-                   'PRODUCT_ICON': os.path.basename(icon),
-                   'INSTALLER_NAME': installer_name,
-                   'ARCH_TAG': '.amd64' if (py_bitness==64) else '',
-                   'PY_EXE': 'py' if console else 'pyw',
-                  }
-    write_nsis_file(nsi_file, definitions, extra_files_copied)
+    nsis_writer.write(nsi_file)
+
     exitcode = run_nsis(nsi_file)
     
     if not exitcode:
