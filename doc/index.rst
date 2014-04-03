@@ -5,6 +5,8 @@ pynsist is a tool to build Windows installers for your Python applications. The
 installers bundle Python itself, so you can distribute your application to
 people who don't have Windows installed.
 
+At present, pynsist requires Python 3.3 or above.
+
 Quickstart
 ----------
 
@@ -54,6 +56,9 @@ Contents
 
    cfgfile
    faq
+
+See also the `examples folder <https://github.com/takluyver/pynsist/tree/master/examples>`_
+in the repository.
 
 Indices and tables
 ==================
