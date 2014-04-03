@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 _PKGDIR = os.path.dirname(__file__)
 DEFAULT_PY_VERSION = '3.3.2'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
+DEFAULT_NSI_TEMPLATE = pjoin(_PKGDIR, 'template.nsi')
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
 if os.name == 'nt' and sys.maxsize == (2**63)-1:
     DEFAULT_BITNESS = 64
@@ -71,7 +72,7 @@ def run_nsis(nsi_file):
 def all_steps(appname, version, script, icon=DEFAULT_ICON, console=False,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
-                installer_name=None):
+                installer_name=None, nsi_template=DEFAULT_NSI_TEMPLATE):
     installer_name = installer_name or make_installer_name(appname, version)
 
     os.makedirs(build_dir, exist_ok=True)
@@ -88,8 +89,8 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, console=False,
     else:
         os.mkdir(build_pkg_dir)
     copy_modules(packages or [], build_pkg_dir)
-    
-    nsis_writer = NSISFileWriter(pjoin(_PKGDIR, 'template.nsi'),
+
+    nsis_writer = NSISFileWriter(nsi_template,
         definitions = {'PRODUCT_NAME': appname,
                        'PRODUCT_VERSION': version,
                        'PY_VERSION': py_version,
@@ -140,4 +141,5 @@ def main(argv=None):
         py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
         build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
         installer_name = cfg.get('Build', 'installer_name', fallback=None),
+        nsi_template = cfg.get('Build', 'nsi_template', fallback=DEFAULT_NSI_TEMPLATE),
     )

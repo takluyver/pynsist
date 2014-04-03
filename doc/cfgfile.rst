@@ -71,3 +71,14 @@ Build section
 
    The filename of the installer, relative to the build directory. The default
    is made from your application name and version.
+
+.. describe:: nsi_template (optional)
+
+   The path of a template .nsi file to specify further details of the installer.
+   The default template is `part of pynsist <https://github.com/takluyver/pynsist/blob/master/nsist/template.nsi>`_.
+
+   pynsist will add a definitions section at the top of the template, and look
+   for tags ``;EXTRA_FILES_INSTALL`` and ``;EXTRA_FILES_UNINSTALL`` to insert lists
+   of extra files and folders to be installed. See the
+   `NSIS Scripting Reference <http://nsis.sourceforge.net/Docs/Chapter4.html>`_
+   for details of the format.
