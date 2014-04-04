@@ -44,6 +44,21 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
     except FileNotFoundError:
         logger.warn("GPG not available - could not check signature of {0}".format(target))
 
+SCRIPT_TEMPLATE = """#!python{qualifier}
+import sys
+sys.path.insert(0, 'pkgs')
+from {module} import {func}
+{func}()
+"""
+
+def write_script(entrypt, python_version, bitness, target):
+    qualifier = '.'.join(python_version.split('.')[:2])
+    if bitness == 32:
+        qualifier += '-32'
+    module, func = entrypt.split(":")
+    with open(target, 'w') as f:
+        f.write(SCRIPT_TEMPLATE.format(qualifier=qualifier, module=module, func=func))
+
 def copy_extra_files(filelist, build_dir):
     results = []  # name, is_directory
     for file in filelist:
@@ -69,7 +84,7 @@ def make_installer_name(appname, version):
 def run_nsis(nsi_file):
     return call(['makensis', nsi_file])
 
-def all_steps(appname, version, script, icon=DEFAULT_ICON, console=False,
+def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON, console=False,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=DEFAULT_NSI_TEMPLATE):
@@ -77,7 +92,17 @@ def all_steps(appname, version, script, icon=DEFAULT_ICON, console=False,
 
     os.makedirs(build_dir, exist_ok=True)
     fetch_python(version=py_version, bitness=py_bitness, destination=build_dir)
-    shutil.copy2(script, build_dir)
+
+    if entry_point is not None:
+        if script is not None:
+            raise ValueError('Both script and entry_point were specified.')
+        script = 'launch.py'
+        write_script(entry_point, py_version, py_bitness, pjoin(build_dir, script))
+    elif script is not None:
+        shutil.copy2(script, build_dir)
+    else:
+        raise ValueError('Neither script nor entry_point was specified.')
+
     shutil.copy2(icon, build_dir)
     
     # Packages
@@ -132,7 +157,8 @@ def main(argv=None):
     all_steps(
         appname = appcfg['name'],
         version = appcfg['version'],
-        script = appcfg['script'],
+        script = appcfg.get('script', fallback=None),
+        entry_point = appcfg.get('entry_point', fallback=None),
         icon = appcfg.get('icon', DEFAULT_ICON),
         console = appcfg.getboolean('console', fallback=False),
         packages = cfg.get('Include', 'packages', fallback='').splitlines(),

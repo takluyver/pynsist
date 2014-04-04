@@ -17,9 +17,32 @@ Application section
 
   The version number of your application.
 
+.. describe:: entry_point
+
+   The function to launch your application, in the format ``module:function``.
+   Dots are allowed in the module part. pynsist will create a script like this,
+   plus some boilerplate::
+
+       from module import function
+       function()
+
 .. describe:: script
 
-  Path to the Python script which launches your application.
+   Path to the Python script which launches your application.
+
+   Ensure that this boilerplate code is at the top of your script::
+
+       #!python3.3
+       import sys
+       sys.path.insert(0, 'pkgs')
+
+   The first line tells it which version of Python to run with. If you use
+   binary packages, packages compiled for Python 3.3 won't work with Python 3.4.
+   The other lines make sure it can find the packages installed along with your
+   application.
+
+.. note::
+   Either ``entry_point`` or ``script`` must be specified, but not both.
 
 .. describe:: icon (optional)
 
