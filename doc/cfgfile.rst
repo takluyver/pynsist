@@ -42,7 +42,8 @@ Application section
    application.
 
 .. note::
-   Either ``entry_point`` or ``script`` must be specified, but not both.
+   Either ``entry_point`` or ``script`` must be specified, but not both. Specifying
+   ``entry_point`` is normally easier and more reliable.
 
 .. describe:: icon (optional)
 
