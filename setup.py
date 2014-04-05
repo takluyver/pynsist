@@ -1,8 +1,12 @@
 from distutils.core import setup
 
+with open('README.rst', 'r') as f:
+    readme=f.read()
+
 setup(name='pynsist',
       version='0.1',
       description='Build Windows installers for Python apps',
+      long_description=readme,
       author='Thomas Kluyver',
       author_email='thomas@kluyver.me.uk',
       url='https://github.com/takluyver/pynsis',
