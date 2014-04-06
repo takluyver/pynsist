@@ -1,3 +1,5 @@
+"""Build NSIS installers for Python applications.
+"""
 import logging
 import os
 import shutil
@@ -52,6 +54,11 @@ from {module} import {func}
 """
 
 def write_script(entrypt, python_version, bitness, target):
+    """Write a launcher script from a 'module:function' entry point
+    
+    python_version and bitness are used to write an appropriate shebang line
+    for the PEP 397 Windows launcher.
+    """
     qualifier = '.'.join(python_version.split('.')[:2])
     if bitness == 32:
         qualifier += '-32'
@@ -60,6 +67,11 @@ def write_script(entrypt, python_version, bitness, target):
         f.write(SCRIPT_TEMPLATE.format(qualifier=qualifier, module=module, func=func))
 
 def copy_extra_files(filelist, build_dir):
+    """Copy a list of files into the build directory.
+    
+    Returns a list of 2-tuples: the filename without any path coomponents,
+    and a boolean that is True if the file is a directory.
+    """
     results = []  # name, is_directory
     for file in filelist:
         file = file.rstrip('/\\')
@@ -78,16 +90,26 @@ def copy_extra_files(filelist, build_dir):
     return results
 
 def make_installer_name(appname, version):
+    """Generate the filename of the installer exe
+    
+    e.g. My_App_1.0.exe
+    """
     s = appname + '_' + version + '.exe'
     return s.replace(' ', '_')
 
 def run_nsis(nsi_file):
+    """Runs makensis using the specified .nsi file"""
     return call(['makensis', nsi_file])
 
 def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON, console=False,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=DEFAULT_NSI_TEMPLATE):
+    """Run all the steps to build an installer.
+    
+    For details of the parameters, see the documentation for the config file
+    options.
+    """
     installer_name = installer_name or make_installer_name(appname, version)
 
     os.makedirs(build_dir, exist_ok=True)
@@ -138,6 +160,11 @@ def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON
         logger.info('Installer written to %s', pjoin(build_dir, installer_name))
 
 def main(argv=None):
+    """Make an installer from the command line.
+    
+    This parses command line arguments and a config file, and calls
+    :func:`all_steps` with the extracted information.
+    """
     logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
     

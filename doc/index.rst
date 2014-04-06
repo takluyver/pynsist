@@ -54,6 +54,14 @@ Contents
 See also the `examples folder <https://github.com/takluyver/pynsist/tree/master/examples>`_
 in the repository.
 
+The API is not yet documented here, because I'm still working out how it should
+be structured. The functions and classes have docstrings, and you're welcome to
+use them directly, though they may change in the future.
+
+.. seealso::
+
+   `pynsist source code on Github <https://github.com/takluyver/pynsist>`_
+
 Indices and tables
 ==================
 

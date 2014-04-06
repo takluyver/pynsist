@@ -5,10 +5,22 @@ import sys
 import zipfile, zipimport
 
 class ModuleCopier:
+    """Finds and copies importable Python modules and packages.
+    
+    This uses importlib to locate modules.
+    """
     def __init__(self, path=None):
         self.path = path if (path is not None) else ([''] + sys.path)
     
     def copy(self, modname, target):
+        """Copy the importable module 'modname' to the directory 'target'.
+        
+        modname should be a top-level import, i.e. without any dots. Packages
+        are always copied whole.
+        
+        This can currently copy regular filesystem files and directories, and
+        extract modules and packages from appropriately structured zip files.
+        """
         loader = importlib.find_loader(modname, self.path)
         if loader is None:
             raise ImportError('Could not find %s' % modname)
