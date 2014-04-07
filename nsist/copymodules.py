@@ -1,4 +1,4 @@
-import importlib, importlib.abc
+import importlib, importlib.abc, importlib.machinery
 import os
 import shutil
 import sys
@@ -25,8 +25,12 @@ class ModuleCopier:
         if loader is None:
             raise ImportError('Could not find %s' % modname)
         pkg = loader.is_package(modname)
-        file = loader.get_filename(modname)
-        if isinstance(loader, importlib.abc.FileLoader):
+
+        if isinstance(loader, importlib.machinery.ExtensionFileLoader):
+            shutil.copy2(loader.path, target)
+
+        elif isinstance(loader, importlib.abc.FileLoader):
+            file = loader.get_filename(modname)
             if pkg:
                 pkgdir, basename = os.path.split(file)
                 assert basename.startswith('__init__')
@@ -36,6 +40,7 @@ class ModuleCopier:
                 shutil.copy2(file, target)
         
         elif isinstance(loader, zipimport.zipimporter):
+            file = loader.get_filename(modname)
             prefix = loader.archive + '/' + loader.prefix
             assert file.startswith(prefix)
             path_in_zip = file[len(prefix):]
