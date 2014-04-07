@@ -6,6 +6,10 @@ import shutil
 from subprocess import check_output, call
 import sys
 from urllib.request import urlretrieve
+if os.name == 'nt':
+    import winreg
+else:
+    winreg = None
 
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
@@ -103,8 +107,15 @@ def run_nsis(nsi_file):
     Returns the exit code.
     """
     try:
-        return call(['makensis', nsi_file])
+        if os.name == 'nt':
+            makensis = pjoin(winreg.QueryValue(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\NSIS'),
+                                     'makensis.exe')
+        else:
+            makensis = 'makensis'
+        return call([makensis, nsi_file])
     except FileNotFoundError:
+        # FileNotFoundError catches both the registry lookup failing and call()
+        # not finding makensis
         print("makensis was not found. Install NSIS and try again.")
         print("http://nsis.sourceforge.net/Download")
         return 1
@@ -136,6 +147,7 @@ def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON
     shutil.copy2(icon, build_dir)
     
     # Packages
+    logger.info("Copying packages into build directory...")
     build_pkg_dir = pjoin(build_dir, 'pkgs')
     if os.path.isdir(build_pkg_dir):
         shutil.rmtree(build_pkg_dir)
