@@ -13,7 +13,7 @@ from .nsiswriter import NSISFileWriter
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
 
-_PKGDIR = os.path.dirname(__file__)
+_PKGDIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_PY_VERSION = '3.3.2'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
 DEFAULT_NSI_TEMPLATE = pjoin(_PKGDIR, 'template.nsi')
