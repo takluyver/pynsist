@@ -98,8 +98,16 @@ def make_installer_name(appname, version):
     return s.replace(' ', '_')
 
 def run_nsis(nsi_file):
-    """Runs makensis using the specified .nsi file"""
-    return call(['makensis', nsi_file])
+    """Runs makensis using the specified .nsi file
+    
+    Returns the exit code.
+    """
+    try:
+        return call(['makensis', nsi_file])
+    except FileNotFoundError:
+        print("makensis was not found. Install NSIS and try again.")
+        print("http://nsis.sourceforge.net/Download")
+        return 1
 
 def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON, console=False,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
