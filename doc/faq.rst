@@ -40,6 +40,8 @@ pynsist has some advantages:
   so it avoids all these problems.
 * It's quite easy to make Windows installers on other platforms, which is
   difficult with other tools.
+* The tool itself is simpler to understand, and less likely to need updating for
+  new Python versions.
 
 And some disadvantages:
 
