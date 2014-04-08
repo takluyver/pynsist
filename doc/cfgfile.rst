@@ -26,9 +26,10 @@ Application section
        from module import function
        function()
 
-.. describe:: script
+.. describe:: script (optional)
 
-   Path to the Python script which launches your application.
+   Path to the Python script which launches your application, as an alternative
+   to ``entry_point``.
 
    Ensure that this boilerplate code is at the top of your script::
 
