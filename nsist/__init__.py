@@ -1,12 +1,21 @@
 """Build NSIS installers for Python applications.
 """
+import errno
 import logging
 import os
 import shutil
 from subprocess import check_output, call
 import sys
-from urllib.request import urlretrieve
-if os.name == 'nt':
+
+PY2 = sys.version_info[0] == 2
+
+if PY2:
+    from urllib import urlretrieve
+else:
+    from urllib.request import urlretrieve
+if os.name == 'nt' and PY2:
+    import _winreg as winreg
+elif os.name == 'nt':
     import winreg
 else:
     winreg = None
@@ -18,7 +27,7 @@ pjoin = os.path.join
 logger = logging.getLogger(__name__)
 
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
-DEFAULT_PY_VERSION = '3.3.2'
+DEFAULT_PY_VERSION = '2.7.6' if PY2 else '3.4.0'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
 DEFAULT_NSI_TEMPLATE = pjoin(_PKGDIR, 'template.nsi')
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
@@ -47,8 +56,24 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
         keys_file = os.path.join(_PKGDIR, 'python-pubkeys.txt')
         check_output(['gpg', '--import', keys_file])
         check_output(['gpg', '--verify', target+'.asc'])
-    except FileNotFoundError:
+    except OSError:
         logger.warn("GPG not available - could not check signature of {0}".format(target))
+
+
+def fetch_pylauncher(bitness=DEFAULT_BITNESS, destination=DEFAULT_BUILD_DIR):
+    """Fetch the MSI for PyLauncher (required for Python2.x).
+
+    It will be placed in the destination directory.
+    """
+    arch_tag = '.amd64' if (bitness == 64) else ''
+    url = ("https://bitbucket.org/vinay.sajip/pylauncher/downloads/"
+           "launchwin{0}.msi".format(arch_tag))
+    target = pjoin(destination, 'launchwin{0}.msi'.format(arch_tag))
+    if os.path.isfile(target):
+        logger.info('PyLauncher MSI already in build directory.')
+        return
+    logger.info('Downloading PyLauncher MSI...')
+    urlretrieve(url, target)
 
 SCRIPT_TEMPLATE = """#!python{qualifier}
 import sys
@@ -113,9 +138,9 @@ def run_nsis(nsi_file):
         else:
             makensis = 'makensis'
         return call([makensis, nsi_file])
-    except FileNotFoundError:
-        # FileNotFoundError catches both the registry lookup failing and call()
-        # not finding makensis
+    except OSError:
+        # OSError catches both the registry lookup failing and call() not
+        # finding makensis
         print("makensis was not found. Install NSIS and try again.")
         print("http://nsis.sourceforge.net/Download")
         return 1
@@ -131,8 +156,17 @@ def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON
     """
     installer_name = installer_name or make_installer_name(appname, version)
 
-    os.makedirs(build_dir, exist_ok=True)
+    try:
+        os.makedirs(build_dir)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            # It's okay if the build directory already exists
+            pass
+        else:
+            raise e
     fetch_python(version=py_version, bitness=py_bitness, destination=build_dir)
+    if PY2:
+        fetch_pylauncher(bitness=py_bitness, destination=build_dir)
 
     if entry_point is not None:
         if script is not None:
