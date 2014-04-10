@@ -16,14 +16,14 @@ class NSISFileWriter(object):
         self.template_file = template_file
         self.definitions = definitions or {}
         self.extra_files = []
-        self.write_after_line = {
-                ';EXTRA_FILES_INSTALL': self.write_extra_files_install,
-                ';EXTRA_FILES_UNINSTALL': self.write_extra_files_uninstall,
+        self.template_fields = {
+                ';EXTRA_FILES_INSTALL': self.make_extra_files_install,
+                ';EXTRA_FILES_UNINSTALL': self.make_extra_files_uninstall,
         }
         if PY2:
-            self.write_after_line.update({
-                ';PYLAUNCHER_INSTALL': self.write_pylauncher_install,
-                ';PYLAUNCHER_HELP': self.write_pylauncher_help})
+            self.template_fields.update({
+                ';PYLAUNCHER_INSTALL': self.make_pylauncher_install,
+                ';PYLAUNCHER_HELP': self.make_pylauncher_help})
 
     def write_definitions(self, f):
         """Write definition lines at the start of the file.
@@ -33,7 +33,7 @@ class NSISFileWriter(object):
         for name, value in self.definitions.items():
             f.write('!define {} "{}"\n'.format(name, value))
     
-    def write_extra_files_install(self, f, indent):
+    def make_extra_files_install(self):
         """Write the commands to install the list of extra files and directories.
         
         :param f: A text-mode writable file handle
@@ -41,13 +41,13 @@ class NSISFileWriter(object):
         """
         for file, is_dir in self.extra_files:
             if is_dir:
-                f.write(indent+'SetOutPath "$INSTDIR\{}"\n'.format(file))
-                f.write(indent+'File /r "{}\*.*"\n'.format(file))
-                f.write(indent+'SetOutPath "$INSTDIR"\n')
+                yield 'SetOutPath "$INSTDIR\{}"\n'.format(file)
+                yield 'File /r "{}\*.*"\n'.format(file)
+                yield 'SetOutPath "$INSTDIR"\n'
             else:
-                f.write(indent+'File "{}"\n'.format(file))
+                yield 'File "{}"\n'.format(file)
 
-    def write_extra_files_uninstall(self, f, indent):
+    def make_extra_files_uninstall(self):
         """Write the commands to uninstall the list of extra files and directories.
         
         :param f: A text-mode writable file handle
@@ -55,22 +55,23 @@ class NSISFileWriter(object):
         """
         for file, is_dir in self.extra_files:
             if is_dir:
-                f.write(indent+'RMDir /r "$INSTDIR\{}"\n'.format(file))
+                yield 'RMDir /r "$INSTDIR\{}"\n'.format(file)
             else:
-                f.write(indent+'Delete "$INSTDIR\{}"\n'.format(file))
+                yield 'Delete "$INSTDIR\{}"\n'.format(file)
 
-    def write_pylauncher_install(self, f, indent):
-        f.write(indent+"Section \"PyLauncher\" sec_pylauncher\n")
-        f.write(indent+"File \"launchwin${ARCH_TAG}.msi\"\n")
-        f.write(indent+"ExecWait 'msiexec /i \"$INSTDIR\launchwin${ARCH_TAG}.msi\" /qb ALLUSERS=1'\n")
-        f.write(indent+"Delete $INSTDIR\launchwin${ARCH_TAG}.msi\n")
-        f.write(indent+"SectionEnd\n")
+    def make_pylauncher_install(self):
+        return ["Section \"PyLauncher\" sec_pylauncher",
+            "    File \"launchwin${ARCH_TAG}.msi\"",
+            "    ExecWait 'msiexec /i \"$INSTDIR\launchwin${ARCH_TAG}.msi\" /qb ALLUSERS=1'",
+            "    Delete $INSTDIR\launchwin${ARCH_TAG}.msi",
+            "SectionEnd",
+           ]
 
-    def write_pylauncher_help(self, f, indent):
-        f.write(indent+"StrCmp $0 ${sec_pylauncher} 0 +2\n")
-        f.write(indent+"SendMessage $R0 ${WM_SETTEXT} 0 "
-                "\"STR:The Python launcher. \\\n")
-        f.write(indent+"This is required for ${PRODUCT_NAME} to run.\"")
+    def make_pylauncher_help(self):
+        return ["StrCmp $0 ${sec_pylauncher} 0 +2",
+                "SendMessage $R0 ${WM_SETTEXT} 0 \"STR:The Python launcher. \\",
+                "    This is required for ${PRODUCT_NAME} to run.\"",
+               ]
 
     def write(self, target):
         """Fill out the template and write the result to 'target'.
@@ -83,6 +84,7 @@ class NSISFileWriter(object):
             for line in fin:
                 fout.write(line)
                 l = line.strip()
-                if l in self.write_after_line:
+                if l in self.template_fields:
                     indent = re.match('\s*', line).group(0)
-                    self.write_after_line[l](fout, indent)
+                    for fillline in self.template_fields[l]():
+                        fout.write(indent+fillline+'\n')
