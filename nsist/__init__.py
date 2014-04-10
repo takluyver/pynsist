@@ -140,7 +140,8 @@ def run_nsis(nsi_file):
             makensis = 'makensis'
         return call([makensis, nsi_file])
     except OSError as e:
-        if e.errno == errno.ENOENT or isinstance(e, WindowsError):
+        # This should catch either the registry key or makensis being absent
+        if e.errno == errno.ENOENT:
             print("makensis was not found. Install NSIS and try again.")
             print("http://nsis.sourceforge.net/Download")
             return 1
