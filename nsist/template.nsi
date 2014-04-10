@@ -33,6 +33,9 @@ Section "Python ${PY_VERSION}" sec_py
   Delete $INSTDIR\python-${PY_VERSION}.msi
 SectionEnd
 
+;PYLAUNCHER_INSTALL
+;------------------
+
 Section "!${PRODUCT_NAME}" sec_app
   SectionIn RO
   File ${SCRIPT}
@@ -82,6 +85,9 @@ Function .onMouseOverSection
     StrCmp $0 ${sec_py} 0 +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:The Python interpreter. \
             This is required for ${PRODUCT_NAME} to run."
+    ;
+    ;PYLAUNCHER_HELP
+    ;------------------
 
     StrCmp $0 ${sec_app} "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:${PRODUCT_NAME}"

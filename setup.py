@@ -1,4 +1,13 @@
+import sys
 from distutils.core import setup
+
+PY2 = sys.version_info[0] == 2
+if PY2:
+    requirements = [
+        'configparser == 3.3.0r2'
+    ]
+else:
+    requirements = []
 
 with open('README.rst', 'r') as f:
     readme=f.read()
@@ -22,8 +31,10 @@ setup(name='pynsist',
           'License :: OSI Approved :: MIT License',
           'Environment :: Win32 (MS Windows)',
           'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 2.7',
           'Topic :: Software Development',
           'Topic :: System :: Installation/Setup',
           'Topic :: System :: Software Distribution',
-      ]
+      ],
+      install_requires=requirements
 )

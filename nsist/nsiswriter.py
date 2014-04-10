@@ -1,4 +1,8 @@
 import re
+import sys
+
+PY2 = sys.version_info[0] == 2
+
 
 class NSISFileWriter(object):
     """Write an .nsi script file by filling in a template.
@@ -16,7 +20,11 @@ class NSISFileWriter(object):
                 ';EXTRA_FILES_INSTALL': self.write_extra_files_install,
                 ';EXTRA_FILES_UNINSTALL': self.write_extra_files_uninstall,
         }
-    
+        if PY2:
+            self.write_after_line.update({
+                ';PYLAUNCHER_INSTALL': self.write_pylauncher_install,
+                ';PYLAUNCHER_HELP': self.write_pylauncher_help})
+
     def write_definitions(self, f):
         """Write definition lines at the start of the file.
         
@@ -50,7 +58,20 @@ class NSISFileWriter(object):
                 f.write(indent+'RMDir /r "$INSTDIR\{}"\n'.format(file))
             else:
                 f.write(indent+'Delete "$INSTDIR\{}"\n'.format(file))
-    
+
+    def write_pylauncher_install(self, f, indent):
+        f.write(indent+"Section \"PyLauncher\" sec_pylauncher\n")
+        f.write(indent+"File \"launchwin${ARCH_TAG}.msi\"\n")
+        f.write(indent+"ExecWait 'msiexec /i \"$INSTDIR\launchwin${ARCH_TAG}.msi\" /qb ALLUSERS=1'\n")
+        f.write(indent+"Delete $INSTDIR\launchwin${ARCH_TAG}.msi\n")
+        f.write(indent+"SectionEnd\n")
+
+    def write_pylauncher_help(self, f, indent):
+        f.write(indent+"StrCmp $0 ${sec_pylauncher} 0 +2\n")
+        f.write(indent+"SendMessage $R0 ${WM_SETTEXT} 0 "
+                "\"STR:The Python launcher. \\\n")
+        f.write(indent+"This is required for ${PRODUCT_NAME} to run.\"")
+
     def write(self, target):
         """Fill out the template and write the result to 'target'.
         
