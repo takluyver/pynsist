@@ -104,7 +104,7 @@ else:
                 # NOTE: `imp.find_module(...)` will *not* find modules in ZIP
                 #       files, so we have to check each file for ourselves
                 for zpath in self.zip_path:
-                    loader = zipimport.zipimporter(fpath)
+                    loader = zipimport.zipimporter(zpath)
                     if loader.find_module(modname) is None:
                         continue
                     copy_zipmodule(loader, modname, target)
