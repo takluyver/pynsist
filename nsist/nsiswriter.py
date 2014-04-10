@@ -62,8 +62,7 @@ class NSISFileWriter(object):
     def write_pylauncher_install(self, f, indent):
         f.write(indent+"Section \"PyLauncher\" sec_pylauncher\n")
         f.write(indent+"File \"launchwin${ARCH_TAG}.msi\"\n")
-        f.write(indent+"ExecWait 'msiexec /i "
-                "\"$INSTDIR\launchwin${ARCH_TAG}.msi\" /qb ALLUSERS=1'\n")
+        f.write(indent+"ExecWait 'msiexec /i \"$INSTDIR\launchwin${ARCH_TAG}.msi\" /qb ALLUSERS=1'\n")
         f.write(indent+"Delete $INSTDIR\launchwin${ARCH_TAG}.msi\n")
         f.write(indent+"SectionEnd\n")
 

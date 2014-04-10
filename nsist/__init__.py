@@ -13,6 +13,7 @@ if PY2:
     from urllib import urlretrieve
 else:
     from urllib.request import urlretrieve
+
 if os.name == 'nt' and PY2:
     import _winreg as winreg
 elif os.name == 'nt':
@@ -138,12 +139,11 @@ def run_nsis(nsi_file):
         else:
             makensis = 'makensis'
         return call([makensis, nsi_file])
-    except OSError:
-        # OSError catches both the registry lookup failing and call() not
-        # finding makensis
-        print("makensis was not found. Install NSIS and try again.")
-        print("http://nsis.sourceforge.net/Download")
-        return 1
+    except OSError as e:
+        if e.errno == errno.ENOENT or isinstance(e, WindowsError):
+            print("makensis was not found. Install NSIS and try again.")
+            print("http://nsis.sourceforge.net/Download")
+            return 1
 
 def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON, console=False,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
@@ -159,10 +159,7 @@ def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON
     try:
         os.makedirs(build_dir)
     except OSError as e:
-        if e.errno == errno.EEXIST:
-            # It's okay if the build directory already exists
-            pass
-        else:
+        if e.errno != errno.EEXIST:
             raise e
     fetch_python(version=py_version, bitness=py_bitness, destination=build_dir)
     if PY2:

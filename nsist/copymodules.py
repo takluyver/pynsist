@@ -28,7 +28,8 @@ if not PY2:
     class ModuleCopier:
         """Finds and copies importable Python modules and packages.
 
-        This uses importlib to locate modules.
+        This is the Python >3.3 version and uses the `importlib` package to
+        locate modules.
         """
         def __init__(self, path=None):
             self.path = path if (path is not None) else ([''] + sys.path)
@@ -70,7 +71,8 @@ else:
     class ModuleCopier:
         """Finds and copies importable Python modules and packages.
 
-        This uses importlib to locate modules.
+        This is the Python 2.7 version and uses the `imp` package to locate
+        modules.
         """
         def __init__(self, path=None):
             self.path = path if (path is not None) else ([''] + sys.path)
@@ -86,14 +88,16 @@ else:
             and extract modules and packages from appropriately structured zip
             files.
             """
-            modinfo = imp.find_module(modname, self.path)
+            info = imp.find_module(modname, self.path)
+            path = info[1]
+            modtype = info[2][2]
 
-            if modinfo[2][2] in (imp.PY_SOURCE, imp.C_EXTENSION):
-                shutil.copy2(modinfo[1], target)
+            if modtype in (imp.PY_SOURCE, imp.C_EXTENSION):
+                shutil.copy2(path, target)
 
-            elif modinfo[2][2] == imp.PKG_DIRECTORY:
+            elif modtype == imp.PKG_DIRECTORY:
                 dest = os.path.join(target, modname)
-                shutil.copytree(modinfo[1], dest,
+                shutil.copytree(path, dest,
                                 ignore=shutil.ignore_patterns('*.pyc'))
             else:
                 # Search all ZIP files in self.path for the module name
