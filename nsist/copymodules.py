@@ -74,6 +74,7 @@ else:
         """
         def __init__(self, path=None):
             self.path = path if (path is not None) else ([''] + sys.path)
+            self.zip_paths = [p for p in self.path if zipfile.is_zipfile(p)]
 
         def copy(self, modname, target):
             """Copy the importable module 'modname' to the directory 'target'.
@@ -94,9 +95,11 @@ else:
                 dest = os.path.join(target, modname)
                 shutil.copytree(modinfo[1], dest,
                                 ignore=shutil.ignore_patterns('*.pyc'))
-
-            elif any(p.endswith('.zip') for p in self.path):
-                for fpath in (p for p in self.path if p.endswith('.zip')):
+            else:
+                # Search all ZIP files in self.path for the module name
+                # NOTE: `imp.find_module(...)` will *not* find modules in ZIP
+                #       files, so we have to check each file for ourselves
+                for zpath in self.zip_path:
                     loader = zipimport.zipimporter(fpath)
                     if loader.find_module(modname) is None:
                         continue
