@@ -2,7 +2,7 @@
 
 import random
 
-def main()
+def main():
     number = random.randint(1, 100)
     guesses = 0
 
