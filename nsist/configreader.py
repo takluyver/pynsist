@@ -100,6 +100,15 @@ CONFIG_VALIDATORS = [
             ('bitness', False),
         ]
     ),
+    SectionValidator('Shortcut ... ',
+        [
+            ('entry_point', True),
+            ('script', False),
+            ('icon', False),
+            ('console', False),
+        ],
+        lambda s: s.startswith('Shortcut ')
+    ),
 ]
 
 class InvalidConfig(ValueError):

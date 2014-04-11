@@ -9,6 +9,10 @@ def test_valid_config():
     configfile = os.path.join(DATA_FILES, 'valid_config.cfg')
     configreader.read_and_validate(configfile)
 
+def test_valid_config_with_shortcut():
+    configfile = os.path.join(DATA_FILES, 'valid_config_with_shortcut.cfg')
+    configreader.read_and_validate(configfile)
+
 @raises(configreader.InvalidConfig)
 def test_invalid_config_keys():
     configfile = os.path.join(DATA_FILES, 'invalid_config_keys.cfg')
