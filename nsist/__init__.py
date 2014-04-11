@@ -273,8 +273,8 @@ def read_and_verify_config_file(config_file):
             ('nsi_template', False),
         ],
         'Include': [
-            ('packages', True),
-            ('files', True),
+            ('packages', False),
+            ('files', False),
         ],
         'Python': [
             ('version', True),
