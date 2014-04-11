@@ -57,6 +57,28 @@ Application section
    a console for the process. If ``false``, or not specified, they will use the
    ``pyw`` launcher, which doesn't create a console.
 
+Shortcut sections
+-----------------
+
+One shortcut will always be generated for the application. You can add extra
+shortcuts by defining sections titled :samp:`Shortcut {Name}`. For example:
+
+.. code-block:: ini
+
+    [Shortcut IPython Notebook]
+    entry_point=IPython.html.notebookapp:launch_new_instance
+    icon=scripts/ipython_nb.ico
+    console=true
+
+.. describe:: entry_point
+              script (optional)
+              icon (optional)
+              console (optional)
+
+   These options all work the same way as in the Application section.
+
+.. versionadded:: 0.2
+
 .. _cfg_python:
 
 Python section
