@@ -6,6 +6,7 @@ import os
 import shutil
 from subprocess import check_output, call
 import sys
+import hashlib
 
 PY2 = sys.version_info[0] == 2
 
@@ -37,6 +38,20 @@ if os.name == 'nt' and sys.maxsize == (2**63)-1:
 else:
     DEFAULT_BITNESS = 32
 
+# file integrity check hashes.
+INSTALLER_HASHES = {
+    # https://www.python.org/download/releases/2.7.6
+    '2.7.6': {
+        32: 'ac54e14f7ba180253b9bae6635d822ea',
+        64: 'b73f8753c76924bc7b75afaa6d304645',
+    },
+    # https://www.python.org/downloads/release/python-340/
+    '3.4.0': {
+        32: 'e3be8a63294e42e126493ca96cfe48bd',
+        64: 'd59aaf1bb32d1bc01a051b3613ab0966',
+    },
+}
+
 def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
                  destination=DEFAULT_BUILD_DIR):
     """Fetch the MSI for the specified version of Python.
@@ -52,13 +67,16 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
         return
     logger.info('Downloading Python MSI...')
     urlretrieve(url, target)
-    urlretrieve(url+'.asc', target+'.asc')
-    try:
-        keys_file = os.path.join(_PKGDIR, 'python-pubkeys.txt')
-        check_output(['gpg', '--import', keys_file])
-        check_output(['gpg', '--verify', target+'.asc'])
-    except OSError:
-        logger.warn("GPG not available - could not check signature of {0}".format(target))
+
+    if version in INSTALLER_HASHES and bitness in INSTALLER_HASHES[version]:
+        md5hash = hashlib.md5()
+        with open(target, 'rb') as installer_file:
+            md5hash.update(installer_file.read())
+        if not md5hash.hexdigest() == INSTALLER_HASHES[version][bitness]:
+            logger.error("The installer file {0} could not be verified, hashes don't match! Aborting.".format(target))
+            sys.exit(1)
+    else:
+        logger.warn("Could not check the file integrity of {0}!".format(target))
 
 
 def fetch_pylauncher(bitness=DEFAULT_BITNESS, destination=DEFAULT_BUILD_DIR):
