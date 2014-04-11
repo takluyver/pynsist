@@ -281,6 +281,7 @@ def read_and_verify_config_file(config_file):
             ('bitness', False),
         ],
     }
+    # check for invalid sections and subsections
     for section in cfg:
         # check section names
         section_name = str(section)
@@ -305,18 +306,18 @@ def read_and_verify_config_file(config_file):
                             section_name,
                             ', '.join(subsection_names))
                 raise NameError(err_msg)
-        # check mandatory sections
-        for section_name, subsection_list in valid_config_sections.items():
-            for subsection_name, mandatory in subsection_list:
-                if mandatory:
-                    try:
-                        cfg[section_name][subsection_name]
-                    except KeyError:
-                        err_msg = ("The section '{0}' must contain a "
-                                   "subsection '{1}'!").format(
-                                    section_name,
-                                    subsection_name)
-                        raise NameError(err_msg)
+    # check mandatory sections
+    for section_name, subsection_list in valid_config_sections.items():
+        for subsection_name, mandatory in subsection_list:
+            if mandatory:
+                try:
+                    cfg[section_name][subsection_name]
+                except KeyError:
+                    err_msg = ("The section '{0}' must contain a "
+                               "subsection '{1}'!").format(
+                                section_name,
+                                subsection_name)
+                    raise NameError(err_msg)
     return cfg
 
 def main(argv=None):
