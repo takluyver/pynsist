@@ -99,8 +99,8 @@ def write_script(entrypt, python_version, bitness, target):
 def prepare_shortcuts(shortcuts, py_version, py_bitness, build_dir):
     files = set()
     for scname, sc in shortcuts.items():
-        if sc['entry_point']:
-            sc['script'] = script = scname.replace(' ', '_') + '.py'
+        if sc.get('entry_point'):
+            sc['script'] = script = scname.replace(' ', '_') + '.launch.py'
             write_script(sc['entry_point'], py_version, py_bitness,
                             pjoin(build_dir, script))
         else:
