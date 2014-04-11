@@ -6,6 +6,7 @@ import os
 import shutil
 from subprocess import check_output, call
 import sys
+import configparser
 
 PY2 = sys.version_info[0] == 2
 
@@ -52,6 +53,7 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
         return
     logger.info('Downloading Python MSI...')
     urlretrieve(url, target)
+
     urlretrieve(url+'.asc', target+'.asc')
     try:
         keys_file = os.path.join(_PKGDIR, 'python-pubkeys.txt')
@@ -59,6 +61,7 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
         check_output(['gpg', '--verify', target+'.asc'])
     except OSError:
         logger.warn("GPG not available - could not check signature of {0}".format(target))
+
 
 
 def fetch_pylauncher(bitness=DEFAULT_BITNESS, destination=DEFAULT_BUILD_DIR):
@@ -249,6 +252,73 @@ def read_shortcuts_config(cfg):
     
     return shortcuts
 
+def read_and_verify_config_file(config_file):
+    cfg = configparser.ConfigParser()
+    cfg.read(config_file)
+    # contains all configuration sections and subsections
+    # the subsections are a tuple with their name and a boolean, which
+    # tells us whether the option is mandatory
+    valid_config_sections = {
+        'Application': [
+            ('name', True),
+            ('version', True),
+            ('entry_point', True),
+            ('script', False),
+            ('icon', False),
+            ('console', False),
+        ],
+        'Build': [
+            ('directory', False),
+            ('installer_name', False),
+            ('nsi_template', False),
+        ],
+        'Include': [
+            ('packages', True),
+            ('files', True),
+        ],
+        'Python': [
+            ('version', True),
+            ('bitness', False),
+        ],
+    }
+    for section in cfg:
+        # check section names
+        section_name = str(section)
+        is_valid_section_name = section_name in valid_config_sections.keys()
+        if section_name == 'DEFAULT':
+            # DEFAULT is always inside the config, so just jump over it
+            continue
+        if not is_valid_section_name:
+            err_msg = ("{0} is not a valid section header. Must "
+                       "be one of these: {1}").format(
+                       section_name, ', '.join(valid_section_headers))
+            raise NameError(err_msg)
+        # check subsection names
+        for subsection in cfg[section_name]:
+            subsection_name = str(subsection)
+            subsection_names = [s[0] for s in valid_config_sections[section_name]]
+            is_valid_subsection = subsection_name in subsection_names
+            if not is_valid_subsection:
+                err_msg = ("'{0}' is not a valid subsection name for '{1}'. Must "
+                           "be one of these: {2}").format(
+                            subsection_name,
+                            section_name,
+                            ', '.join(subsection_names))
+                raise NameError(err_msg)
+        # check mandatory sections
+        for section_name, subsection_list in valid_config_sections.items():
+            for subsection_name, mandatory in subsection_list:
+                if mandatory:
+                    try:
+                        cfg[section_name][subsection_name]
+                    except KeyError:
+                        err_msg = ("The section '{0}' must contain a "
+                                   "subsection '{1}'!").format(
+                                    section_name,
+                                    subsection_name)
+                        raise NameError(err_msg)
+    return cfg
+
 def main(argv=None):
     """Make an installer from the command line.
     
@@ -267,9 +337,12 @@ def main(argv=None):
     if dirname:
         os.chdir(dirname)
     
-    import configparser
-    cfg = configparser.ConfigParser()
-    cfg.read(config_file)
+    try:
+        cfg = read_and_verify_config_file(config_file)
+    except NameError as e:
+        logger.error('Error parsing configuration file:')
+        logger.error(str(e))
+        sys.exit(1)
     appcfg = cfg['Application']
     all_steps(
         appname = appcfg['name'],
