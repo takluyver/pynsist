@@ -43,7 +43,8 @@ Section "!${PRODUCT_NAME}" sec_app
   SetOutPath "$INSTDIR\pkgs"
   File /r "pkgs\*.*"
   SetOutPath "$INSTDIR"
-  ;EXTRA_FILES_INSTALL
+  ;INSTALL_FILES
+  ;INSTALL_DIRECTORIES
   ;-------------------
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}.lnk" "${PY_EXE}" '"$INSTDIR\${SCRIPT}"' \
       "$INSTDIR\${PRODUCT_ICON}"
@@ -68,7 +69,8 @@ Section "Uninstall"
   Delete "$INSTDIR\${SCRIPT}"
   Delete "$INSTDIR\${PRODUCT_ICON}"
   RMDir /r "$INSTDIR\pkgs"
-  ;EXTRA_FILES_UNINSTALL
+  ;UNINSTALL_FILES
+  ;UNINSTALL_DIRECTORIES
   ;---------------------
   Delete "$SMPROGRAMS\${PRODUCT_NAME}.lnk"
   RMDir $INSTDIR

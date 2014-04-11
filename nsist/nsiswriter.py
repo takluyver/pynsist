@@ -15,15 +15,34 @@ class NSISFileWriter(object):
         """
         self.template_file = template_file
         self.definitions = definitions or {}
-        self.extra_files = []
+        self.files = []
+        self.directories = []
         self.template_fields = {
-                ';EXTRA_FILES_INSTALL': self.make_extra_files_install,
-                ';EXTRA_FILES_UNINSTALL': self.make_extra_files_uninstall,
+                ';INSTALL_FILES': self.files_install,
+                ';INSTALL_DIRECTORIES': self.dirs_install,
+                ';UNINSTALL_FILES': self.files_uninstall,
+                ';UNINSTALL_DIRECTORIES': self.dirs_uninstall,
         }
         if PY2:
             self.template_fields.update({
-                ';PYLAUNCHER_INSTALL': self.make_pylauncher_install,
-                ';PYLAUNCHER_HELP': self.make_pylauncher_help})
+                ';PYLAUNCHER_INSTALL': self.pylauncher_install,
+                ';PYLAUNCHER_HELP': self.pylauncher_help})
+
+    def write(self, target):
+        """Fill out the template and write the result to 'target'.
+        
+        :param str target: Path to the file to be written
+        """
+        with open(target, 'w') as fout, open(self.template_file) as fin:
+            self.write_definitions(fout)
+
+            for line in fin:
+                fout.write(line)
+                l = line.strip()
+                if l in self.template_fields:
+                    indent = re.match('\s*', line).group(0)
+                    for fillline in self.template_fields[l]():
+                        fout.write(indent+fillline+'\n')
 
     def write_definitions(self, f):
         """Write definition lines at the start of the file.
@@ -33,33 +52,31 @@ class NSISFileWriter(object):
         for name, value in self.definitions.items():
             f.write('!define {} "{}"\n'.format(name, value))
     
-    def make_extra_files_install(self):
-        """Write the commands to install the list of extra files and directories.
-        
-        :param f: A text-mode writable file handle
-        :param str indent: Leading space at this point in the file
-        """
-        for file, is_dir in self.extra_files:
-            if is_dir:
-                yield 'SetOutPath "$INSTDIR\{}"\n'.format(file)
-                yield 'File /r "{}\*.*"\n'.format(file)
-                yield 'SetOutPath "$INSTDIR"\n'
-            else:
-                yield 'File "{}"\n'.format(file)
 
-    def make_extra_files_uninstall(self):
-        """Write the commands to uninstall the list of extra files and directories.
-        
-        :param f: A text-mode writable file handle
-        :param str indent: Leading space at this point in the file
-        """
-        for file, is_dir in self.extra_files:
-            if is_dir:
-                yield 'RMDir /r "$INSTDIR\{}"\n'.format(file)
-            else:
-                yield 'Delete "$INSTDIR\{}"\n'.format(file)
+    # Template fillers
+    # ----------------
 
-    def make_pylauncher_install(self):
+    # These return an iterable of lines to fill after a given template field
+
+    def files_install(self):
+        for file in self.files:
+            yield 'File "{}"'.format(file)
+
+    def dirs_install(self):
+        for dir in self.directories:
+            yield 'SetOutPath "$INSTDIR\{}"'.format(dir)
+            yield 'File /r "{}\*.*"'.format(dir)
+        yield 'SetOutPath "$INSTDIR"'                
+
+    def files_uninstall(self):
+        for file in self.files:
+            yield 'Delete "$INSTDIR\{}"'.format(file)
+
+    def dirs_uninstall(self):
+        for dir in self.directories:
+            yield 'RMDir /r "$INSTDIR\{}"'.format(dir)
+
+    def pylauncher_install(self):
         return ["Section \"PyLauncher\" sec_pylauncher",
             "    File \"launchwin${ARCH_TAG}.msi\"",
             "    ExecWait 'msiexec /i \"$INSTDIR\launchwin${ARCH_TAG}.msi\" /qb ALLUSERS=1'",
@@ -67,24 +84,8 @@ class NSISFileWriter(object):
             "SectionEnd",
            ]
 
-    def make_pylauncher_help(self):
+    def pylauncher_help(self):
         return ["StrCmp $0 ${sec_pylauncher} 0 +2",
                 "SendMessage $R0 ${WM_SETTEXT} 0 \"STR:The Python launcher. \\",
                 "    This is required for ${PRODUCT_NAME} to run.\"",
                ]
-
-    def write(self, target):
-        """Fill out the template and write the result to 'target'.
-        
-        :param str target: Path to the file to be written
-        """
-        with open(target, 'w') as fout, open(self.template_file) as fin:
-            self.write_definitions(fout)
-            
-            for line in fin:
-                fout.write(line)
-                l = line.strip()
-                if l in self.template_fields:
-                    indent = re.match('\s*', line).group(0)
-                    for fillline in self.template_fields[l]():
-                        fout.write(indent+fillline+'\n')

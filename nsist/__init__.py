@@ -99,13 +99,14 @@ def write_script(entrypt, python_version, bitness, target):
 def copy_extra_files(filelist, build_dir):
     """Copy a list of files into the build directory.
     
-    Returns a list of 2-tuples: the filename without any path coomponents,
-    and a boolean that is True if the file is a directory.
+    Returns two lists, files and directories, with only the base filenames
+    (i.e. no leading path components)
     """
-    results = []  # name, is_directory
+    files, directories = [], []
     for file in filelist:
         file = file.rstrip('/\\')
         basename = os.path.basename(file)
+
         if os.path.isdir(file):
             target_name = pjoin(build_dir, basename)
             if os.path.isdir(target_name):
@@ -113,11 +114,12 @@ def copy_extra_files(filelist, build_dir):
             elif os.path.exists(target_name):
                 os.unlink(target_name)
             shutil.copytree(file, target_name)
-            results.append((basename, True))
+            directories.append(basename)
         else:
             shutil.copy2(file, build_dir)
-            results.append((basename, False))
-    return results
+            files.append(basename)
+
+    return files, directories
 
 def make_installer_name(appname, version):
     """Generate the filename of the installer exe
@@ -201,7 +203,8 @@ def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON
                       }
         )
     # Extra files
-    nsis_writer.extra_files = copy_extra_files(extra_files or [], build_dir)
+    nsis_writer.files, nsis_writer.directories = \
+                            copy_extra_files(extra_files or [], build_dir)
 
     nsi_file = pjoin(build_dir, 'installer.nsi')
     nsis_writer.write(nsi_file)
