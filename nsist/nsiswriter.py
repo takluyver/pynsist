@@ -17,11 +17,14 @@ class NSISFileWriter(object):
         self.definitions = definitions or {}
         self.files = []
         self.directories = []
+        self.shortcuts = {}
         self.template_fields = {
                 ';INSTALL_FILES': self.files_install,
                 ';INSTALL_DIRECTORIES': self.dirs_install,
+                ';INSTALL_SHORTCUTS': self.shortcuts_install,
                 ';UNINSTALL_FILES': self.files_uninstall,
                 ';UNINSTALL_DIRECTORIES': self.dirs_uninstall,
+                ';UNINSTALL_SHORTCUTS': self.shortcuts_uninstall,
         }
         if PY2:
             self.template_fields.update({
@@ -66,7 +69,22 @@ class NSISFileWriter(object):
         for dir in self.directories:
             yield 'SetOutPath "$INSTDIR\{}"'.format(dir)
             yield 'File /r "{}\*.*"'.format(dir)
-        yield 'SetOutPath "$INSTDIR"'                
+        yield 'SetOutPath "$INSTDIR"'
+    
+    def shortcuts_install(self):
+        if len(self.shortcuts) == 1:
+            scname, sc = next(iter(self.shortcuts.items()))
+            yield 'CreateShortCut "$SMPROGRAMS\{}.lnk" "{}" \'"$INSTDIR\{}"\' \\'.format(\
+                    scname, ('py' if sc['console'] else 'pyw'), sc['script'])
+            yield '    "$INSTDIR\{}"'.format(sc['icon'])
+            return
+        
+        # Multiple shortcuts - make a folder
+        yield 'CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"'
+        for scname, sc in self.shortcuts.items():
+            yield 'CreateShortCut "$SMPROGRAMS\${{PRODUCT_NAME}}\{}.lnk" "{}" \\'.format(\
+                    scname, ('py' if sc['console'] else 'pyw'))
+            yield '    \'"$INSTDIR\{}"\' "$INSTDIR\{}"'.format(sc['script'], sc['icon'])
 
     def files_uninstall(self):
         for file in self.files:
@@ -75,6 +93,13 @@ class NSISFileWriter(object):
     def dirs_uninstall(self):
         for dir in self.directories:
             yield 'RMDir /r "$INSTDIR\{}"'.format(dir)
+    
+    def shortcuts_uninstall(self):
+        if len(self.shortcuts) == 1:
+            scname = next(iter(self.shortcuts))
+            yield 'Delete "$SMPROGRAMS\{}.lnk"'.format(scname)
+        else:
+            yield 'RMDir /r "$SMPROGRAMS\${PRODUCT_NAME}"'
 
     def pylauncher_install(self):
         return ["Section \"PyLauncher\" sec_pylauncher",

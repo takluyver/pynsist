@@ -96,6 +96,24 @@ def write_script(entrypt, python_version, bitness, target):
     with open(target, 'w') as f:
         f.write(SCRIPT_TEMPLATE.format(qualifier=qualifier, module=module, func=func))
 
+def prepare_shortcuts(shortcuts, py_version, py_bitness, build_dir):
+    files = set()
+    for scname, sc in shortcuts.items():
+        if sc['entry_point']:
+            sc['script'] = script = scname.replace(' ', '_') + '.py'
+            write_script(sc['entry_point'], py_version, py_bitness,
+                            pjoin(build_dir, script))
+        else:
+            shutil.copy2(sc['script'], build_dir)
+    
+        shutil.copy2(sc['icon'], build_dir)
+        sc['icon'] = os.path.basename(sc['icon'])
+        sc['script'] = os.path.basename(sc['script'])
+        files.add(sc['script'])
+        files.add(sc['icon'])
+    
+    return files
+
 def copy_extra_files(filelist, build_dir):
     """Copy a list of files into the build directory.
     
@@ -148,7 +166,7 @@ def run_nsis(nsi_file):
             print("http://nsis.sourceforge.net/Download")
             return 1
 
-def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON, console=False,
+def all_steps(appname, version, shortcuts, icon=DEFAULT_ICON, 
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=DEFAULT_NSI_TEMPLATE):
@@ -167,18 +185,8 @@ def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON
     fetch_python(version=py_version, bitness=py_bitness, destination=build_dir)
     if PY2:
         fetch_pylauncher(bitness=py_bitness, destination=build_dir)
-
-    if entry_point is not None:
-        if script is not None:
-            raise ValueError('Both script and entry_point were specified.')
-        script = 'launch.py'
-        write_script(entry_point, py_version, py_bitness, pjoin(build_dir, script))
-    elif script is not None:
-        shutil.copy2(script, build_dir)
-    else:
-        raise ValueError('Neither script nor entry_point was specified.')
-
-    shutil.copy2(icon, build_dir)
+    
+    shortcuts_files = prepare_shortcuts(shortcuts, py_version, py_bitness, build_dir)
     
     # Packages
     logger.info("Copying packages into build directory...")
@@ -195,17 +203,18 @@ def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON
         definitions = {'PRODUCT_NAME': appname,
                        'PRODUCT_VERSION': version,
                        'PY_VERSION': py_version,
-                       'SCRIPT': os.path.basename(script),
                        'PRODUCT_ICON': os.path.basename(icon),
                        'INSTALLER_NAME': installer_name,
                        'ARCH_TAG': '.amd64' if (py_bitness==64) else '',
-                       'PY_EXE': 'py' if console else 'pyw',
                       }
         )
     # Extra files
     nsis_writer.files, nsis_writer.directories = \
                             copy_extra_files(extra_files or [], build_dir)
 
+    nsis_writer.files.extend(shortcuts_files)
+    nsis_writer.shortcuts = shortcuts
+    
     nsi_file = pjoin(build_dir, 'installer.nsi')
     nsis_writer.write(nsi_file)
 
@@ -213,6 +222,32 @@ def all_steps(appname, version, script=None, entry_point=None, icon=DEFAULT_ICON
     
     if not exitcode:
         logger.info('Installer written to %s', pjoin(build_dir, installer_name))
+
+def read_shortcuts_config(cfg):
+    
+    shortcuts = {}
+    def _check_shortcut(name, sc, section):
+        if ('entry_point' not in sc) and ('script' not in sc):
+            raise ValueError('Section {} has neither entry_point nor script.'.format(section))
+        elif ('entry_point' in sc) and ('script' in sc):
+            raise ValueError('Section {} has both entry_point and script.'.format(section))
+            
+        # Copy to a regular dict so it can hold a boolean value
+        sc2 = dict(sc)
+        if 'icon' not in sc2:
+            sc2['icon'] = DEFAULT_ICON        
+        sc2['console'] = sc.getboolean('console', fallback=False)
+        shortcuts[name] = sc2
+    
+    for section in cfg.sections():
+        if section.startswith("Shortcut "):
+            name = section[len("Shortcut "):]
+            _check_shortcut(name, cfg[section], section)
+    
+    appcfg = cfg['Application']
+    _check_shortcut(appcfg['name'], appcfg, 'Application')
+    
+    return shortcuts
 
 def main(argv=None):
     """Make an installer from the command line.
@@ -239,10 +274,8 @@ def main(argv=None):
     all_steps(
         appname = appcfg['name'],
         version = appcfg['version'],
-        script = appcfg.get('script', fallback=None),
-        entry_point = appcfg.get('entry_point', fallback=None),
         icon = appcfg.get('icon', DEFAULT_ICON),
-        console = appcfg.getboolean('console', fallback=False),
+        shortcuts = read_shortcuts_config(cfg),
         packages = cfg.get('Include', 'packages', fallback='').splitlines(),
         extra_files = cfg.get('Include', 'files', fallback='').splitlines(),
         py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
