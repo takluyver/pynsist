@@ -14,6 +14,13 @@ extensionmod_errmsg = """Found an extension module that will not be usable on %s
 Put Windows packages in pynsist_pkgs/ to avoid this."""
 
 def check_ext_mod(path, target_python):
+    """If path is an extension module, check that it matches target platform.
+    
+    It should be for Windows and we should be running on the same version
+    of Python that we're targeting. Raises ExtensionModuleMismatch if not.
+    
+    Does nothing if path is not an extension module.
+    """
     if path.endswith('.so'):
         raise ExtensionModuleMismatch(extensionmod_errmsg % ('Windows', path))
     elif path.endswith('.pyd') and not target_python.startswith(running_python):
@@ -22,11 +29,14 @@ def check_ext_mod(path, target_python):
         raise ExtensionModuleMismatch(extensionmod_errmsg % ('Python '+target_python, path))
 
 def check_package_for_ext_mods(path, target_python):
+    """Walk the directory path, calling :func:`check_ext_mod` on each file.
+    """
     for dirpath, dirnames, filenames in os.walk(path):
         for filename in filenames:
             check_ext_mod(os.path.join(path, dirpath, filename), target_python)
 
 def copy_zipmodule(loader, modname, target):
+    """Copy a module or package out of a zip file to the target directory."""
     file = loader.get_filename(modname)
     prefix = loader.archive + '/' + loader.prefix
     assert file.startswith(prefix)
