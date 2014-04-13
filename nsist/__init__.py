@@ -197,7 +197,7 @@ def all_steps(appname, version, shortcuts, icon=DEFAULT_ICON,
         shutil.copytree('pynsist_pkgs', build_pkg_dir)
     else:
         os.mkdir(build_pkg_dir)
-    copy_modules(packages or [], build_pkg_dir)
+    copy_modules(packages or [], build_pkg_dir, py_version=py_version)
 
     nsis_writer = NSISFileWriter(nsi_template,
         definitions = {'PRODUCT_NAME': appname,

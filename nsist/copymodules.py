@@ -4,7 +4,27 @@ import sys
 import zipfile, zipimport
 
 PY2 = sys.version_info[0] == 2
+running_python  = '.'.join(str(x) for x in sys.version_info[:2])
 
+class ExtensionModuleMismatch(ImportError):
+    pass
+
+extensionmod_errmsg = """Found an extension module that will not be usable on %s:
+%s
+Put Windows packages in pynsist_pkgs/ to avoid this."""
+
+def check_ext_mod(path, target_python):
+    if path.endswith('.so'):
+        raise ExtensionModuleMismatch(extensionmod_errmsg % ('Windows', path))
+    elif path.endswith('.pyd') and not target_python.startswith(running_python):
+        # TODO: From Python 3.2, extension modules can restrict themselves
+        # to a stable ABI. Can we detect this?
+        raise ExtensionModuleMismatch(extensionmod_errmsg % ('Python '+target_python, path))
+
+def check_package_for_ext_mods(path, target_python):
+    for dirpath, dirnames, filenames in os.walk(path):
+        for filename in filenames:
+            check_ext_mod(os.path.join(path, dirpath, filename), target_python)
 
 def copy_zipmodule(loader, modname, target):
     file = loader.get_filename(modname)
@@ -31,7 +51,8 @@ if not PY2:
         This is the Python >3.3 version and uses the `importlib` package to
         locate modules.
         """
-        def __init__(self, path=None):
+        def __init__(self, py_version, path=None):
+            self.py_version = py_version
             self.path = path if (path is not None) else ([''] + sys.path)
 
         def copy(self, modname, target):
@@ -50,6 +71,7 @@ if not PY2:
             pkg = loader.is_package(modname)
 
             if isinstance(loader, importlib.machinery.ExtensionFileLoader):
+                check_ext_mod(loader.path, self.py_version)
                 shutil.copy2(loader.path, target)
 
             elif isinstance(loader, importlib.abc.FileLoader):
@@ -57,6 +79,7 @@ if not PY2:
                 if pkg:
                     pkgdir, basename = os.path.split(file)
                     assert basename.startswith('__init__')
+                    check_package_for_ext_mods(pkgdir, self.py_version)
                     dest = os.path.join(target, modname)
                     shutil.copytree(pkgdir, dest,
                                     ignore=shutil.ignore_patterns('*.pyc'))
@@ -74,7 +97,8 @@ else:
         This is the Python 2.7 version and uses the `imp` package to locate
         modules.
         """
-        def __init__(self, path=None):
+        def __init__(self, py_version, path=None):
+            self.py_version = py_version
             self.path = path if (path is not None) else ([''] + sys.path)
             self.zip_paths = [p for p in self.path if zipfile.is_zipfile(p)]
 
@@ -92,10 +116,14 @@ else:
             path = info[1]
             modtype = info[2][2]
 
+            if modtype == imp.C_EXTENSION:
+                check_ext_mod(path, self.py_version)
+
             if modtype in (imp.PY_SOURCE, imp.C_EXTENSION):
                 shutil.copy2(path, target)
 
             elif modtype == imp.PKG_DIRECTORY:
+                check_package_for_ext_mods(path, self.py_version)
                 dest = os.path.join(target, modname)
                 shutil.copytree(path, dest,
                                 ignore=shutil.ignore_patterns('*.pyc'))
@@ -110,13 +138,13 @@ else:
                     copy_zipmodule(loader, modname, target)
 
 
-def copy_modules(modnames, target, path=None):
+def copy_modules(modnames, target, py_version, path=None):
     """Copy the specified importable modules to the target directory.
     
     By default, it finds modules in sys.path - this can be overridden by passing
     the path parameter.
     """
-    mc = ModuleCopier(path)
+    mc = ModuleCopier(py_version, path)
     files_in_target_noext = [os.path.splitext(f)[0] for f in os.listdir(target)]
     
     for modname in modnames:
