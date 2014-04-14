@@ -72,7 +72,7 @@ CONFIG_VALIDATORS = {
         ('bitness', False),
     ]),
     'Shortcut': SectionValidator([
-        ('entry_point', True),
+        ('entry_point', False),
         ('script', False),
         ('icon', False),
         ('console', False),
