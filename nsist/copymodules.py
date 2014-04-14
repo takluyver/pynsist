@@ -1,7 +1,10 @@
 import os
 import shutil
 import sys
+import tempfile
 import zipfile, zipimport
+
+pjoin = os.path.join
 
 PY2 = sys.version_info[0] == 2
 running_python  = '.'.join(str(x) for x in sys.version_info[:2])
@@ -38,17 +41,27 @@ def check_package_for_ext_mods(path, target_python):
 def copy_zipmodule(loader, modname, target):
     """Copy a module or package out of a zip file to the target directory."""
     file = loader.get_filename(modname)
-    prefix = loader.archive + '/' + loader.prefix
-    assert file.startswith(prefix)
-    path_in_zip = file[len(prefix):]
+    assert file.startswith(loader.archive)
+    path_in_zip = file[len(loader.archive+'/'):]
     zf = zipfile.ZipFile(loader.archive)
+
+    # If the packages are in a subdirectory, extracting them recreates the
+    # directory structure from the zip file. So extract to a temp dir first,
+    # and then copy the modules to target.
+    tempdir = tempfile.mkdtemp()
     if loader.is_package(modname):
+        # Extract everything in a folder
         pkgdir, basename = path_in_zip.rsplit('/', 1)
         assert basename.startswith('__init__')
         pkgfiles = [f for f in zf.namelist() if f.startswith(pkgdir)]
-        zf.extractall(target, pkgfiles)
+        zf.extractall(tempdir, pkgfiles)
+        shutil.copytree(pjoin(tempdir, pkgdir), pjoin(target, modname))
     else:
-        zf.extract(path_in_zip, target)
+        # Extract a single file
+        zf.extract(path_in_zip, tempdir)
+        shutil.copy2(pjoin(tempdir, path_in_zip), target)
+
+    shutil.rmtree(tempdir)
 
 if not PY2:
     import importlib
@@ -122,7 +135,21 @@ else:
             and extract modules and packages from appropriately structured zip
             files.
             """
-            info = imp.find_module(modname, self.path)
+            try:
+                info = imp.find_module(modname, self.path)
+            except ImportError:
+                # Search all ZIP files in self.path for the module name
+                # NOTE: `imp.find_module(...)` will *not* find modules in ZIP
+                #       files, so we have to check each file for ourselves
+                for zpath in self.zip_paths:
+                    loader = zipimport.zipimporter(zpath)
+                    if loader.find_module(modname) is None:
+                        continue
+                    copy_zipmodule(loader, modname, target)
+                    return
+                # Not found in zip files either - re-raise exception
+                raise
+
             path = info[1]
             modtype = info[2][2]
 
@@ -137,15 +164,6 @@ else:
                 dest = os.path.join(target, modname)
                 shutil.copytree(path, dest,
                                 ignore=shutil.ignore_patterns('*.pyc'))
-            else:
-                # Search all ZIP files in self.path for the module name
-                # NOTE: `imp.find_module(...)` will *not* find modules in ZIP
-                #       files, so we have to check each file for ourselves
-                for zpath in self.zip_path:
-                    loader = zipimport.zipimporter(zpath)
-                    if loader.find_module(modname) is None:
-                        continue
-                    copy_zipmodule(loader, modname, target)
 
 
 def copy_modules(modnames, target, py_version, path=None):

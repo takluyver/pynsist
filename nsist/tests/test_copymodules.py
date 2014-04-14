@@ -8,7 +8,10 @@ pjoin = os.path.join
 
 running_python = '.'.join(str(x) for x in sys.version_info[:3])
 test_dir = os.path.dirname(__file__)
-sample_path = [pjoin(test_dir, 'sample_pkgs')]
+sample_path = [pjoin(test_dir, 'sample_pkgs'),
+               pjoin(test_dir, 'sample_zip.egg'),
+               pjoin(test_dir, 'sample_zip.egg/rootdir'),
+              ]
 
 from .utils import assert_is_file, assert_is_dir
 
@@ -48,3 +51,15 @@ class TestCopyModules(unittest.TestCase):
         
         with self.assertRaisesRegexp(ExtensionModuleMismatch, "on Python 4"):
             copy_modules(['win_extmod'], self.target, '4.0.0', sample_path)
+    
+    def test_copy_from_zipfile(self):
+        copy_modules(['zippedmod2','zippedpkg2'],
+                     self.target, running_python, sample_path)
+#        assert_is_file(pjoin(self.target, 'zippedmod.py'))
+#        assert_is_dir(pjoin(self.target, 'zippedpkg'))
+        assert_is_file(pjoin(self.target, 'zippedmod2.py'))
+        assert_is_dir(pjoin(self.target, 'zippedpkg2'))
+    
+    def test_module_not_found(self):
+        with self.assertRaises(ImportError):
+            copy_modules(['nonexistant'], self.target, '3.3.5', sample_path)
