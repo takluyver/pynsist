@@ -23,7 +23,6 @@ else:
 
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
-from . import configreader
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
@@ -271,6 +270,7 @@ def main(argv=None):
         os.chdir(dirname)
     
     try:
+        from . import configreader
         cfg = configreader.read_and_validate(config_file)
     except configreader.InvalidConfig as e:
         logger.error('Error parsing configuration file:')
