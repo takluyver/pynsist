@@ -4,3 +4,6 @@ python:
   - "3.3"
 # command to run tests
 script: nosetests
+# Ensure dependencies are installed
+install:
+  - pip install .
