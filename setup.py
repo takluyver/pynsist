@@ -4,7 +4,7 @@ from distutils.core import setup
 PY2 = sys.version_info[0] == 2
 if PY2:
     requirements = [
-        'configparser == 3.3.0r2'
+        'configparser >= 3.3.0r2'
     ]
 else:
     requirements = []
