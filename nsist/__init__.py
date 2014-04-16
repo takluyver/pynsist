@@ -52,6 +52,7 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
         return
     logger.info('Downloading Python MSI...')
     urlretrieve(url, target)
+
     urlretrieve(url+'.asc', target+'.asc')
     try:
         keys_file = os.path.join(_PKGDIR, 'python-pubkeys.txt')
@@ -59,6 +60,7 @@ def fetch_python(version=DEFAULT_PY_VERSION, bitness=DEFAULT_BITNESS,
         check_output(['gpg', '--verify', target+'.asc'])
     except OSError:
         logger.warn("GPG not available - could not check signature of {0}".format(target))
+
 
 
 def fetch_pylauncher(bitness=DEFAULT_BITNESS, destination=DEFAULT_BUILD_DIR):
@@ -267,9 +269,13 @@ def main(argv=None):
     if dirname:
         os.chdir(dirname)
     
-    import configparser
-    cfg = configparser.ConfigParser()
-    cfg.read(config_file)
+    try:
+        from . import configreader
+        cfg = configreader.read_and_validate(config_file)
+    except configreader.InvalidConfig as e:
+        logger.error('Error parsing configuration file:')
+        logger.error(str(e))
+        sys.exit(1)
     appcfg = cfg['Application']
     all_steps(
         appname = appcfg['name'],
