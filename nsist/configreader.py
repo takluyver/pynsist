@@ -53,7 +53,7 @@ CONFIG_VALIDATORS = {
     'Application': SectionValidator([
         ('name', True),
         ('version', True),
-        ('entry_point', True),
+        ('entry_point', False),
         ('script', False),
         ('icon', False),
         ('console', False),
