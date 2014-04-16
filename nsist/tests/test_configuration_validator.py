@@ -19,13 +19,13 @@ def test_invalid_config_keys():
     configreader.read_and_validate(configfile)
 
 @raises(configreader.InvalidConfig)
-def test_invalid_config_subsection():
-    configfile = os.path.join(DATA_FILES, 'invalid_config_subsection.cfg')
+def test_invalid_config_key():
+    configfile = os.path.join(DATA_FILES, 'invalid_config_key.cfg')
     configreader.read_and_validate(configfile)
 
 @raises(configreader.InvalidConfig)
-def test_missing_config_subsection():
-    configfile = os.path.join(DATA_FILES, 'missing_config_subsection.cfg')
+def test_missing_config_key():
+    configfile = os.path.join(DATA_FILES, 'missing_config_key.cfg')
     configreader.read_and_validate(configfile)
 
 @raises(configparser.Error)
