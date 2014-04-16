@@ -15,7 +15,7 @@ def test_valid_config_with_shortcut():
 
 @raises(configreader.InvalidConfig)
 def test_invalid_config_keys():
-    configfile = os.path.join(DATA_FILES, 'invalid_config_keys.cfg')
+    configfile = os.path.join(DATA_FILES, 'invalid_config_section.cfg')
     configreader.read_and_validate(configfile)
 
 @raises(configreader.InvalidConfig)
