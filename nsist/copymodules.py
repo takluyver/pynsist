@@ -51,7 +51,7 @@ def copy_zipmodule(loader, modname, target):
     tempdir = tempfile.mkdtemp()
     if loader.is_package(modname):
         # Extract everything in a folder
-        pkgdir, basename = path_in_zip.rsplit('/', 1)
+        pkgdir, basename = os.path.split(path_in_zip)
         assert basename.startswith('__init__')
         pkgfiles = [f for f in zf.namelist() if f.startswith(pkgdir)]
         zf.extractall(tempdir, pkgfiles)
