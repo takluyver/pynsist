@@ -12,8 +12,10 @@ else:
 with open('README.rst', 'r') as f:
     readme=f.read()
 
+from nsist import __version__
+
 setup(name='pynsist',
-      version='0.1',
+      version=__version__,
       description='Build Windows installers for Python apps',
       long_description=readme,
       author='Thomas Kluyver',

@@ -24,6 +24,8 @@ else:
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
 
+__version__ = '0.2'
+
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
 
