@@ -98,3 +98,38 @@ def read_and_validate(config_file):
                        ', '.join(['"%s"' % n for n in valid_section_names]))
             raise InvalidConfig(err_msg)    
     return config
+
+def read_shortcuts_config(cfg):
+    """Read and verify the shortcut definitions from the config file.
+    
+    There is one shortcut per 'Shortcut <name>' section, and one for the
+    Application section.
+    
+    Returns a list of dictionaries with the fields from the shortcut sections.
+    The optional 'icon' and 'console' fields will be filled with their
+    default values if not supplied.
+    """
+    shortcuts = {}
+    def _check_shortcut(name, sc, section):
+        if ('entry_point' not in sc) and ('script' not in sc):
+            raise InvalidConfig('Section {} has neither entry_point nor script.'.format(section))
+        elif ('entry_point' in sc) and ('script' in sc):
+            raise InvalidConfig('Section {} has both entry_point and script.'.format(section))
+
+        # Copy to a regular dict so it can hold a boolean value
+        sc2 = dict(sc)
+        if 'icon' not in sc2:
+            from . import DEFAULT_ICON
+            sc2['icon'] = DEFAULT_ICON
+        sc2['console'] = sc.getboolean('console', fallback=False)
+        shortcuts[name] = sc2
+
+    for section in cfg.sections():
+        if section.startswith("Shortcut "):
+            name = section[len("Shortcut "):]
+            _check_shortcut(name, cfg[section], section)
+
+    appcfg = cfg['Application']
+    _check_shortcut(appcfg['name'], appcfg, 'Application')
+
+    return shortcuts

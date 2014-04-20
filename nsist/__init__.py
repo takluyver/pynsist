@@ -244,32 +244,6 @@ class InstallerBuilder(object):
         if not exitcode:
             logger.info('Installer written to %s', pjoin(self.build_dir, self.installer_name))
 
-def read_shortcuts_config(cfg):
-    
-    shortcuts = {}
-    def _check_shortcut(name, sc, section):
-        if ('entry_point' not in sc) and ('script' not in sc):
-            raise ValueError('Section {} has neither entry_point nor script.'.format(section))
-        elif ('entry_point' in sc) and ('script' in sc):
-            raise ValueError('Section {} has both entry_point and script.'.format(section))
-            
-        # Copy to a regular dict so it can hold a boolean value
-        sc2 = dict(sc)
-        if 'icon' not in sc2:
-            sc2['icon'] = DEFAULT_ICON        
-        sc2['console'] = sc.getboolean('console', fallback=False)
-        shortcuts[name] = sc2
-    
-    for section in cfg.sections():
-        if section.startswith("Shortcut "):
-            name = section[len("Shortcut "):]
-            _check_shortcut(name, cfg[section], section)
-    
-    appcfg = cfg['Application']
-    _check_shortcut(appcfg['name'], appcfg, 'Application')
-    
-    return shortcuts
-
 def main(argv=None):
     """Make an installer from the command line.
     
@@ -291,6 +265,7 @@ def main(argv=None):
     try:
         from . import configreader
         cfg = configreader.read_and_validate(config_file)
+        shortcuts = configreader.read_shortcuts_config(cfg)
     except configreader.InvalidConfig as e:
         logger.error('Error parsing configuration file:')
         logger.error(str(e))
@@ -300,7 +275,7 @@ def main(argv=None):
         appname = appcfg['name'],
         version = appcfg['version'],
         icon = appcfg.get('icon', DEFAULT_ICON),
-        shortcuts = read_shortcuts_config(cfg),
+        shortcuts = shortcuts,
         packages = cfg.get('Include', 'packages', fallback='').splitlines(),
         extra_files = cfg.get('Include', 'files', fallback='').splitlines(),
         py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
