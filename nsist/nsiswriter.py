@@ -7,17 +7,15 @@ PY2 = sys.version_info[0] == 2
 class NSISFileWriter(object):
     """Write an .nsi script file by filling in a template.
     """
-    def __init__(self, template_file, definitions=None):
+    def __init__(self, template_file, installerbuilder, definitions=None):
         """Instantiate an NSISFileWriter
         
         :param str template_file: Path to the .nsi template
         :param dict definitions: Mapping of name to value (values will be quoted)
         """
         self.template_file = template_file
+        self.installerbuilder = installerbuilder
         self.definitions = definitions or {}
-        self.files = []
-        self.directories = []
-        self.shortcuts = {}
         self.template_fields = {
                 ';INSTALL_FILES': self.files_install,
                 ';INSTALL_DIRECTORIES': self.dirs_install,
@@ -62,18 +60,19 @@ class NSISFileWriter(object):
     # These return an iterable of lines to fill after a given template field
 
     def files_install(self):
-        for file in self.files:
+        for file in self.installerbuilder.install_files:
             yield 'File "{}"'.format(file)
 
     def dirs_install(self):
-        for dir in self.directories:
+        for dir in self.installerbuilder.install_dirs:
             yield 'SetOutPath "$INSTDIR\{}"'.format(dir)
             yield 'File /r "{}\*.*"'.format(dir)
         yield 'SetOutPath "$INSTDIR"'
     
     def shortcuts_install(self):
-        if len(self.shortcuts) == 1:
-            scname, sc = next(iter(self.shortcuts.items()))
+        shortcuts = self.installerbuilder.shortcuts
+        if len(shortcuts) == 1:
+            scname, sc = next(iter(shortcuts.items()))
             yield 'CreateShortCut "$SMPROGRAMS\{}.lnk" "{}" \'"$INSTDIR\{}"\' \\'.format(\
                     scname, ('py' if sc['console'] else 'pyw'), sc['script'])
             yield '    "$INSTDIR\{}"'.format(sc['icon'])
@@ -81,22 +80,23 @@ class NSISFileWriter(object):
         
         # Multiple shortcuts - make a folder
         yield 'CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"'
-        for scname, sc in self.shortcuts.items():
+        for scname, sc in shortcuts.items():
             yield 'CreateShortCut "$SMPROGRAMS\${{PRODUCT_NAME}}\{}.lnk" "{}" \\'.format(\
                     scname, ('py' if sc['console'] else 'pyw'))
             yield '    \'"$INSTDIR\{}"\' "$INSTDIR\{}"'.format(sc['script'], sc['icon'])
 
     def files_uninstall(self):
-        for file in self.files:
+        for file in self.installerbuilder.install_files:
             yield 'Delete "$INSTDIR\{}"'.format(file)
 
     def dirs_uninstall(self):
-        for dir in self.directories:
+        for dir in self.installerbuilder.install_dirs:
             yield 'RMDir /r "$INSTDIR\{}"'.format(dir)
     
     def shortcuts_uninstall(self):
-        if len(self.shortcuts) == 1:
-            scname = next(iter(self.shortcuts))
+        shortcuts = self.installerbuilder.shortcuts
+        if len(shortcuts) == 1:
+            scname = next(iter(shortcuts))
             yield 'Delete "$SMPROGRAMS\{}.lnk"'.format(scname)
         else:
             yield 'RMDir /r "$SMPROGRAMS\${PRODUCT_NAME}"'
