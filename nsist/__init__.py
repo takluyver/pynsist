@@ -4,25 +4,22 @@ import errno
 import logging
 import os
 import shutil
-from subprocess import check_output, call
+from subprocess import call
 import sys
 
 PY2 = sys.version_info[0] == 2
 
-if PY2:
-    from urllib import urlretrieve
-else:
-    from urllib.request import urlretrieve
-
-if os.name == 'nt' and PY2:
-    import _winreg as winreg
-elif os.name == 'nt':
-    import winreg
+if os.name == 'nt':
+    if PY2:
+        import _winreg as winreg
+    else:
+        import winreg
 else:
     winreg = None
 
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
+from .util import download
 
 __version__ = '0.2'
 
@@ -77,21 +74,13 @@ class InstallerBuilder(object):
         """
         version = self.py_version
         arch_tag = '.amd64' if (self.py_bitness==64) else ''
-        url = 'http://python.org/ftp/python/{0}/python-{0}{1}.msi'.format(version, arch_tag)
+        url = 'https://python.org/ftp/python/{0}/python-{0}{1}.msi'.format(version, arch_tag)
         target = pjoin(self.build_dir, 'python-{0}{1}.msi'.format(version, arch_tag))
         if os.path.isfile(target):
             logger.info('Python MSI already in build directory.')
             return
         logger.info('Downloading Python MSI...')
-        urlretrieve(url, target)
-    
-        urlretrieve(url+'.asc', target+'.asc')
-        try:
-            keys_file = os.path.join(_PKGDIR, 'python-pubkeys.txt')
-            check_output(['gpg', '--import', keys_file])
-            check_output(['gpg', '--verify', target+'.asc'])
-        except OSError:
-            logger.warn("GPG not available - could not check signature of {0}".format(target))
+        download(url, target)
 
     def fetch_pylauncher(self):
         """Fetch the MSI for PyLauncher (required for Python2.x).
@@ -106,7 +95,7 @@ class InstallerBuilder(object):
             logger.info('PyLauncher MSI already in build directory.')
             return
         logger.info('Downloading PyLauncher MSI...')
-        urlretrieve(url, target)
+        download(url, target)
 
     SCRIPT_TEMPLATE = """#!python{qualifier}
     import sys, os

@@ -2,12 +2,11 @@ import sys
 from distutils.core import setup
 
 PY2 = sys.version_info[0] == 2
+
+requirements = ['requests',
+               ]
 if PY2:
-    requirements = [
-        'configparser >= 3.3.0r2'
-    ]
-else:
-    requirements = []
+    requirements.append('configparser >= 3.3.0r2')
 
 with open('README.rst', 'r') as f:
     readme=f.read()
