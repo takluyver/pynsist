@@ -33,7 +33,6 @@ setup(name='pynsist',
       url='https://github.com/takluyver/pynsist',
       packages=['nsist'],
       package_data={'nsist': ['template.nsi',
-                              'python-pubkeys.txt',
                               'glossyorb.ico',
                              ]
                     },
