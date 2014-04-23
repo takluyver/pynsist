@@ -73,9 +73,12 @@ class NSISFileWriter(object):
         shortcuts = self.installerbuilder.shortcuts
         if len(shortcuts) == 1:
             scname, sc = next(iter(shortcuts.items()))
+            # The output path becomes the working directory for shortcuts.
+            yield 'SetOutPath "%HOMEDRIVE%\\%HOMEPATH%"'
             yield 'CreateShortCut "$SMPROGRAMS\{}.lnk" "{}" \'"$INSTDIR\{}"\' \\'.format(\
                     scname, ('py' if sc['console'] else 'pyw'), sc['script'])
             yield '    "$INSTDIR\{}"'.format(sc['icon'])
+            yield 'SetOutPath "$INSTDIR"
             return
         
         # Multiple shortcuts - make a folder
