@@ -188,7 +188,8 @@ class InstallerBuilder(object):
                            'ARCH_TAG': '.amd64' if (self.py_bitness==64) else '',
                           },
             )
-        
+
+        logger.info('Writing NSI file to %s', self.nsi_file)
         nsis_writer.write(self.nsi_file)    
 
     def run_nsis(self):
@@ -225,10 +226,12 @@ class InstallerBuilder(object):
         self.prepare_shortcuts()
         
         # Packages
-        
+        self.prepare_packages()
         
         # Extra files
         self.copy_extra_files()
+
+        self.write_nsi()
     
         exitcode = self.run_nsis()
         

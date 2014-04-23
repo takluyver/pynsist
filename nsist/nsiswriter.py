@@ -78,7 +78,7 @@ class NSISFileWriter(object):
             yield 'CreateShortCut "$SMPROGRAMS\{}.lnk" "{}" \'"$INSTDIR\{}"\' \\'.format(\
                     scname, ('py' if sc['console'] else 'pyw'), sc['script'])
             yield '    "$INSTDIR\{}"'.format(sc['icon'])
-            yield 'SetOutPath "$INSTDIR"
+            yield 'SetOutPath "$INSTDIR"'
             return
         
         # Multiple shortcuts - make a folder
