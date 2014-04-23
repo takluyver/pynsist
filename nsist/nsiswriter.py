@@ -71,10 +71,10 @@ class NSISFileWriter(object):
     
     def shortcuts_install(self):
         shortcuts = self.installerbuilder.shortcuts
+        # The output path becomes the working directory for shortcuts.
+        yield 'SetOutPath "%HOMEDRIVE%\\%HOMEPATH%"'
         if len(shortcuts) == 1:
             scname, sc = next(iter(shortcuts.items()))
-            # The output path becomes the working directory for shortcuts.
-            yield 'SetOutPath "%HOMEDRIVE%\\%HOMEPATH%"'
             yield 'CreateShortCut "$SMPROGRAMS\{}.lnk" "{}" \'"$INSTDIR\{}"\' \\'.format(\
                     scname, ('py' if sc['console'] else 'pyw'), sc['script'])
             yield '    "$INSTDIR\{}"'.format(sc['icon'])
@@ -87,6 +87,7 @@ class NSISFileWriter(object):
             yield 'CreateShortCut "$SMPROGRAMS\${{PRODUCT_NAME}}\{}.lnk" "{}" \\'.format(\
                     scname, ('py' if sc['console'] else 'pyw'))
             yield '    \'"$INSTDIR\{}"\' "$INSTDIR\{}"'.format(sc['script'], sc['icon'])
+        yield 'SetOutPath "$INSTDIR"'
 
     def files_uninstall(self):
         for file in self.installerbuilder.install_files:
