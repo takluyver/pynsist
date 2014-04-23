@@ -45,6 +45,9 @@ Section "!${PRODUCT_NAME}" sec_app
   ;INSTALL_FILES
   ;INSTALL_DIRECTORIES
   ;INSTALL_SHORTCUTS
+  ; Byte-compile Python files.
+  DetailPrint "Byte-compiling Python modules..."
+  ExecWait 'py -${PY_QUALIFIER} -m compileall "$INSTDIR\pkgs"'
   WriteUninstaller $INSTDIR\uninstall.exe
   ; Add ourselves to Add/remove programs
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \

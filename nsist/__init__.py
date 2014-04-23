@@ -53,6 +53,9 @@ class InstallerBuilder(object):
         self.installer_name = installer_name or self.make_installer_name()
         self.nsi_template = nsi_template
         self.nsi_file = pjoin(self.build_dir, 'installer.nsi')
+        self.py_qualifier = '.'.join(self.py_version.split('.')[:2])
+        if self.py_bitness == 32:
+            self.py_qualifier += '-32'
         
         # To be filled later
         self.install_files = []
@@ -121,12 +124,10 @@ class InstallerBuilder(object):
         python_version and bitness are used to write an appropriate shebang line
         for the PEP 397 Windows launcher.
         """
-        qualifier = '.'.join(self.py_version.split('.')[:2])
-        if self.py_bitness == 32:
-            qualifier += '-32'
         module, func = entrypt.split(":")
         with open(target, 'w') as f:
-            f.write(self.SCRIPT_TEMPLATE.format(qualifier=qualifier, module=module, func=func))
+            f.write(self.SCRIPT_TEMPLATE.format(qualifier=self.py_qualifier,
+                                                module=module, func=func))
 
     def prepare_shortcuts(self):
         files = set()
@@ -181,6 +182,7 @@ class InstallerBuilder(object):
             definitions = {'PRODUCT_NAME': self.appname,
                            'PRODUCT_VERSION': self.version,
                            'PY_VERSION': self.py_version,
+                           'PY_QUALIFIER': self.py_qualifier,
                            'PRODUCT_ICON': os.path.basename(self.icon),
                            'INSTALLER_NAME': self.installer_name,
                            'ARCH_TAG': '.amd64' if (self.py_bitness==64) else '',
