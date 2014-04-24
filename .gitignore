@@ -4,3 +4,4 @@ build/
 MANIFEST
 dist/
 doc/_build
+pynsist_pkgs/
