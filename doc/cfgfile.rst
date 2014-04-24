@@ -42,9 +42,17 @@ Application section
    The other lines make sure it can find the packages installed along with your
    application.
 
+.. describe:: target (optional)
+              parameters (optional)
+
+   Lower level definition of a shortcut, to create start menu entries for help
+   pages or other non-Python entry points. You shouldn't normally use this for
+   Python entry points.
+
 .. note::
-   Either ``entry_point`` or ``script`` must be specified, but not both. Specifying
-   ``entry_point`` is normally easier and more reliable.
+   Either ``entry_point``, ``script`` or ``target`` must be specified, but not
+   more than one. Specifying ``entry_point`` is normally easiest and most
+   reliable.
 
 .. describe:: icon (optional)
 
@@ -74,6 +82,8 @@ shortcuts by defining sections titled :samp:`Shortcut {Name}`. For example:
               script (optional)
               icon (optional)
               console (optional)
+              target (optional)
+              parameters (optional)
 
    These options all work the same way as in the Application section.
 
