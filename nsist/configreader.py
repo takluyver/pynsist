@@ -55,6 +55,8 @@ CONFIG_VALIDATORS = {
         ('version', True),
         ('entry_point', False),
         ('script', False),
+        ('target', False),
+        ('parameters', False),
         ('icon', False),
         ('console', False),
     ]),
@@ -74,6 +76,8 @@ CONFIG_VALIDATORS = {
     'Shortcut': SectionValidator([
         ('entry_point', False),
         ('script', False),
+        ('target', False),
+        ('parameters', False),
         ('icon', False),
         ('console', False),
     ]),
@@ -111,10 +115,14 @@ def read_shortcuts_config(cfg):
     """
     shortcuts = {}
     def _check_shortcut(name, sc, section):
-        if ('entry_point' not in sc) and ('script' not in sc):
-            raise InvalidConfig('Section {} has neither entry_point nor script.'.format(section))
-        elif ('entry_point' in sc) and ('script' in sc):
-            raise InvalidConfig('Section {} has both entry_point and script.'.format(section))
+        alternatives = ['entry_point', 'script', 'target']
+        has_alternatives = sum(1 for k in alternatives if k in sc)
+        if has_alternatives < 1:
+            raise InvalidConfig('Section [{}] has none of {}.'.format(
+                                    section, ', '.join(alternatives)))
+        elif has_alternatives > 1:
+            raise InvalidConfig('Section [{}] has more than one of {}.'.format(
+                                    section, ', '.join(alternatives)))
 
         # Copy to a regular dict so it can hold a boolean value
         sc2 = dict(sc)
@@ -122,6 +130,7 @@ def read_shortcuts_config(cfg):
             from . import DEFAULT_ICON
             sc2['icon'] = DEFAULT_ICON
         sc2['console'] = sc.getboolean('console', fallback=False)
+        sc2['parameters'] = sc.get('parameters', fallback='')
         shortcuts[name] = sc2
 
     for section in cfg.sections():

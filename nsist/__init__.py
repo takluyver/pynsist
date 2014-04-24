@@ -2,6 +2,7 @@
 """
 import errno
 import logging
+import ntpath
 import os
 import shutil
 from subprocess import call
@@ -132,16 +133,20 @@ from {module} import {func}
     def prepare_shortcuts(self):
         files = set()
         for scname, sc in self.shortcuts.items():
-            if sc.get('entry_point'):
-                sc['script'] = script = scname.replace(' ', '_') + '.launch.py'
-                self.write_script(sc['entry_point'], pjoin(self.build_dir, script))
-            else:
-                shutil.copy2(sc['script'], self.build_dir)
-        
+            if not sc.get('target'):
+                if sc.get('entry_point'):
+                    sc['script'] = script = scname.replace(' ', '_') + '.launch.py' \
+                                                + ('' if sc['console'] else 'w')
+                    self.write_script(sc['entry_point'], pjoin(self.build_dir, script))
+                else:
+                    shutil.copy2(sc['script'], self.build_dir)
+
+                sc['target'] = 'py' if sc['console'] else 'pyw'
+                sc['parameters'] = '"%s"' % ntpath.join('$INSTDIR', sc['script'])
+                files.add(os.path.basename(sc['script']))
+
             shutil.copy2(sc['icon'], self.build_dir)
             sc['icon'] = os.path.basename(sc['icon'])
-            sc['script'] = os.path.basename(sc['script'])
-            files.add(sc['script'])
             files.add(sc['icon'])
     
         self.install_files.extend(files)

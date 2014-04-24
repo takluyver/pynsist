@@ -85,8 +85,8 @@ class NSISFileWriter(object):
         yield 'CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"'
         for scname, sc in shortcuts.items():
             yield 'CreateShortCut "$SMPROGRAMS\${{PRODUCT_NAME}}\{}.lnk" "{}" \\'.format(\
-                    scname, ('py' if sc['console'] else 'pyw'))
-            yield '    \'"$INSTDIR\{}"\' "$INSTDIR\{}"'.format(sc['script'], sc['icon'])
+                    scname, sc['target'])
+            yield '    \'{}\' "$INSTDIR\{}"'.format(sc['parameters'], sc['icon'])
         yield 'SetOutPath "$INSTDIR"'
 
     def files_uninstall(self):
