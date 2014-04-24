@@ -3,6 +3,8 @@
  
 SetCompressor lzma
 
+RequestExecutionLevel admin
+
 ; Modern UI installer stuff 
 !include "MUI2.nsh"
 !define MUI_ABORTWARNING
@@ -38,6 +40,7 @@ SectionEnd
 
 Section "!${PRODUCT_NAME}" sec_app
   SectionIn RO
+  SetShellVarContext all
   File ${PRODUCT_ICON}
   SetOutPath "$INSTDIR\pkgs"
   File /r "pkgs\*.*"
@@ -65,6 +68,7 @@ Section "!${PRODUCT_NAME}" sec_app
 SectionEnd
 
 Section "Uninstall"
+  SetShellVarContext all
   Delete $INSTDIR\uninstall.exe
   Delete "$INSTDIR\${PRODUCT_ICON}"
   RMDir /r "$INSTDIR\pkgs"
