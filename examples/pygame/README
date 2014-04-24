@@ -1,0 +1,9 @@
+This is an example that uses binary packages.
+
+To make the installer on a non-Windows system, download the pygame installer
+for 32-bit Python 3.4 (win32-py3.4) from here:
+http://www.lfd.uci.edu/~gohlke/pythonlibs/#pygame
+
+Open it up with an archive tool, and extract the pygame folder from PLATLIB.
+Place it in a folder called pynsist_pkgs, and pynsist will use it in preference
+to the files it finds on your system.
