@@ -108,6 +108,15 @@ Python section
 Include section
 ---------------
 
+To write these lists, put each value on a new line, with more indentation than
+the line with the key:
+
+.. code-block:: ini
+
+    key=value1
+      value2
+      value3
+
 .. describe:: packages (optional)
 
    A list of importable package and module names to include in the installer.
@@ -115,7 +124,26 @@ Include section
 
 .. describe:: files (optional)
 
-   Extra files to be installed with your application.
+   Extra files or directories to be installed with your application.
+
+   You can optionally add ``> destination`` after each file to install it
+   somewhere other than the installation directory. The destination can be:
+
+   * An absolute path on the target system, e.g. ``C:\\`` (but this is not
+     usually desirable).
+   * A path starting with ``$INSTDIR``, the specified installation directory.
+   * A path starting with any of the `constants NSIS provides
+     <http://nsis.sourceforge.net/Docs/Chapter4.html#4.2.3>`_, e.g. ``$SYSDIR``.
+
+   The destination can also include ``${PRODUCT_NAME}``, which will be expanded
+   to the name of your application.
+
+   For instance, to put a data file in the (32 bit) common files directory:
+
+   .. code-block:: ini
+
+       [Include]
+       files=mydata.dat > $COMMONFILES
 
 Build section
 -------------
