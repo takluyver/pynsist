@@ -1,3 +1,6 @@
+import itertools
+import operator
+import ntpath
 import re
 import sys
 
@@ -52,7 +55,6 @@ class NSISFileWriter(object):
         """
         for name, value in self.definitions.items():
             f.write('!define {} "{}"\n'.format(name, value))
-    
 
     # Template fillers
     # ----------------
@@ -60,12 +62,16 @@ class NSISFileWriter(object):
     # These return an iterable of lines to fill after a given template field
 
     def files_install(self):
-        for file in self.installerbuilder.install_files:
-            yield 'File "{}"'.format(file)
+        for destination, group in itertools.groupby(
+                    self.installerbuilder.install_files, operator.itemgetter(1)):
+            yield 'SetOutPath "{}"'.format(destination)
+            for file, _ in group:
+                yield 'File "{}"'.format(file)
+        yield 'SetOutPath "$INSTDIR"'
 
     def dirs_install(self):
-        for dir in self.installerbuilder.install_dirs:
-            yield 'SetOutPath "$INSTDIR\{}"'.format(dir)
+        for dir, destination in self.installerbuilder.install_dirs:
+            yield 'SetOutPath "{}"'.format(ntpath.join(destination, dir))
             yield 'File /r "{}\*.*"'.format(dir)
         yield 'SetOutPath "$INSTDIR"'
     
@@ -90,12 +96,12 @@ class NSISFileWriter(object):
         yield 'SetOutPath "$INSTDIR"'
 
     def files_uninstall(self):
-        for file in self.installerbuilder.install_files:
-            yield 'Delete "$INSTDIR\{}"'.format(file)
+        for file, destination in self.installerbuilder.install_files:
+            yield 'Delete "{}"'.format(ntpath.join(destination, file))
 
     def dirs_uninstall(self):
-        for dir in self.installerbuilder.install_dirs:
-            yield 'RMDir /r "$INSTDIR\{}"'.format(dir)
+        for dir, destination in self.installerbuilder.install_dirs:
+            yield 'RMDir /r "{}"'.format(ntpath.join(destination, dir))
     
     def shortcuts_uninstall(self):
         shortcuts = self.installerbuilder.shortcuts

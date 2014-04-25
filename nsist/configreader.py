@@ -87,7 +87,9 @@ class InvalidConfig(ValueError):
     pass
 
 def read_and_validate(config_file):
-    config = configparser.ConfigParser()
+    # Interpolation interferes with Windows-style environment variables, so
+    # it's disabled for now.
+    config = configparser.ConfigParser(interpolation=None)
     config.read(config_file)
     for section in config.sections():
         if section in CONFIG_VALIDATORS:
@@ -102,6 +104,23 @@ def read_and_validate(config_file):
                        ', '.join(['"%s"' % n for n in valid_section_names]))
             raise InvalidConfig(err_msg)    
     return config
+
+def read_extra_files(cfg):
+    """Read the list of extra files from the config file.
+    
+    Returns a list of 2-tuples: (file, destination_directory), which can be
+    passed as the ``extra_files`` parameter to :class:`nsist.InstallerBuilder`.
+    """
+    lines = cfg.get('Include', 'files', fallback='').splitlines()
+    pairs = []
+    for line in lines:
+        if '>' in line:
+            file, dest = line.rsplit('>', 1)
+            pairs.append((file.strip(), dest.strip()))
+        else:
+            pairs.append((line, '$INSTDIR'))
+
+    return pairs
 
 def read_shortcuts_config(cfg):
     """Read and verify the shortcut definitions from the config file.

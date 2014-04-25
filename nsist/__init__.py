@@ -3,6 +3,7 @@
 import errno
 import logging
 import ntpath
+import operator
 import os
 import shutil
 from subprocess import call
@@ -149,7 +150,7 @@ from {module} import {func}
             sc['icon'] = os.path.basename(sc['icon'])
             files.add(sc['icon'])
     
-        self.install_files.extend(files)
+        self.install_files.extend([(f, '$INSTDIR') for f in files])
     
     def prepare_packages(self):
         logger.info("Copying packages into build directory...")
@@ -166,9 +167,12 @@ from {module} import {func}
         """Copy a list of files into the build directory, and add them to
         install_files or install_dirs as appropriate.
         """
-        for file in self.extra_files:
+        for file, destination in self.extra_files:
             file = file.rstrip('/\\')
             basename = os.path.basename(file)
+
+            if not destination:
+                destination = '$INSTDIR'
     
             if os.path.isdir(file):
                 target_name = pjoin(self.build_dir, basename)
@@ -177,10 +181,10 @@ from {module} import {func}
                 elif os.path.exists(target_name):
                     os.unlink(target_name)
                 shutil.copytree(file, target_name)
-                self.install_dirs.append(basename)
+                self.install_dirs.append((basename, destination))
             else:
                 shutil.copy2(file, self.build_dir)
-                self.install_files.append(basename)
+                self.install_files.append((basename, destination))
     
     def write_nsi(self):
         nsis_writer = NSISFileWriter(self.nsi_template, installerbuilder=self,
@@ -195,6 +199,8 @@ from {module} import {func}
             )
 
         logger.info('Writing NSI file to %s', self.nsi_file)
+        # Sort by destination directory, so we can group them effectively
+        self.install_files.sort(key=operator.itemgetter(1))
         nsis_writer.write(self.nsi_file)    
 
     def run_nsis(self):
@@ -276,7 +282,7 @@ def main(argv=None):
         icon = appcfg.get('icon', DEFAULT_ICON),
         shortcuts = shortcuts,
         packages = cfg.get('Include', 'packages', fallback='').splitlines(),
-        extra_files = cfg.get('Include', 'files', fallback='').splitlines(),
+        extra_files = configreader.read_extra_files(cfg),
         py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
         py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
         build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
