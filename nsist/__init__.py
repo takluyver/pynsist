@@ -39,6 +39,21 @@ else:
     DEFAULT_BITNESS = 32
 
 class InstallerBuilder(object):
+    """Controls building an installer.
+    
+    :param str appname: Application name
+    :param str version: Application version
+    :param list shortcuts: List of dictionaries, with keys matching
+            :ref:`shortcut_config` in the config file
+    :param str icon: Path to an icon for the application
+    :param list packages: List of strings for importable packages to include
+    :param list extra_files: List of 2-tuples (file, destination) of files to include
+    :param str py_version: Full version of Python to bundle
+    :param int py_bitness: Bitness of bundled Python (32 or 64)
+    :param str build_dir: Directory to run the build in
+    :param str installer_name: Filename of the installer to produce
+    :param str nsi_template: Path to a template NSI file to use
+    """
     def __init__(self, appname, version, shortcuts, icon=DEFAULT_ICON, 
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
@@ -132,6 +147,14 @@ from {module} import {func}
                                                 module=module, func=func))
 
     def prepare_shortcuts(self):
+        """Prepare shortcut files in the build directory.
+        
+        If entry_point is specified, write the script. If script is specified,
+        copy to the build directory. Prepare target and parameters for these
+        shortcuts.
+        
+        Also copies shortcut icons
+        """
         files = set()
         for scname, sc in self.shortcuts.items():
             if not sc.get('target'):
@@ -153,6 +176,12 @@ from {module} import {func}
         self.install_files.extend([(f, '$INSTDIR') for f in files])
     
     def prepare_packages(self):
+        """Move requested packages into the build directory.
+        
+        If a pynsist_pkgs directory exists, it is copied into the build
+        directory as pkgs/ . Any packages not already there are found on
+        sys.path and copied in.
+        """
         logger.info("Copying packages into build directory...")
         build_pkg_dir = pjoin(self.build_dir, 'pkgs')
         if os.path.isdir(build_pkg_dir):
@@ -187,6 +216,11 @@ from {module} import {func}
                 self.install_files.append((basename, destination))
     
     def write_nsi(self):
+        """Write the NSI file to define the NSIS installer.
+        
+        Most of the details of this are in the template and the
+        :class:`nsist.nsiswriter.NSISFileWriter` class.
+        """
         nsis_writer = NSISFileWriter(self.nsi_template, installerbuilder=self,
             definitions = {'PRODUCT_NAME': self.appname,
                            'PRODUCT_VERSION': self.version,

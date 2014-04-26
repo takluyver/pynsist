@@ -65,6 +65,8 @@ Application section
    a console for the process. If ``false``, or not specified, they will use the
    ``pyw`` launcher, which doesn't create a console.
 
+.. _shortcut_config:
+
 Shortcut sections
 -----------------
 
