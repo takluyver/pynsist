@@ -169,8 +169,8 @@ else:
 def copy_modules(modnames, target, py_version, path=None):
     """Copy the specified importable modules to the target directory.
     
-    By default, it finds modules in sys.path - this can be overridden by passing
-    the path parameter.
+    By default, it finds modules in :data:`sys.path` - this can be overridden
+    by passing the path parameter.
     """
     mc = ModuleCopier(py_version, path)
     files_in_target_noext = [os.path.splitext(f)[0] for f in os.listdir(target)]

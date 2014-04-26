@@ -39,7 +39,11 @@ else:
     DEFAULT_BITNESS = 32
 
 class InstallerBuilder(object):
-    """Controls building an installer.
+    """Controls building an installer. This includes three main steps:
+    
+    1. Arranging the necessary files in the build directory.
+    2. Filling out the template NSI file to control NSIS.
+    3. Running ``makensis`` to build the installer.
     
     :param str appname: Application name
     :param str version: Application version

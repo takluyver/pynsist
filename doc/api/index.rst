@@ -6,3 +6,4 @@ Python API
 
    main
    nsiswriter
+   copymodules
