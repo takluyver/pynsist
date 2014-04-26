@@ -89,7 +89,7 @@ class InstallerBuilder(object):
     def fetch_python(self):
         """Fetch the MSI for the specified version of Python.
         
-        It will be placed in the destination directory, and validated using GPG
+        It will be placed in the build directory.
         if possible.
         """
         version = self.py_version
@@ -105,7 +105,7 @@ class InstallerBuilder(object):
     def fetch_pylauncher(self):
         """Fetch the MSI for PyLauncher (required for Python2.x).
     
-        It will be placed in the destination directory.
+        It will be placed in the build directory.
         """
         arch_tag = '.amd64' if (self.py_bitness == 64) else ''
         url = ("https://bitbucket.org/vinay.sajip/pylauncher/downloads/"
