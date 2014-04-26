@@ -23,7 +23,7 @@ from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
 from .util import download
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
