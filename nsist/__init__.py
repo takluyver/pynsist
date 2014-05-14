@@ -273,7 +273,7 @@ from {module} import {func}
             if e.errno != errno.EEXIST:
                 raise e
         self.fetch_python()
-        if PY2:
+        if self.py_version < '3.3':
             self.fetch_pylauncher()
         
         self.prepare_shortcuts()

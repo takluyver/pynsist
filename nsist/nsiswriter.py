@@ -27,7 +27,7 @@ class NSISFileWriter(object):
                 ';UNINSTALL_DIRECTORIES': self.dirs_uninstall,
                 ';UNINSTALL_SHORTCUTS': self.shortcuts_uninstall,
         }
-        if PY2:
+        if installerbuilder.py_version < '3.3':
             self.template_fields.update({
                 ';PYLAUNCHER_INSTALL': self.pylauncher_install,
                 ';PYLAUNCHER_HELP': self.pylauncher_help})
