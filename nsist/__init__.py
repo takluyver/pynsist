@@ -5,6 +5,7 @@ import logging
 import ntpath
 import operator
 import os
+import re
 import shutil
 from subprocess import call
 import sys
@@ -38,6 +39,15 @@ if os.name == 'nt' and sys.maxsize == (2**63)-1:
 else:
     DEFAULT_BITNESS = 32
 
+class InputError(ValueError):
+    def __init__(self, param, value, expected):
+        self.param = param
+        self.value = value
+        self.expected = expected
+
+    def __str__(self):
+        return "{e.value!r} is not valid for {e.param}, expected {e.expected}".format(e=self)
+
 class InstallerBuilder(object):
     """Controls building an installer. This includes three main steps:
     
@@ -69,7 +79,11 @@ class InstallerBuilder(object):
         self.packages = packages or []
         self.extra_files = extra_files or []
         self.py_version = py_version
+        if not self._py_version_pattern.match(py_version):
+            raise InputError('py_version', py_version, "a full Python version like '3.4.0'")
         self.py_bitness = py_bitness
+        if py_bitness not in {32, 64}:
+            raise InputError('py_bitness', py_bitness, "32 or 64")
         self.build_dir = build_dir
         self.installer_name = installer_name or self.make_installer_name()
         self.nsi_template = nsi_template
@@ -82,6 +96,8 @@ class InstallerBuilder(object):
         self.install_files = []
         self.install_dirs = []
     
+    _py_version_pattern = re.compile(r'\d\.\d+\.\d+$')
+
     def make_installer_name(self):
         """Generate the filename of the installer exe
         
@@ -318,16 +334,22 @@ def main(argv=None):
         logger.error(str(e))
         sys.exit(1)
     appcfg = cfg['Application']
-    InstallerBuilder(
-        appname = appcfg['name'],
-        version = appcfg['version'],
-        icon = appcfg.get('icon', DEFAULT_ICON),
-        shortcuts = shortcuts,
-        packages = cfg.get('Include', 'packages', fallback='').splitlines(),
-        extra_files = configreader.read_extra_files(cfg),
-        py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
-        py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
-        build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
-        installer_name = cfg.get('Build', 'installer_name', fallback=None),
-        nsi_template = cfg.get('Build', 'nsi_template', fallback=DEFAULT_NSI_TEMPLATE),
-    ).run()
+
+    try:
+        InstallerBuilder(
+            appname = appcfg['name'],
+            version = appcfg['version'],
+            icon = appcfg.get('icon', DEFAULT_ICON),
+            shortcuts = shortcuts,
+            packages = cfg.get('Include', 'packages', fallback='').splitlines(),
+            extra_files = configreader.read_extra_files(cfg),
+            py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
+            py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
+            build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
+            installer_name = cfg.get('Build', 'installer_name', fallback=None),
+            nsi_template = cfg.get('Build', 'nsi_template', fallback=DEFAULT_NSI_TEMPLATE),
+        ).run()
+    except InputError as e:
+        logger.error("Error in config values:")
+        logger.error(str(e))
+        sys.exit(1)
