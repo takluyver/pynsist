@@ -150,6 +150,10 @@ from {module} import {func}
             f.write(self.SCRIPT_TEMPLATE.format(qualifier=self.py_qualifier,
                                                 module=module, func=func))
 
+        pkg = module.split('.')[0]
+        if pkg not in self.packages:
+            self.packages.append(pkg)
+
     def prepare_shortcuts(self):
         """Prepare shortcut files in the build directory.
         
