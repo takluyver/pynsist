@@ -39,6 +39,15 @@ if os.name == 'nt' and sys.maxsize == (2**63)-1:
 else:
     DEFAULT_BITNESS = 32
 
+def find_makensis_win():
+    """Locate makensis.exe on Windows by querying the registry"""
+    try:
+        nsis_install_dir = winreg.QueryValue(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\NSIS')
+    except OSError:
+        nsis_install_dir = winreg.QueryValue(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Wow6432Node\\NSIS')
+
+    return pjoin(nsis_install_dir, 'makensis.exe')
+
 class InputError(ValueError):
     def __init__(self, param, value, expected):
         self.param = param
@@ -268,8 +277,7 @@ from {module} import {func}
         """
         try:
             if os.name == 'nt':
-                makensis = pjoin(winreg.QueryValue(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\NSIS'),
-                                         'makensis.exe')
+                makensis = find_makensis_win()
             else:
                 makensis = 'makensis'
             return call([makensis, self.nsi_file])
