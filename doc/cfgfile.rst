@@ -65,6 +65,12 @@ Application section
    a console for the process. If ``false``, or not specified, they will use the
    ``pyw`` launcher, which doesn't create a console.
 
+.. describe:: extra_preamble (optional)
+
+   Any extra Python commands to be run before your code is launched, for example
+   to set environment variables needed by pygtk. This is only valid if you use
+   ``entry_point`` to specify how to launch your application.
+
 .. _shortcut_config:
 
 Shortcut sections
@@ -86,6 +92,7 @@ shortcuts by defining sections titled :samp:`Shortcut {Name}`. For example:
               console (optional)
               target (optional)
               parameters (optional)
+              extra_preamble (optional)
 
    These options all work the same way as in the Application section.
 

@@ -163,11 +163,13 @@ def excepthook(etype, value, tb):
 if appdata:
     sys.excepthook = excepthook
 
+{extra_preamble}
+
 from {module} import {func}
 {func}()
 """
     
-    def write_script(self, entrypt, target):
+    def write_script(self, entrypt, target, extra_preamble=''):
         """Write a launcher script from a 'module:function' entry point
         
         python_version and bitness are used to write an appropriate shebang line
@@ -176,7 +178,7 @@ from {module} import {func}
         module, func = entrypt.split(":")
         with open(target, 'w') as f:
             f.write(self.SCRIPT_TEMPLATE.format(qualifier=self.py_qualifier,
-                                                module=module, func=func))
+                    module=module, func=func, extra_preamble=extra_preamble))
 
         pkg = module.split('.')[0]
         if pkg not in self.packages:
@@ -197,7 +199,8 @@ from {module} import {func}
                 if sc.get('entry_point'):
                     sc['script'] = script = scname.replace(' ', '_') + '.launch.py' \
                                                 + ('' if sc['console'] else 'w')
-                    self.write_script(sc['entry_point'], pjoin(self.build_dir, script))
+                    self.write_script(sc['entry_point'], pjoin(self.build_dir, script),
+                                      sc.get('extra_preamble', ''))
                 else:
                     shutil.copy2(sc['script'], self.build_dir)
 

@@ -59,6 +59,7 @@ CONFIG_VALIDATORS = {
         ('parameters', False),
         ('icon', False),
         ('console', False),
+        ('extra_preamble', False),
     ]),
     'Build': SectionValidator([
         ('directory', False),
@@ -80,6 +81,7 @@ CONFIG_VALIDATORS = {
         ('parameters', False),
         ('icon', False),
         ('console', False),
+        ('extra_preamble', False),
     ]),
 }
 
@@ -150,6 +152,8 @@ def read_shortcuts_config(cfg):
             sc2['icon'] = DEFAULT_ICON
         sc2['console'] = sc.getboolean('console', fallback=False)
         sc2['parameters'] = sc.get('parameters', fallback='')
+        if 'extra_preamble' in sc2 and 'entry_point' not in sc2:
+            raise InvalidConfig('extra_preamble is only valid with entry_point')
         shortcuts[name] = sc2
 
     for section in cfg.sections():
