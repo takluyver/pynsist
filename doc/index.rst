@@ -49,6 +49,7 @@ Contents
    :maxdepth: 2
 
    cfgfile
+   installers
    faq
    releasenotes
    api/index
