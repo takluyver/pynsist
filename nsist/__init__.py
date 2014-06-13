@@ -97,7 +97,7 @@ class InstallerBuilder(object):
         self.installer_name = installer_name or self.make_installer_name()
         self.nsi_template = nsi_template
         self.nsi_file = pjoin(self.build_dir, 'installer.nsi')
-        self.py_qualifier = '.'.join(self.py_version.split('.')[:2])
+        self.py_major_version = self.py_qualifier = '.'.join(self.py_version.split('.')[:2])
         if self.py_bitness == 32:
             self.py_qualifier += '-32'
         
@@ -263,7 +263,8 @@ from {module} import {func}
         nsis_writer = NSISFileWriter(self.nsi_template, installerbuilder=self,
             definitions = {'PRODUCT_NAME': self.appname,
                            'PRODUCT_VERSION': self.version,
-                           'PY_VERSION': self.py_version,
+                           'PY_VERSION': self.py_version,  # e.g. 3.4.1
+                           'PY_MAJOR_VERSION': self.py_major_version,  #e.g. 3.4
                            'PY_QUALIFIER': self.py_qualifier,
                            'PRODUCT_ICON': os.path.basename(self.icon),
                            'INSTALLER_NAME': self.installer_name,

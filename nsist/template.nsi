@@ -29,9 +29,16 @@ Section -SETTINGS
   SetOverwrite ifnewer
 SectionEnd
 
+Var PyTargetDir
 Section "Python ${PY_VERSION}" sec_py
   File "python-${PY_VERSION}${ARCH_TAG}.msi"
-  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi" /qb ALLUSERS=1'
+  StrCmp "${ARCH_TAG}" ".amd64" 0 +4
+    StrCpy $PyTargetDir "$COMMONFILES64\Python\${PY_MAJOR_VERSION}"
+    DetailPrint "Installing Python ${PY_MAJOR_VERSION}, 64 bit"
+    Goto +3
+    StrCpy $PyTargetDir "$COMMONFILES32\Python\${PY_MAJOR_VERSION}"
+    DetailPrint "Installing Python ${PY_MAJOR_VERSION}, 32 bit"
+  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi" /qb ALLUSERS=1 TARGETDIR="$PyTargetDir"'
   Delete $INSTDIR\python-${PY_VERSION}.msi
 SectionEnd
 
