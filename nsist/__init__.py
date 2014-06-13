@@ -266,6 +266,7 @@ from {module} import {func}
                            'PY_VERSION': self.py_version,  # e.g. 3.4.1
                            'PY_MAJOR_VERSION': self.py_major_version,  #e.g. 3.4
                            'PY_QUALIFIER': self.py_qualifier,
+                           'BITNESS' : str(self.py_bitness),
                            'PRODUCT_ICON': os.path.basename(self.icon),
                            'INSTALLER_NAME': self.installer_name,
                            'ARCH_TAG': '.amd64' if (self.py_bitness==64) else '',

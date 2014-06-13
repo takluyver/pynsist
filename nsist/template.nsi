@@ -21,7 +21,7 @@ RequestExecutionLevel admin
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${INSTALLER_NAME}"
-InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
+InstallDir "$PROGRAMFILES${BITNESS}\${PRODUCT_NAME}"
 ShowInstDetails show
 
 Section -SETTINGS
@@ -29,17 +29,12 @@ Section -SETTINGS
   SetOverwrite ifnewer
 SectionEnd
 
-Var PyTargetDir
 Section "Python ${PY_VERSION}" sec_py
   File "python-${PY_VERSION}${ARCH_TAG}.msi"
-  StrCmp "${ARCH_TAG}" ".amd64" 0 +4
-    StrCpy $PyTargetDir "$COMMONFILES64\Python\${PY_MAJOR_VERSION}"
-    DetailPrint "Installing Python ${PY_MAJOR_VERSION}, 64 bit"
-    Goto +3
-    StrCpy $PyTargetDir "$COMMONFILES32\Python\${PY_MAJOR_VERSION}"
-    DetailPrint "Installing Python ${PY_MAJOR_VERSION}, 32 bit"
-  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi" /qb ALLUSERS=1 TARGETDIR="$PyTargetDir"'
-  Delete $INSTDIR\python-${PY_VERSION}.msi
+  DetailPrint "Installing Python ${PY_MAJOR_VERSION}, ${BITNESS} bit"
+  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi" \
+            /qb ALLUSERS=1 TARGETDIR="$COMMONFILES${BITNESS}\Python\${PY_MAJOR_VERSION}"'
+  Delete $INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi
 SectionEnd
 
 ;PYLAUNCHER_INSTALL
