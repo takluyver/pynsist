@@ -24,3 +24,26 @@ The installers pynsist builds do a number of things:
 
 The installer (and uninstaller) is produced using `NSIS
 <http://nsis.sourceforge.net/Main_Page>`_, with the Modern UI.
+
+Uncaught exceptions
+-------------------
+
+If there is an uncaught exception in your application - for instance if it fails
+to start because a package is missing - the traceback will be written to
+:file:`%APPDATA%\\{scriptname}.log`. On Windows 7, :envvar:`APPDATA` defaults to
+:file:`C:\\Users\\{username}\\AppData\\Roaming`. If users report crashes, details
+of the problem will probably be found there.
+
+You can override this by setting :func:`sys.excepthook`.
+
+This is only provided if you specify your application using ``entry_point``.
+
+Working directory
+-----------------
+
+If users start your application from the start menu shortcuts, the working
+directory will be set to their home directory (``%HOMEDRIVE%%HOMEPATH%``). If
+they double-click on the scripts in the installation directory, the working
+directory will be the installation directory. Your application shouldn't
+rely on having a particular working directory; if it does, use :func:`os.chdir`
+to set it first.
