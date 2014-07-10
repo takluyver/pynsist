@@ -165,8 +165,9 @@ if appdata:
 
 {extra_preamble}
 
-from {module} import {func}
-{func}()
+if __name__ == '__main__':
+    from {module} import {func}
+    {func}()
 """
     
     def write_script(self, entrypt, target, extra_preamble=''):
