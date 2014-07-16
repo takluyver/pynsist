@@ -1,6 +1,7 @@
 """Build NSIS installers for Python applications.
 """
 import errno
+import io
 import logging
 import ntpath
 import operator
@@ -200,8 +201,19 @@ if __name__ == '__main__':
                 if sc.get('entry_point'):
                     sc['script'] = script = scname.replace(' ', '_') + '.launch.py' \
                                                 + ('' if sc['console'] else 'w')
+
+                    specified_preamble = sc.get('extra_preamble', None)
+                    if isinstance(specified_preamble, str):
+                        # Filename
+                        extra_preamble = io.open(specified_preamble, encoding='utf-8')
+                    elif specified_preamble is None:
+                        extra_preamble = io.StringIO()  # Empty
+                    else:
+                        # Passed a StringIO or similar object
+                        extra_preamble = specified_preamble
+
                     self.write_script(sc['entry_point'], pjoin(self.build_dir, script),
-                                      sc.get('extra_preamble', ''))
+                                      extra_preamble.read().rstrip())
                 else:
                     shutil.copy2(sc['script'], self.build_dir)
 

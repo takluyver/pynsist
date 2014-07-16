@@ -67,9 +67,12 @@ Application section
 
 .. describe:: extra_preamble (optional)
 
-   Any extra Python commands to be run before your code is launched, for example
-   to set environment variables needed by pygtk. This is only valid if you use
-   ``entry_point`` to specify how to launch your application.
+   Path to a file containing extra Python commands to be run before your code is
+   launched, for example  to set environment variables needed by pygtk. This is
+   only valid if you use ``entry_point`` to specify how to launch your application.
+   
+   If you use the Python API, this parameter can also be passed as a file-like
+   object, such as :class:`io.StringIO`.
 
 .. _shortcut_config:
 

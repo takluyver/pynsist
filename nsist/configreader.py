@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import configparser
+import os.path
 
 class SectionValidator(object):
     def __init__(self, keys):
@@ -152,8 +153,14 @@ def read_shortcuts_config(cfg):
             sc2['icon'] = DEFAULT_ICON
         sc2['console'] = sc.getboolean('console', fallback=False)
         sc2['parameters'] = sc.get('parameters', fallback='')
-        if 'extra_preamble' in sc2 and 'entry_point' not in sc2:
-            raise InvalidConfig('extra_preamble is only valid with entry_point')
+        if 'extra_preamble' in sc2:
+            if 'entry_point' not in sc2:
+                raise InvalidConfig('extra_preamble is only valid with entry_point')
+            preamb_file = sc2['extra_preamble']
+            if not os.path.isfile(preamb_file):
+                raise InvalidConfig('extra_preamble file %r does not exist' %
+                                                    preamb_file)
+
         shortcuts[name] = sc2
 
     for section in cfg.sections():
