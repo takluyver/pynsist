@@ -1,4 +1,6 @@
-from os.path import isfile, isdir, exists
+from os.path import isfile, isdir, exists, dirname
+
+test_dir = dirname(__file__)
 
 def assert_is_file(path):
     assert exists(path), "%s does not exist"

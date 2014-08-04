@@ -6,14 +6,14 @@ import unittest
 
 pjoin = os.path.join
 
+from .utils import assert_is_file, assert_is_dir, test_dir
+
 running_python = '.'.join(str(x) for x in sys.version_info[:3])
-test_dir = os.path.dirname(__file__)
+
 sample_path = [pjoin(test_dir, 'sample_pkgs'),
                pjoin(test_dir, 'sample_zip.egg'),
                pjoin(test_dir, 'sample_zip.egg/rootdir'),
               ]
-
-from .utils import assert_is_file, assert_is_dir
 
 from nsist.copymodules import copy_modules, ExtensionModuleMismatch
 

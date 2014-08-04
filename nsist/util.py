@@ -1,4 +1,13 @@
 import requests
+import sys
+
+PY3 = sys.version_info[0] >= 3
+
+if PY3:
+    text_types = (str,)
+else:
+    text_types = (str, unicode) # analysis:ignore
+
 
 def download(url, target):
     """Download a file using requests.
