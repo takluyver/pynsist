@@ -53,6 +53,7 @@ Contents
    faq
    releasenotes
    api/index
+   examples
 
 See also the `examples folder <https://github.com/takluyver/pynsist/tree/master/examples>`_
 in the repository.
