@@ -1,6 +1,9 @@
+import os
 import re
 import sys
 from distutils.core import setup
+from distutils.command.build_scripts import build_scripts
+from distutils import log
 
 PY2 = sys.version_info[0] == 2
 
@@ -23,6 +26,26 @@ with open('nsist/__init__.py', 'r') as f:
         if m:
             __version__ = eval(m.group(1))
             break
+
+cmdclass = {}
+
+class build_scripts_cmds(build_scripts):
+    """Add <name>.cmd files so scripts work at the command line on Windows"""
+    def copy_scripts(self):
+        build_scripts.copy_scripts(self)
+        for script in self.scripts:
+            # XXX: Check that the file is a Python script?
+            # (For now, assume that anything specified in scripts is Python)
+            script_name = os.path.basename(script)
+            cmd_file = os.path.join(self.build_dir, script_name + '.cmd')
+            cmd = '"{python}" "%~dp0\{script}" %*\r\n'.format(
+                    python=sys.executable, script=script_name)
+            log.info("Writing %s wrapper script" % cmd_file)
+            with open(cmd_file, 'w') as f:
+                f.write(cmd)
+
+if os.name == 'nt':
+    cmdclass['build_scripts'] = build_scripts_cmds
 
 setup(name='pynsist',
       version=__version__,
@@ -47,5 +70,6 @@ setup(name='pynsist',
           'Topic :: System :: Installation/Setup',
           'Topic :: System :: Software Distribution',
       ],
-      install_requires=requirements
+      install_requires=requirements,
+      cmdclass=cmdclass,
 )
