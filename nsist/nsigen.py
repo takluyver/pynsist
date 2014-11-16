@@ -1,3 +1,5 @@
+import re
+
 class Comment(object):
     def __init__(self, content):
         self.content = content
@@ -5,12 +7,26 @@ class Comment(object):
     def generate(self, state=None):
         yield "; " + self.content
 
-def _should_quote(arg):
-    return (' ' in arg) or ('$' in arg)
+_escaped_chars_re = re.compile(r'[\r\n\t"]')
+def _quote(arg):
+    if arg == '':
+        return '""'
+
+    def repl(match):
+        char = match.group(0)
+        if char == '"':
+            return '$\\"'
+        else:
+            return '$' + repr(char)[1:-1]
+    arg, nsub = _escaped_chars_re.subn(repl, arg)
+    
+    if nsub > 0 or (' ' in arg) or ('${' in arg) or ('#' in arg):
+        return '"%s"' % arg
+        
+    return arg
 
 def assemble_line(parts):
-    quoted_parts = [("%s" % p) if _should_quote(p) else p
-                    for p in parts if p is not None]
+    quoted_parts = [_quote(p) for p in parts if p is not None]
     return ' '.join(quoted_parts)
 
 class Instruction(object):
@@ -28,6 +44,7 @@ def make_instruction_class(name):
     return type(name, (Instruction,), {'__init__': __init__})
 
 File = make_instruction_class('File')
+DetailPrint = make_instruction_class('DetailPrint')
 
 class Scope(object):
     def __init__(self, contents=None):
@@ -35,8 +52,11 @@ class Scope(object):
 
     def generate_children(self, state=None):
         for child in self.contents:
-            for line in child.generate(state):
-                yield '  ' + line
+            if isinstance(child, str):
+                yield child
+            else:
+                for line in child.generate(state):
+                    yield '  ' + line
 
 class Section(Scope):
     def __init__(self, name=None, index_var=None, selected=True, contents=None):
@@ -80,7 +100,9 @@ class Function(Scope):
     def generate(self, state=None):
         yield assemble_line(['Function', self.name])
         for line in self.generate_children(state):
-            yield
+            yield line
+        yield 'FunctionEnd'
+        yield ''  # Blank line after a function
 
 class Label(object):
     def __init__(self, name):
@@ -100,7 +122,7 @@ class Conditional(object):
     def generate(self, state):
         if_counter = state.get('if_counter', 1)
         state['if_counter'] = if_counter + 1
-        yield assemble_line([self.name] + self.parameters + ["0",
+        yield assemble_line([self.name] + list(self.parameters) + ["0",
                      ("else%d" if self.elsebody else "endif%d") % if_counter])
         for child in self.ifbody:
             for line in child.generate(state):
@@ -172,8 +194,11 @@ class Document(object):
 
     def generate(self, state):
         for child in self.children:
-            for line in child.generate(state):
-                yield line
+            if isinstance(child, str):
+                yield child
+            else:
+                for line in child.generate(state):
+                    yield line
 
     def write(self, fileobj_or_path):
         if isinstance(fileobj_or_path, str):
