@@ -3,6 +3,8 @@ import shutil
 import sys
 import tempfile
 import zipfile, zipimport
+import fnmatch
+from functools import partial
 
 pjoin = os.path.join
 
@@ -63,6 +65,26 @@ def copy_zipmodule(loader, modname, target):
 
     shutil.rmtree(tempdir)
 
+def copytree_ignore_callback(excludes, pkgdir, modname, directory, files):
+    """This is being called back by our shutil.copytree call to implement the
+    'exclude' feature.
+    """
+    ignored = set()
+
+    # Filter by file names relative to the build directory
+    reldir = os.path.relpath(directory, pkgdir)
+    target = os.path.join('pkgs/', modname, reldir)
+    files = [os.path.join(target, fname) for fname in files]
+
+    # Execute all patterns
+    for pattern in excludes + ['*.pyc']:
+        ignored.update([
+            os.path.basename(fname)
+            for fname in fnmatch.filter(files, pattern)
+        ])
+
+    return ignored
+
 if not PY2:
     import importlib
     import importlib.abc
@@ -78,7 +100,7 @@ if not PY2:
             self.py_version = py_version
             self.path = path if (path is not None) else ([''] + sys.path)
 
-        def copy(self, modname, target):
+        def copy(self, modname, target, exclude):
             """Copy the importable module 'modname' to the directory 'target'.
 
             modname should be a top-level import, i.e. without any dots.
@@ -104,8 +126,18 @@ if not PY2:
                     assert basename.startswith('__init__')
                     check_package_for_ext_mods(pkgdir, self.py_version)
                     dest = os.path.join(target, modname)
-                    shutil.copytree(pkgdir, dest,
-                                    ignore=shutil.ignore_patterns('*.pyc'))
+                    if exclude is not None and len(exclude) > 0:
+                        shutil.copytree(
+                            pkgdir, dest,
+                            ignore=partial(copytree_ignore_callback, exclude, pkgdir, modname)
+                        )
+                    else:
+                        # Don't use our exclude callback if we don't need to,
+                        # as it slows things down.
+                        shutil.copytree(
+                            pkgdir, dest,
+                            ignore=shutil.ignore_patterns('*.pyc')
+                        )
                 else:
                     shutil.copy2(file, target)
 
@@ -125,7 +157,7 @@ else:
             self.path = path if (path is not None) else ([''] + sys.path)
             self.zip_paths = [p for p in self.path if zipfile.is_zipfile(p)]
 
-        def copy(self, modname, target):
+        def copy(self, modname, target, exclude):
             """Copy the importable module 'modname' to the directory 'target'.
 
             modname should be a top-level import, i.e. without any dots.
@@ -162,25 +194,35 @@ else:
             elif modtype == imp.PKG_DIRECTORY:
                 check_package_for_ext_mods(path, self.py_version)
                 dest = os.path.join(target, modname)
-                shutil.copytree(path, dest,
-                                ignore=shutil.ignore_patterns('*.pyc'))
+                if exclude is not None and len(exclude) > 0:
+                    shutil.copytree(
+                        path, dest,
+                        ignore=partial(copytree_ignore_callback, exclude, path, modname)
+                    )
+                else:
+                    # Don't use our exclude callback if we don't need to,
+                    # as it slows things down.
+                    shutil.copytree(
+                        path, dest,
+                        ignore=shutil.ignore_patterns('*.pyc')
+                    )
 
 
-def copy_modules(modnames, target, py_version, path=None):
+def copy_modules(modnames, target, py_version, path=None, exclude=None):
     """Copy the specified importable modules to the target directory.
-    
+
     By default, it finds modules in :data:`sys.path` - this can be overridden
     by passing the path parameter.
     """
     mc = ModuleCopier(py_version, path)
     files_in_target_noext = [os.path.splitext(f)[0] for f in os.listdir(target)]
-    
+
     for modname in modnames:
         if modname in files_in_target_noext:
             # Already there, no need to copy it.
             continue
-        mc.copy(modname, target)
-    
+        mc.copy(modname, target, exclude)
+
     if not modnames:
         # NSIS abhors an empty folder, so give it a file to find.
         with open(os.path.join(target, 'placeholder'), 'w') as f:

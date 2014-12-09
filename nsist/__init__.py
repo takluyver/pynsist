@@ -10,6 +10,7 @@ import re
 import shutil
 from subprocess import call
 import sys
+import fnmatch
 
 PY2 = sys.version_info[0] == 2
 
@@ -78,15 +79,17 @@ class InstallerBuilder(object):
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
     """
-    def __init__(self, appname, version, shortcuts, icon=DEFAULT_ICON, 
+    def __init__(self, appname, version, shortcuts, icon=DEFAULT_ICON,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
-                installer_name=None, nsi_template=DEFAULT_NSI_TEMPLATE):
+                installer_name=None, nsi_template=DEFAULT_NSI_TEMPLATE,
+                exclude=None):
         self.appname = appname
         self.version = version
         self.shortcuts = shortcuts
         self.icon = icon
         self.packages = packages or []
+        self.exclude = exclude or []
         self.extra_files = extra_files or []
         self.py_version = py_version
         if not self._py_version_pattern.match(py_version):
@@ -242,7 +245,25 @@ if __name__ == '__main__':
             shutil.copytree('pynsist_pkgs', build_pkg_dir)
         else:
             os.mkdir(build_pkg_dir)
-        copy_modules(self.packages, build_pkg_dir, py_version=self.py_version)
+        copy_modules(self.packages, build_pkg_dir,
+                     py_version=self.py_version, exclude=self.exclude)
+
+    def copytree_ignore_callback(self, directory, files):
+        """This is being called back by our shutil.copytree call to implement the
+        'exclude' feature.
+        """
+        ignored = set()
+
+        # Filter by file names relative to the build directory
+        files = [os.path.join(directory, fname) for fname in files]
+
+        # Execute all patterns
+        for pattern in self.exclude:
+            ignored.update([
+                os.path.basename(fname)
+                for fname in fnmatch.filter(files, pattern)
+            ])
+        return ignored
 
     def copy_extra_files(self):
         """Copy a list of files into the build directory, and add them to
@@ -254,22 +275,28 @@ if __name__ == '__main__':
 
             if not destination:
                 destination = '$INSTDIR'
-    
+
             if os.path.isdir(file):
                 target_name = pjoin(self.build_dir, basename)
                 if os.path.isdir(target_name):
                     shutil.rmtree(target_name)
                 elif os.path.exists(target_name):
                     os.unlink(target_name)
-                shutil.copytree(file, target_name)
+                if self.exclude is not None and len(self.exclude) > 0:
+                    shutil.copytree(file, target_name,
+                                    ignore=self.copytree_ignore_callback)
+                else:
+                    # Don't use our exclude callback if we don't need to,
+                    # as it slows things down.
+                    shutil.copytree(file, target_name)
                 self.install_dirs.append((basename, destination))
             else:
                 shutil.copy2(file, self.build_dir)
                 self.install_files.append((basename, destination))
-    
+
     def write_nsi(self):
         """Write the NSI file to define the NSIS installer.
-        
+
         Most of the details of this are in the template and the
         :class:`nsist.nsiswriter.NSISFileWriter` class.
         """
@@ -377,6 +404,7 @@ def main(argv=None):
             build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
             installer_name = cfg.get('Build', 'installer_name', fallback=None),
             nsi_template = cfg.get('Build', 'nsi_template', fallback=DEFAULT_NSI_TEMPLATE),
+            exclude = cfg.get('Include', 'exclude', fallback='').splitlines(),
         ).run()
     except InputError as e:
         logger.error("Error in config values:")
