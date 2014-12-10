@@ -282,7 +282,7 @@ if __name__ == '__main__':
                     shutil.rmtree(target_name)
                 elif os.path.exists(target_name):
                     os.unlink(target_name)
-                if self.exclude is not None and len(self.exclude) > 0:
+                if self.exclude:
                     shutil.copytree(file, target_name,
                                     ignore=self.copytree_ignore_callback)
                 else:
