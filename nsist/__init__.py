@@ -31,7 +31,7 @@ pjoin = os.path.join
 logger = logging.getLogger(__name__)
 
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
-DEFAULT_PY_VERSION = '2.7.8' if PY2 else '3.4.2'
+DEFAULT_PY_VERSION = '2.7.9' if PY2 else '3.4.2'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
 DEFAULT_NSI_TEMPLATE = pjoin(_PKGDIR, 'template.nsi')
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
