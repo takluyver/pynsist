@@ -126,7 +126,7 @@ if not PY2:
                     assert basename.startswith('__init__')
                     check_package_for_ext_mods(pkgdir, self.py_version)
                     dest = os.path.join(target, modname)
-                    if exclude is not None and len(exclude) > 0:
+                    if exclude:
                         shutil.copytree(
                             pkgdir, dest,
                             ignore=partial(copytree_ignore_callback, exclude, pkgdir, modname)
@@ -194,7 +194,7 @@ else:
             elif modtype == imp.PKG_DIRECTORY:
                 check_package_for_ext_mods(path, self.py_version)
                 dest = os.path.join(target, modname)
-                if exclude is not None and len(exclude) > 0:
+                if exclude:
                     shutil.copytree(
                         path, dest,
                         ignore=partial(copytree_ignore_callback, exclude, path, modname)
