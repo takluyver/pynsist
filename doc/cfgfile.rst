@@ -157,6 +157,38 @@ the line with the key:
        [Include]
        files=mydata.dat > $COMMONFILES
 
+.. describe:: exclude (optional)
+
+   Files to be excluded from your installer. This can be used to include a
+   Python library or extra directory only partially, for example to include
+   large monolithic python packages without their samples and test suites to
+   achieve a smaller installer file.
+
+   Please note:
+
+   * The parameter is expected to contain a list of files *relative to the
+     build directory*. Therefore, to include files from a package, you have to
+     start your pattern with ``pkgs/<packagename>/``.
+   * You can use `wildcard characters`_ like ``*`` or ``?``, similar to a Unix 
+     shell.
+   * If you want to exclude whole subfolders, do *not* put a path separator 
+     (e.g. ``/``) at their end.
+   * The exclude patterns are only applied to packages and to directories
+     specified using the ``files`` option. If your ``exclude`` option directly 
+     contradicts your ``files`` or ``packages`` option, the files in question
+     will be included (you can not exclude a full package/extra directory
+     or a single file listed in ``files``).
+
+   Example:
+
+   .. code-block:: ini
+
+       [Include]
+       packages=PySide
+       files=data_dir
+       exclude=pkgs/PySide/examples
+         data_dir/ignoredfile
+
 Build section
 -------------
 
@@ -179,3 +211,6 @@ Build section
    of extra files and folders to be installed. See the
    `NSIS Scripting Reference <http://nsis.sourceforge.net/Docs/Chapter4.html>`_
    for details of the format.
+
+
+.. _wildcard characters: https://docs.python.org/3/library/fnmatch.html
