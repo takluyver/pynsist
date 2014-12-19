@@ -55,7 +55,7 @@ setup(name='pynsist',
       author_email='thomas@kluyver.me.uk',
       url='https://github.com/takluyver/pynsist',
       packages=['nsist'],
-      package_data={'nsist': ['template.nsi',
+      package_data={'nsist': ['pyapp.nsi',
                               'glossyorb.ico',
                              ]
                     },

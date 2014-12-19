@@ -70,6 +70,7 @@ CONFIG_VALIDATORS = {
     'Include': SectionValidator([
         ('packages', False),
         ('files', False),
+        ('exclude', False),
     ]),
     'Python': SectionValidator([
         ('version', True),
