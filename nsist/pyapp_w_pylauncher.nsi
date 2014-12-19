@@ -1,11 +1,11 @@
-[% extends pyapp.nsi %]
+[% extends "pyapp.nsi" %]
 [# For Python 2, add the py/pyw Windows launcher. Python 3 includes it already. #]
 
 [% block sections %]
 [[ super() ]]
 
 Section "PyLauncher" sec_pylauncher
-    File "launchwin${ARCH_TAG}.msi",
+    File "launchwin${ARCH_TAG}.msi"
     ExecWait 'msiexec /i "$INSTDIR\launchwin${ARCH_TAG}.msi" /qb ALLUSERS=1'
     Delete "$INSTDIR\launchwin${ARCH_TAG}.msi"
 SectionEnd

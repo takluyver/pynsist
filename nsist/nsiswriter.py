@@ -37,10 +37,10 @@ class NSISFileWriter(object):
         )
         self.template = env.get_template(template_file)
         self.installerbuilder = installerbuilder
-        self.namespace = ns = {
+        self.namespace = {
             'ib': installerbuilder,
-            'grouped_files': itertools.groupby(
-                   self.installerbuilder.install_files, operator.itemgetter(1)),
+            'grouped_files': list(itertools.groupby(self.installerbuilder.install_files,
+                    operator.itemgetter(1))),
             'icon': os.path.basename(installerbuilder.icon),
             'arch_tag': '.amd64' if (installerbuilder.py_bitness==64) else '',
             'pjoin': ntpath.join,

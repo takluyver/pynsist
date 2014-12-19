@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_PY_VERSION = '2.7.9' if PY2 else '3.4.2'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
-DEFAULT_NSI_TEMPLATE = 'pyapp_w_launcher.nsi' if PY2 else 'pyapp.nsi'
+DEFAULT_NSI_TEMPLATE = 'pyapp_w_pylauncher.nsi' if PY2 else 'pyapp.nsi'
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
 if os.name == 'nt' and sys.maxsize == (2**63)-1:
     DEFAULT_BITNESS = 64
@@ -300,23 +300,12 @@ if __name__ == '__main__':
         Most of the details of this are in the template and the
         :class:`nsist.nsiswriter.NSISFileWriter` class.
         """
-        nsis_writer = NSISFileWriter(self.nsi_template, installerbuilder=self,
-            definitions = {'PRODUCT_NAME': self.appname,
-                           'PRODUCT_VERSION': self.version,
-                           'PY_VERSION': self.py_version,  # e.g. 3.4.1
-                           'PY_MAJOR_VERSION': self.py_major_version,  #e.g. 3.4
-                           'PY_QUALIFIER': self.py_qualifier,
-                           'BITNESS' : str(self.py_bitness),
-                           'PRODUCT_ICON': os.path.basename(self.icon),
-                           'INSTALLER_NAME': self.installer_name,
-                           'ARCH_TAG': '.amd64' if (self.py_bitness==64) else '',
-                          },
-            )
+        nsis_writer = NSISFileWriter(self.nsi_template, installerbuilder=self)
 
         logger.info('Writing NSI file to %s', self.nsi_file)
         # Sort by destination directory, so we can group them effectively
         self.install_files.sort(key=operator.itemgetter(1))
-        nsis_writer.write(self.nsi_file)    
+        nsis_writer.write(self.nsi_file)
 
     def run_nsis(self):
         """Runs makensis using the specified .nsi file

@@ -56,6 +56,7 @@ setup(name='pynsist',
       url='https://github.com/takluyver/pynsist',
       packages=['nsist'],
       package_data={'nsist': ['pyapp.nsi',
+                              'pyapp_w_pylauncher.nsi',
                               'glossyorb.ico',
                              ]
                     },
