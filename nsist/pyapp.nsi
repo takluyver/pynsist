@@ -1,10 +1,18 @@
-
-; Definitions will be added above
+!define PRODUCT_NAME "[[ib.appname]]"
+!define PRODUCT_VERSION "[[ib.version]]"
+!define PY_VERSION "[[ib.py_version]]"
+!define PY_MAJOR_VERSION "[[ib.py_major_version]]"
+!define PY_QUALIFIER "[[ib.py_qualifier]]"
+!define BITNESS "[[ib.py_bitness]]"
+!define ARCH_TAG "[[arch_tag]]"
+!define INSTALLER_NAME "[[ib.installer_name]]"
+!define PRODUCT_ICON "[[icon]]"
  
 SetCompressor lzma
 
 RequestExecutionLevel admin
 
+[% block modernui %]
 ; Modern UI installer stuff 
 !include "MUI2.nsh"
 !define MUI_ABORTWARNING
@@ -17,13 +25,14 @@ RequestExecutionLevel admin
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_LANGUAGE "English"
-; MUI end ------
+[% endblock modernui %]
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${INSTALLER_NAME}"
 InstallDir "$PROGRAMFILES${BITNESS}\${PRODUCT_NAME}"
 ShowInstDetails show
 
+[% block sections %]
 Section -SETTINGS
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
@@ -37,9 +46,6 @@ Section "Python ${PY_VERSION}" sec_py
   Delete $INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi
 SectionEnd
 
-;PYLAUNCHER_INSTALL
-;------------------
-
 Section "!${PRODUCT_NAME}" sec_app
   SectionIn RO
   SetShellVarContext all
@@ -47,9 +53,41 @@ Section "!${PRODUCT_NAME}" sec_app
   SetOutPath "$INSTDIR\pkgs"
   File /r "pkgs\*.*"
   SetOutPath "$INSTDIR"
-  ;INSTALL_FILES
-  ;INSTALL_DIRECTORIES
-  ;INSTALL_SHORTCUTS
+  
+  ; Install files
+  [% for destination, group in grouped_files %]
+    SetOutPath "[[destination]]"
+    [% for file, _ in group %]
+      File "[[file]]"
+    [% endfor %]
+  [% endfor %]
+  
+  ; Install directories
+  [% for dir, destination in ib.install_dirs %]
+    SetOutPath "[[ pjoin(destination, dir) ]]"
+    File /r "[[dir]]\*.*"
+  [% endfor %]
+  
+  [% block install_shortcuts %]
+  ; Install shortcuts
+  ; The output path becomes the working directory for shortcuts
+  SetOutPath "%HOMEDRIVE%\%HOMEPATH%"
+  [% if single_shortcut %]
+    [% for scname, sc in ib.shortcuts.items() %]
+      CreateShortCut "$SMPROGRAMS\[[scname]].lnk" "[[sc['target'] ]]" \
+        '"$INSTDIR\[[ sc['parameters'] ]]"' "$INSTDIR\[[ sc['icon'] ]]"
+    [% endfor %]
+  [% else %]
+    [# Multiple shortcuts: create a directory for them #]
+    CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
+    [% for scname, sc in ib.shortcuts.items() %]
+      CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\[[scname]].lnk" "[[sc['target'] ]]" \
+        '"$INSTDIR\[[ sc['parameters'] ]]"' "$INSTDIR\[[ sc['icon'] ]]"
+    [% endfor %]
+  [% endif %]
+  SetOutPath "$INSTDIR"
+  [% endblock install_shortcuts %]
+  
   ; Byte-compile Python files.
   DetailPrint "Byte-compiling Python modules..."
   nsExec::ExecToLog 'py -${PY_QUALIFIER} -m compileall -q "$INSTDIR\pkgs"'
@@ -74,12 +112,29 @@ Section "Uninstall"
   Delete $INSTDIR\uninstall.exe
   Delete "$INSTDIR\${PRODUCT_ICON}"
   RMDir /r "$INSTDIR\pkgs"
-  ;UNINSTALL_FILES
-  ;UNINSTALL_DIRECTORIES
-  ;UNINSTALL_SHORTCUTS
+  ; Uninstall files
+  [% for file, destination in ib.install_files %]
+    Delete "[[pjoin(destination, file)]]"
+  [% endfor %]
+  ; Uninstall directories
+  [% for dir, destination in ib.install_dirs %]
+    RMDir /r "[[pjoin(destination, dir)]]"
+  [% endfor %]
+  [% block uninstall_shortcuts %]
+  ; Uninstall shortcuts
+  [% if single_shortcut %]
+    [% for scname in ib.shortcuts %]
+      Delete "$SMPROGRAMS\[[scname]].lnk"
+    [% endfor %]
+  [% else %]
+    RMDir /r "$SMPROGRAMS\${PRODUCT_NAME}"
+  [% endif %]
+  [% endblock uninstall_shortcuts %]
   RMDir $INSTDIR
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 SectionEnd
+
+[% endblock sections %]
 
 ; Functions
 
@@ -88,13 +143,13 @@ Function .onMouseOverSection
     FindWindow $R0 "#32770" "" $HWNDPARENT
     GetDlgItem $R0 $R0 1043 ; description item (must be added to the UI)
 
+    [% block mouseover_messages %]
     StrCmp $0 ${sec_py} 0 +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:The Python interpreter. \
             This is required for ${PRODUCT_NAME} to run."
-    ;
-    ;PYLAUNCHER_HELP
-    ;------------------
 
     StrCmp $0 ${sec_app} "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:${PRODUCT_NAME}"
+    
+    [% endblock mouseover_messages %]
 FunctionEnd

@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_PY_VERSION = '2.7.9' if PY2 else '3.4.2'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
-DEFAULT_NSI_TEMPLATE = pjoin(_PKGDIR, 'template.nsi')
+DEFAULT_NSI_TEMPLATE = 'pyapp_w_launcher.nsi' if PY2 else 'pyapp.nsi'
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
 if os.name == 'nt' and sys.maxsize == (2**63)-1:
     DEFAULT_BITNESS = 64
