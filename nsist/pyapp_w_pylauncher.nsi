@@ -13,8 +13,7 @@ SectionEnd
 
 [% block mouseover_messages %]
 [[ super() ]]
-
-StrCmp $0 ${sec_app} "" +2
-  SendMessage $R0 ${WM_SETTEXT} 0 "STR:The Python launcher. \
-      This is required for ${PRODUCT_NAME} to run."
+    StrCmp $0 ${sec_app} "" +2
+      SendMessage $R0 ${WM_SETTEXT} 0 "STR:The Python launcher. \
+          This is required for ${PRODUCT_NAME} to run."
 [% endblock %]
