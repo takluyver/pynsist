@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_PY_VERSION = '2.7.9' if PY2 else '3.4.2'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
-DEFAULT_NSI_TEMPLATE = 'pyapp_w_pylauncher.nsi' if PY2 else 'pyapp.nsi'
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
 if os.name == 'nt' and sys.maxsize == (2**63)-1:
     DEFAULT_BITNESS = 64
@@ -82,7 +81,7 @@ class InstallerBuilder(object):
     def __init__(self, appname, version, shortcuts, icon=DEFAULT_ICON,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
-                installer_name=None, nsi_template=DEFAULT_NSI_TEMPLATE,
+                installer_name=None, nsi_template=None,
                 exclude=None):
         self.appname = appname
         self.version = version
@@ -100,6 +99,11 @@ class InstallerBuilder(object):
         self.build_dir = build_dir
         self.installer_name = installer_name or self.make_installer_name()
         self.nsi_template = nsi_template
+        if self.nsi_template is None:
+            if self.py_version < '3.3':
+                self.nsi_template = 'pyapp_w_pylauncher.nsi'
+            else:
+                self.nsi_template = 'pyapp.nsi'
         self.nsi_file = pjoin(self.build_dir, 'installer.nsi')
         self.py_major_version = self.py_qualifier = '.'.join(self.py_version.split('.')[:2])
         if self.py_bitness == 32:
@@ -392,7 +396,7 @@ def main(argv=None):
             py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
             build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
             installer_name = cfg.get('Build', 'installer_name', fallback=None),
-            nsi_template = cfg.get('Build', 'nsi_template', fallback=DEFAULT_NSI_TEMPLATE),
+            nsi_template = cfg.get('Build', 'nsi_template', fallback=None),
             exclude = cfg.get('Include', 'exclude', fallback='').splitlines(),
         ).run()
     except InputError as e:
