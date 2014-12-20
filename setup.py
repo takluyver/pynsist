@@ -8,6 +8,7 @@ from distutils import log
 PY2 = sys.version_info[0] == 2
 
 requirements = ['requests',
+                'jinja2',
                ]
 if PY2:
     requirements.append('configparser >= 3.3.0r2')
