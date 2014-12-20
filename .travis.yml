@@ -7,3 +7,6 @@ script: nosetests
 # Ensure dependencies are installed
 install:
   - pip install .
+
+# Enable new Travis stack, should speed up builds
+sudo: false
