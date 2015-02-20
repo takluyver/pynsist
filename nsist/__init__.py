@@ -329,7 +329,7 @@ if __name__ == '__main__':
                 print("http://nsis.sourceforge.net/Download")
                 return 1
 
-    def run(self):
+    def run(self, makensis=True):
         """Run all the steps to build an installer.
         """
         try:
@@ -350,11 +350,12 @@ if __name__ == '__main__':
         self.copy_extra_files()
 
         self.write_nsi()
-    
-        exitcode = self.run_nsis()
-        
-        if not exitcode:
-            logger.info('Installer written to %s', pjoin(self.build_dir, self.installer_name))
+
+        if makensis:
+            exitcode = self.run_nsis()
+
+            if not exitcode:
+                logger.info('Installer written to %s', pjoin(self.build_dir, self.installer_name))
 
 def main(argv=None):
     """Make an installer from the command line.
@@ -368,6 +369,9 @@ def main(argv=None):
     import argparse
     argp = argparse.ArgumentParser(prog='pynsist')
     argp.add_argument('config_file')
+    argp.add_argument('--no-makensis', action='store_true',
+        help='Prepare files and folders, stop before calling makensis. For debugging.'
+    )
     options = argp.parse_args(argv)
     
     dirname, config_file = os.path.split(options.config_file)
@@ -398,7 +402,7 @@ def main(argv=None):
             installer_name = cfg.get('Build', 'installer_name', fallback=None),
             nsi_template = cfg.get('Build', 'nsi_template', fallback=None),
             exclude = cfg.get('Include', 'exclude', fallback='').splitlines(),
-        ).run()
+        ).run(makensis=(not options.no_makensis))
     except InputError as e:
         logger.error("Error in config values:")
         logger.error(str(e))
