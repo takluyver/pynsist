@@ -1,5 +1,5 @@
 import itertools
-import operator
+from operator import itemgetter
 import os
 import ntpath
 import re
@@ -34,13 +34,22 @@ class NSISFileWriter(object):
         variable_end_string="]]",
         comment_start_string="[#",
         comment_end_string="#]",
+
+        # Trim whitespace around block tags, so formatting works as I expect
+        trim_blocks=True,
+        lstrip_blocks=True,
         )
         self.template = env.get_template(template_file)
         self.installerbuilder = installerbuilder
+
+        # Group files by their destination directory
+        grouped_files = [(dest, [x[0] for x in group]) for (dest, group) in
+            itertools.groupby(self.installerbuilder.install_files, itemgetter(1))
+                ]
+
         self.namespace = {
             'ib': installerbuilder,
-            'grouped_files': list(itertools.groupby(self.installerbuilder.install_files,
-                    operator.itemgetter(1))),
+            'grouped_files': grouped_files,
             'icon': os.path.basename(installerbuilder.icon),
             'arch_tag': '.amd64' if (installerbuilder.py_bitness==64) else '',
             'pjoin': ntpath.join,

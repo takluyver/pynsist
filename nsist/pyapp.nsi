@@ -57,8 +57,8 @@ Section "!${PRODUCT_NAME}" sec_app
   ; Install files
   [% for destination, group in grouped_files %]
     SetOutPath "[[destination]]"
-    [% for file, _ in group %]
-      File "[[file]]"
+    [% for file in group %]
+      File "[[ file ]]"
     [% endfor %]
   [% endfor %]
   
@@ -74,15 +74,15 @@ Section "!${PRODUCT_NAME}" sec_app
   SetOutPath "%HOMEDRIVE%\%HOMEPATH%"
   [% if single_shortcut %]
     [% for scname, sc in ib.shortcuts.items() %]
-      CreateShortCut "$SMPROGRAMS\[[scname]].lnk" "[[sc['target'] ]]" \
-        '"$INSTDIR\[[ sc['parameters'] ]]"' "$INSTDIR\[[ sc['icon'] ]]"
+    CreateShortCut "$SMPROGRAMS\[[scname]].lnk" "[[sc['target'] ]]" \
+      '[[ sc['parameters'] ]]' "$INSTDIR\[[ sc['icon'] ]]"
     [% endfor %]
   [% else %]
     [# Multiple shortcuts: create a directory for them #]
     CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
     [% for scname, sc in ib.shortcuts.items() %]
-      CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\[[scname]].lnk" "[[sc['target'] ]]" \
-        '"$INSTDIR\[[ sc['parameters'] ]]"' "$INSTDIR\[[ sc['icon'] ]]"
+    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\[[scname]].lnk" "[[sc['target'] ]]" \
+      '[[ sc['parameters'] ]]' "$INSTDIR\[[ sc['icon'] ]]"
     [% endfor %]
   [% endif %]
   SetOutPath "$INSTDIR"
