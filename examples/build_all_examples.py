@@ -6,6 +6,7 @@ example_cfgs = [
     'pyqt/installer.cfg',
     'tkinter/installer.cfg',
     'pygame/installer.cfg',
+    'pygtk/installer.cfg',
 ]
 
 examples_dir = os.path.dirname(os.path.abspath(__file__))
