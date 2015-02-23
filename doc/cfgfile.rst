@@ -204,13 +204,15 @@ Build section
 .. describe:: nsi_template (optional)
 
    The path of a template .nsi file to specify further details of the installer.
-   The default template is `part of pynsist <https://github.com/takluyver/pynsist/blob/master/nsist/template.nsi>`_.
+   The default template is `part of pynsist <https://github.com/takluyver/pynsist/blob/master/nsist/pyapp.nsi>`_.
 
-   pynsist will add a definitions section at the top of the template, and look
-   for tags ``;EXTRA_FILES_INSTALL`` and ``;EXTRA_FILES_UNINSTALL`` to insert lists
-   of extra files and folders to be installed. See the
-   `NSIS Scripting Reference <http://nsis.sourceforge.net/Docs/Chapter4.html>`_
-   for details of the format.
+   This is an advanced option, and if you specify a custom template, you may
+   well have to update it to work with future releases of Pynsist.
 
+   See the `NSIS Scripting Reference <http://nsis.sourceforge.net/Docs/Chapter4.html>`_
+   for details of the NSIS language, and the Jinja2 `Template Designer Docs
+   <http://jinja.pocoo.org/docs/dev/templates/>`_ for details of the template
+   format. Pynsist uses templates with square brackets (``[]``) instead of
+   Jinja's default curly braces (``{}``).
 
 .. _wildcard characters: https://docs.python.org/3/library/fnmatch.html
