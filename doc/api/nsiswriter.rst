@@ -9,4 +9,3 @@ Writing NSIS files
 
    .. automethod:: write
 
-   .. automethod:: write_definitions
