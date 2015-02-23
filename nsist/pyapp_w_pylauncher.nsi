@@ -5,9 +5,15 @@
 [[ super() ]]
 
 Section "PyLauncher" sec_pylauncher
+    ; Check for the existence of the pyw command, skip installing if it exists
+    nsExec::Exec 'where pyw'
+    Pop $0
+    IntCmp $0 0 SkipPylauncher
+    ; Extract the py/pyw launcher msi and run it.
     File "launchwin${ARCH_TAG}.msi"
     ExecWait 'msiexec /i "$INSTDIR\launchwin${ARCH_TAG}.msi" /qb ALLUSERS=1'
     Delete "$INSTDIR\launchwin${ARCH_TAG}.msi"
+    SkipPylauncher:
 SectionEnd
 [% endblock %]
 
