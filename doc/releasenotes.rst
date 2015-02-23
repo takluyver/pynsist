@@ -16,6 +16,8 @@ Version 1.5
 * Applications run in a console (under :program:`python`) now show the traceback
   for an uncaught error in the console as well as writing it to the log file.
 * Install :program:`pynsist` command on Windows.
+* Fixed an error message caused by unnecessarily rerunning the installer for the
+  PEP 397 ``py`` launcher, bundled with Python 2 applications.
 * :program:`pynsist` now takes a :option:`--no-makensis` option, which stops it
   before running :program:`makensis` for debugging.
 

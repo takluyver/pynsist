@@ -26,7 +26,7 @@ from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
 from .util import download, text_types
 
-__version__ = '1.0'
+__version__ = '1.5'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
