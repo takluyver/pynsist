@@ -67,8 +67,9 @@ class InstallerBuilder(object):
     
     :param str appname: Application name
     :param str version: Application version
-    :param list shortcuts: List of dictionaries, with keys matching
-            :ref:`shortcut_config` in the config file
+    :param list shortcuts: Dictionary keyed by shortcut name, containing
+            dictionaries whose keys match the fields of :ref:`shortcut_config`
+            in the config file
     :param str icon: Path to an icon for the application
     :param list packages: List of strings for importable packages to include
     :param list extra_files: List of 2-tuples (file, destination) of files to include
@@ -127,7 +128,6 @@ class InstallerBuilder(object):
         """Fetch the MSI for the specified version of Python.
         
         It will be placed in the build directory.
-        if possible.
         """
         version = self.py_version
         arch_tag = '.amd64' if (self.py_bitness==64) else ''
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     def write_script(self, entrypt, target, extra_preamble=''):
         """Write a launcher script from a 'module:function' entry point
         
-        python_version and bitness are used to write an appropriate shebang line
+        py_version and py_bitness are used to write an appropriate shebang line
         for the PEP 397 Windows launcher.
         """
         module, func = entrypt.split(":")

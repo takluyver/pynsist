@@ -56,7 +56,7 @@ Application section
 
 .. describe:: icon (optional)
 
-  Path to a ``.ico`` file to be used for shortcuts to your application. pynsis
+  Path to a ``.ico`` file to be used for shortcuts to your application. Pynsist
   has a default generic icon, but you probably want to replace it.
 
 .. describe:: console (optional)
