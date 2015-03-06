@@ -24,6 +24,22 @@ Python by default, though you can override this :ref:`in the config file <cfg_py
 Whichever method you use, compiled libraries must have the same bit-ness as
 the version of Python that's installed.
 
+Using data files
+----------------
+
+Applications often need data files along with their code. The easiest way to use
+data files with Pynsist is to store them in a Python package (a directory with
+a ``__init__.py`` file) you're creating for your application. They will be
+copied automatically, and modules in that package can locate them using
+``__file__`` like this::
+
+    data_file_path = os.path.join(os.path.dirname(__file__), 'file.dat')
+
+If you don't want to put data files inside a Python package, you will need to
+list them in the ``files`` key of the ``[Include]`` section of the config file.
+Your code can find them relative to the location of the launch script running your
+application (``sys.module['__main__'].__file__``).
+
 Alternatives
 ------------
 
