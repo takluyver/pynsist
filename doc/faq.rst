@@ -38,7 +38,7 @@ copied automatically, and modules in that package can locate them using
 If you don't want to put data files inside a Python package, you will need to
 list them in the ``files`` key of the ``[Include]`` section of the config file.
 Your code can find them relative to the location of the launch script running your
-application (``sys.module['__main__'].__file__``).
+application (``sys.modules['__main__'].__file__``).
 
 Alternatives
 ------------
