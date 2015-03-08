@@ -3,7 +3,6 @@ wget -O gtkbundle.zip http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.24/gt
 wget -O pygobject.exe http://ftp.gnome.org/pub/GNOME/binaries/win32/pygobject/2.28/pygobject-2.28.3.win32-py2.7.exe
 wget -O pycairo.exe http://ftp.gnome.org/pub/GNOME/binaries/win32/pycairo/1.8/pycairo-1.8.10.win32-py2.7.exe
 wget -O pygtk.exe http://ftp.gnome.org/pub/GNOME/binaries/win32/pygtk/2.24/pygtk-2.24.0.win32-py2.7.exe
-#Numpy and Matplotlib are both the bindings for Python 2.7 and 32-bit, but will work on a 64-bit Windows
 wget -O numpy.exe http://downloads.sourceforge.net/project/numpy/NumPy/1.9.2/numpy-1.9.2-win32-superpack-python2.7.exe
 wget -O matplotlib.exe https://downloads.sourceforge.net/project/matplotlib/matplotlib/matplotlib-1.4.3/windows/matplotlib-1.4.3.win32-py2.7.exe
 

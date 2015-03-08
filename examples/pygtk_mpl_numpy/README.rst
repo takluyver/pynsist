@@ -33,7 +33,7 @@ Matplotlib
 The example downloads the 32-bit Python 2.7 bindings of Matplotlib 1.4.3
 (matplotlib-1.4.3.win32-py2.7.exe).
 
-In the :code:`installer.cfg` Matplotlib additionally requires the sig, dateutil
+In the :code:`installer.cfg` Matplotlib additionally requires the six, dateutil
 and pyparsing packages:
 
 ::
@@ -84,7 +84,7 @@ The example is customized for 32-bit and Python 2.7. This is expressed in the
 
 ::
 
-    version=2.7.7
+    version=2.7.9
     bitness=32
 
 The include section requires pygtk, numpy and matplotlib. In order to satisfy the
