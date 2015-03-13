@@ -89,7 +89,7 @@ class InstallerBuilder(object):
         self.shortcuts = shortcuts
         self.icon = icon
         self.packages = packages or []
-        self.exclude = exclude or []
+        self.exclude = [os.path.normpath(p) for p in (exclude or [])]
         self.extra_files = extra_files or []
         self.py_version = py_version
         if not self._py_version_pattern.match(py_version):
@@ -268,6 +268,7 @@ if __name__ == '__main__':
         ignored = set()
 
         # Filter by file names relative to the build directory
+        directory = os.path.normpath(directory)
         files = [os.path.join(directory, fname) for fname in files]
 
         # Execute all patterns
