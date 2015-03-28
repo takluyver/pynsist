@@ -12,7 +12,7 @@ with different frameworks:
 - `A PyQt4 application <https://github.com/takluyver/pynsist/tree/master/examples/pyqt>`_
 - `A PyGTK application <https://github.com/takluyver/pynsist/tree/master/examples/pygtk>`_
 - `A PyGTK application including Numpy and Matplotlib (32 bit, Python 2.7) <https://github.com/takluyver/pynsist/tree/master/examples/pygtk_mpl_numpy>`_
-- `A PyGTK application including Numpy and Matplotlib (64 bit, Python 3.4) <https://github.com/takluyver/pynsist/tree/master/examples/pygi_mpl_numpy>`_
+- `A PyGI (or PyGObject) application including Numpy and Matplotlib (64 bit, Python 3.4) <https://github.com/takluyver/pynsist/tree/master/examples/pygi_mpl_numpy>`_
 - `A pygame application <https://github.com/takluyver/pynsist/tree/master/examples/pygame>`_
 
 Real-world examples
