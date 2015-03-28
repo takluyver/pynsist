@@ -24,3 +24,5 @@ These may illustrate more complex uses of pynsist.
 - `Spreads <https://github.com/jbaiter/spreads/tree/windows>`_ is a book scanning tool,
   including a tkinter configuration system and a local webserver. Its use of
   pynsist (see ``buildmsi.py``) includes working with setuptools info files.
+- `InnStereo <https://github.com/tobias47n9e/innsbruck-stereographic>`_ is a GTK 3
+  application for geologists. Besides pygi, it uses numpy and matplotlib.
