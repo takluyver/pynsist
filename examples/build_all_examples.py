@@ -8,6 +8,7 @@ example_cfgs = [
     'pygame/installer.cfg',
     'pygtk/installer.cfg',
     'pygtk_mpl_numpy/installer.cfg',
+    'pygi_mpl_numpy/installer.cfg',
 ]
 
 examples_dir = os.path.dirname(os.path.abspath(__file__))
