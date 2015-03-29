@@ -3,8 +3,8 @@
 """
 This test program utilizes the Python bindings for GTK3 (PyGI or PyGObject).
 
-The program conists of a windows with a button that closes the windows when
-clicked. The windows also shows a matplotlib plot. The plot is based on this
+The program conists of a window with a button that closes the window when
+clicked. The window also shows a matplotlib plot. The plot is based on this
 example: http://matplotlib.org/examples/pie_and_polar_charts/polar_bar_demo.html
 """
 
