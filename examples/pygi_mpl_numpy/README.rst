@@ -66,12 +66,12 @@ The include section requires the Python packages numpy, matplotlib (which are ta
         dateutil
         pyparsing
 
-Compiling
----------
+glib-schemas
+------------
 
 When the pygi-aio bundle is installed on a Windows-machine, the installer performs some post-installation compiling steps. After extracting the libraries from the bundle, compiling can be carried out on Linux, as long as the operating system used for packaging and the targeted operating system have the same bitness. For different bitnesses, use a virtual machine with desired bitness, install the bundle, and copy the compiled files back into your build directory.
 
-An example are the ``glib-schemas`` which are required for the GtkFileChooserDialog to work properly. The script ``2_extract.sh`` will automatically call the following command to compile the ``glib-schemas``:
+An example are the glib-schemas which are required for the GtkFileChooserDialog to work properly. The script ``2_extract.sh`` will automatically call the following command to compile the glib-schemas:
 
 ::
 
