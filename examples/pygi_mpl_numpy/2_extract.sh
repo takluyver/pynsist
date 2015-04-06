@@ -35,3 +35,6 @@ done
 
 #Remove pygi Folder
 rm -r pygi
+
+#Compile glib schemas
+glib-compile-schemas pynsist_pkgs/gnome/share/glib-2.0/schemas/
