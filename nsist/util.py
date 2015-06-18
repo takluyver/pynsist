@@ -35,12 +35,12 @@ def get_cache_dir(ensure_existence=False):
         p = Path(xdg, 'pynsist')
 
     elif sys.platform == 'darwin':
-        p = Path(os.path.expanduser('~'), 'Library/Caches/flit')
+        p = Path(os.path.expanduser('~'), 'Library/Caches/pynsist')
 
     else:
         # Windows (hopefully)
         local = os.environ.get('LOCALAPPDATA', None) or (os.path.expanduser('~\\AppData\\Local'))
-        p = Path(local, 'flit')
+        p = Path(local, 'pynsist')
 
     if ensure_existence:
         try:
