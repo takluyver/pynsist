@@ -75,6 +75,7 @@ CONFIG_VALIDATORS = {
     'Python': SectionValidator([
         ('version', True),
         ('bitness', False),
+        ('format', False),
     ]),
     'Shortcut': SectionValidator([
         ('entry_point', False),

@@ -13,6 +13,9 @@ requirements = ['requests',
 if PY2:
     requirements.append('configparser >= 3.3.0r2')
 
+if sys.version_info < (3, 4):
+    requirements.append('pathlib')
+
 with open('README.rst', 'r') as f:
     readme=f.read()
 

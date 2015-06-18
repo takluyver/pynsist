@@ -11,6 +11,7 @@ import shutil
 from subprocess import call
 import sys
 import fnmatch
+import zipfile
 
 PY2 = sys.version_info[0] == 2
 
@@ -24,7 +25,7 @@ else:
 
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
-from .util import download, text_types
+from .util import download, text_types, get_cache_dir
 
 __version__ = '1.5'
 
@@ -81,7 +82,8 @@ class InstallerBuilder(object):
     """
     def __init__(self, appname, version, shortcuts, icon=DEFAULT_ICON,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
-                py_bitness=DEFAULT_BITNESS, build_dir=DEFAULT_BUILD_DIR,
+                py_bitness=DEFAULT_BITNESS, py_format='installer',
+                build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None):
         self.appname = appname
@@ -97,6 +99,9 @@ class InstallerBuilder(object):
         self.py_bitness = py_bitness
         if py_bitness not in {32, 64}:
             raise InputError('py_bitness', py_bitness, "32 or 64")
+        self.py_format = py_format
+        if py_format not in {'installer', 'bundled'}:
+            raise InputError('py_format', py_format, "installer or bundled")
         self.build_dir = build_dir
         self.installer_name = installer_name or self.make_installer_name()
         self.nsi_template = nsi_template
@@ -138,6 +143,29 @@ class InstallerBuilder(object):
             return
         logger.info('Downloading Python MSI...')
         download(url, target)
+
+    def fetch_python_embeddable(self):
+        arch_tag = 'amd64' if (self.py_bitness==64) else 'win32'
+        filename = 'python-{}-embed-{}.zip'.format(self.py_version, arch_tag)
+        url = 'https://www.python.org/ftp/python/{}/{}'.format(self.py_version,
+                                                               filename)
+        cache_file = get_cache_dir(ensure_existence=True) / filename
+        if not cache_file.is_file():
+            logger.info('Downloading embeddable Python build...')
+            download(url, cache_file)
+
+        logger.info('Unpacking Python...')
+        python_dir = pjoin(self.build_dir, 'Python')
+        try:
+            shutil.rmtree(python_dir)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+        with zipfile.ZipFile(cache_file) as z:
+            z.extractall(python_dir)
+
+        self.install_dirs.append(python_dir)
 
     def fetch_pylauncher(self):
         """Fetch the MSI for PyLauncher (required for Python2.x).
@@ -387,9 +415,9 @@ def main(argv=None):
     dirname, config_file = os.path.split(options.config_file)
     if dirname:
         os.chdir(dirname)
-    
+
+    from . import configreader
     try:
-        from . import configreader
         cfg = configreader.read_and_validate(config_file)
         shortcuts = configreader.read_shortcuts_config(cfg)
     except configreader.InvalidConfig as e:
@@ -408,6 +436,7 @@ def main(argv=None):
             extra_files = configreader.read_extra_files(cfg),
             py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
             py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
+            py_format = cfg.get('Python', 'format', fallback='installer'),
             build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
             installer_name = cfg.get('Build', 'installer_name', fallback=None),
             nsi_template = cfg.get('Build', 'nsi_template', fallback=None),
