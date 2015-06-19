@@ -93,33 +93,51 @@ class InstallerBuilder(object):
         self.packages = packages or []
         self.exclude = [os.path.normpath(p) for p in (exclude or [])]
         self.extra_files = extra_files or []
+
+        # Python options
         self.py_version = py_version
         if not self._py_version_pattern.match(py_version):
-            raise InputError('py_version', py_version, "a full Python version like '3.4.0'")
+            if not os.environ.get('PYNSIST_PY_PRERELEASE'):
+                raise InputError('py_version', py_version,
+                                 "a full Python version like '3.4.0'")
         self.py_bitness = py_bitness
         if py_bitness not in {32, 64}:
             raise InputError('py_bitness', py_bitness, "32 or 64")
+        self.py_major_version = self.py_qualifier = '.'.join(self.py_version.split('.')[:2])
+        if self.py_bitness == 32:
+            self.py_qualifier += '-32'
         self.py_format = py_format
-        if py_format not in {'installer', 'bundled'}:
-            raise InputError('py_format', py_format, "installer or bundled")
+        if self._py_version_tuple >= (3, 5):
+            if py_format not in {'installer', 'bundled'}:
+                raise InputError('py_format', py_format, "installer or bundled")
+        else:
+            if py_format != 'installer':
+                raise InputError('py_format', py_format, "installer (for Python < 3.5)")
+
+        # Build details
         self.build_dir = build_dir
         self.installer_name = installer_name or self.make_installer_name()
         self.nsi_template = nsi_template
         if self.nsi_template is None:
-            if self.py_version < '3.3':
+            if self.py_format == 'bundled':
+                self.nsi_template = 'pyapp.nsi'
+            elif self._py_version_tuple < (3, 3):
                 self.nsi_template = 'pyapp_w_pylauncher.nsi'
             else:
-                self.nsi_template = 'pyapp.nsi'
+                self.nsi_template = 'pyapp_installpy.nsi'
+
         self.nsi_file = pjoin(self.build_dir, 'installer.nsi')
-        self.py_major_version = self.py_qualifier = '.'.join(self.py_version.split('.')[:2])
-        if self.py_bitness == 32:
-            self.py_qualifier += '-32'
         
         # To be filled later
         self.install_files = []
         self.install_dirs = []
     
     _py_version_pattern = re.compile(r'\d\.\d+\.\d+$')
+
+    @property
+    def _py_version_tuple(self):
+        parts = self.py_version.split('.')
+        return int(parts[0]), int(parts[1])
 
     def make_installer_name(self):
         """Generate the filename of the installer exe
@@ -147,8 +165,8 @@ class InstallerBuilder(object):
     def fetch_python_embeddable(self):
         arch_tag = 'amd64' if (self.py_bitness==64) else 'win32'
         filename = 'python-{}-embed-{}.zip'.format(self.py_version, arch_tag)
-        url = 'https://www.python.org/ftp/python/{}/{}'.format(self.py_version,
-                                                               filename)
+        url = 'https://www.python.org/ftp/python/{}/{}'.format(
+            re.sub(r'b\d+$', '', self.py_version), filename)
         cache_file = get_cache_dir(ensure_existence=True) / filename
         if not cache_file.is_file():
             logger.info('Downloading embeddable Python build...')
@@ -162,10 +180,10 @@ class InstallerBuilder(object):
             if e.errno != errno.ENOENT:
                 raise
 
-        with zipfile.ZipFile(cache_file) as z:
+        with zipfile.ZipFile(str(cache_file)) as z:
             z.extractall(python_dir)
 
-        self.install_dirs.append(python_dir)
+        self.install_dirs.append(('Python', '$INSTDIR'))
 
     def fetch_pylauncher(self):
         """Fetch the MSI for PyLauncher (required for Python2.x).
@@ -261,7 +279,11 @@ if __name__ == '__main__':
                 else:
                     shutil.copy2(sc['script'], self.build_dir)
 
-                sc['target'] = 'py' if sc['console'] else 'pyw'
+                if self.py_format == 'bundled':
+                    target = '$INSTDIR\Python\python{}.exe'
+                else:
+                    target = 'py{}'
+                sc['target'] = target.format('' if sc['console'] else 'w')
                 sc['parameters'] = '"%s"' % ntpath.join('$INSTDIR', sc['script'])
                 files.add(os.path.basename(sc['script']))
 
@@ -375,9 +397,13 @@ if __name__ == '__main__':
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise e
-        self.fetch_python()
-        if self.py_version < '3.3':
-            self.fetch_pylauncher()
+
+        if self.py_format == 'bundled':
+            self.fetch_python_embeddable()
+        else:
+            self.fetch_python()
+            if self.py_version < '3.3':
+                self.fetch_pylauncher()
         
         self.prepare_shortcuts()
         

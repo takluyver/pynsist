@@ -1,9 +1,7 @@
-[% extends "pyapp.nsi" %]
+[% extends "pyapp_installpy.nsi" %]
 [# For Python 2, add the py/pyw Windows launcher. Python 3 includes it already. #]
 
 [% block sections %]
-[[ super() ]]
-
 Section "PyLauncher" sec_pylauncher
     ; Check for the existence of the pyw command, skip installing if it exists
     nsExec::Exec 'where pyw'
@@ -15,6 +13,8 @@ Section "PyLauncher" sec_pylauncher
     Delete "$INSTDIR\launchwin${ARCH_TAG}.msi"
     SkipPylauncher:
 SectionEnd
+
+[[ super() ]]
 [% endblock %]
 
 [% block mouseover_messages %]

@@ -56,6 +56,11 @@ class NSISFileWriter(object):
             'single_shortcut': len(installerbuilder.shortcuts) == 1,
         }
 
+        if installerbuilder.py_format == 'bundled':
+            self.namespace['python'] = '"$INSTDIR\\Python\\python"'
+        else:
+            self.namespace['python'] = 'py -{}'.format(installerbuilder.py_qualifier)
+
     def write(self, target):
         """Fill out the template and write the result to 'target'.
         

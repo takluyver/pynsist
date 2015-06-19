@@ -2,7 +2,6 @@
 !define PRODUCT_VERSION "[[ib.version]]"
 !define PY_VERSION "[[ib.py_version]]"
 !define PY_MAJOR_VERSION "[[ib.py_major_version]]"
-!define PY_QUALIFIER "[[ib.py_qualifier]]"
 !define BITNESS "[[ib.py_bitness]]"
 !define ARCH_TAG "[[arch_tag]]"
 !define INSTALLER_NAME "[[ib.installer_name]]"
@@ -19,11 +18,12 @@ RequestExecutionLevel admin
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
 
 ; UI pages
+[% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
+[% endblock ui_pages %]
 !insertmacro MUI_LANGUAGE "English"
 [% endblock modernui %]
 
@@ -32,19 +32,12 @@ OutFile "${INSTALLER_NAME}"
 InstallDir "$PROGRAMFILES${BITNESS}\${PRODUCT_NAME}"
 ShowInstDetails show
 
-[% block sections %]
 Section -SETTINGS
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
 SectionEnd
 
-Section "Python ${PY_VERSION}" sec_py
-  File "python-${PY_VERSION}${ARCH_TAG}.msi"
-  DetailPrint "Installing Python ${PY_MAJOR_VERSION}, ${BITNESS} bit"
-  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi" \
-            /qb ALLUSERS=1 TARGETDIR="$COMMONFILES${BITNESS}\Python\${PY_MAJOR_VERSION}"'
-  Delete $INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi
-SectionEnd
+[% block sections %]
 
 Section "!${PRODUCT_NAME}" sec_app
   SectionIn RO
@@ -90,7 +83,7 @@ Section "!${PRODUCT_NAME}" sec_app
   
   ; Byte-compile Python files.
   DetailPrint "Byte-compiling Python modules..."
-  nsExec::ExecToLog 'py -${PY_QUALIFIER} -m compileall -q "$INSTDIR\pkgs"'
+  nsExec::ExecToLog '[[ python ]] -m compileall -q "$INSTDIR\pkgs"'
   WriteUninstaller $INSTDIR\uninstall.exe
   ; Add ourselves to Add/remove programs
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
@@ -144,10 +137,6 @@ Function .onMouseOverSection
     GetDlgItem $R0 $R0 1043 ; description item (must be added to the UI)
 
     [% block mouseover_messages %]
-    StrCmp $0 ${sec_py} 0 +2
-      SendMessage $R0 ${WM_SETTEXT} 0 "STR:The Python interpreter. \
-            This is required for ${PRODUCT_NAME} to run."
-
     StrCmp $0 ${sec_app} "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:${PRODUCT_NAME}"
     

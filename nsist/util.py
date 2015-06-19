@@ -49,3 +49,5 @@ def get_cache_dir(ensure_existence=False):
             # Py2 compatible equivalent of FileExistsError
             if e.errno != errno.EEXIST:
                 raise
+
+    return p
