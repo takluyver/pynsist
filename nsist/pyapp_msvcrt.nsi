@@ -34,10 +34,21 @@ Section "-msvcrt"
   IfFileExists "$SYSDIR\ucrtbase.dll" skip_msvcrt
   StrCmp $0 "--" skip_msvcrt
 
-  DetailPrint "Downloading and installing MSVCRT from $0"
-  NSISdl::download $0 msvcrt.msu
-  ExecWait 'start /wait wusa /quiet /norestart "$INSTDIR\msvcrt.msu"' $1
-  Delete "$INSTDIR\msvcrt.msu"
+  DetailPrint "Need to install MSVCRT 2015. This may take a few minutes."
+  DetailPrint "Downloading $0"
+  NSISdl::download "$0" "$INSTDIR\msvcrt.msu"
+  Pop $2
+  DetailPrint "Download finished ($2)"
+  ${If} $2 == "success"
+    DetailPrint "Running wusa to install update package"
+    ExecWait 'wusa "$INSTDIR\msvcrt.msu" /quiet /norestart' $1
+    Delete "$INSTDIR\msvcrt.msu"
+  ${Else}
+    MessageBox MB_OK "Failed to download important update! \
+            ${PRODUCT_NAME} will not run until you install the Visual C++ \
+            redistributable for Visual Studio 2015.\
+            $\n$\nhttp://www.microsoft.com/en-us/download/details.aspx?id=48145"
+  ${EndIf}
 
   # This WUSA exit code means a reboot is needed.
   ${If} $1 = 0x00240005
