@@ -36,7 +36,7 @@ Section "-msvcrt"
 
   DetailPrint "Downloading and installing MSVCRT from $0"
   NSISdl::download $0 msvcrt.msu
-  ExecWait 'wusa /quiet /norestart "$INSTDIR\msvcrt.msu"' $1
+  ExecWait 'start /wait wusa /quiet /norestart "$INSTDIR\msvcrt.msu"' $1
   Delete "$INSTDIR\msvcrt.msu"
 
   # This WUSA exit code means a reboot is needed.
@@ -46,4 +46,6 @@ Section "-msvcrt"
 
   skip_msvcrt:
 SectionEnd
+
+[[ super() ]]
 [% endblock sections %]

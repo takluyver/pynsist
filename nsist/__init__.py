@@ -120,7 +120,7 @@ class InstallerBuilder(object):
         self.nsi_template = nsi_template
         if self.nsi_template is None:
             if self.py_format == 'bundled':
-                self.nsi_template = 'pyapp.nsi'
+                self.nsi_template = 'pyapp_msvcrt.nsi'
             elif self._py_version_tuple < (3, 3):
                 self.nsi_template = 'pyapp_w_pylauncher.nsi'
             else:
@@ -370,6 +370,9 @@ if __name__ == '__main__':
         # Sort by destination directory, so we can group them effectively
         self.install_files.sort(key=operator.itemgetter(1))
         nsis_writer.write(self.nsi_file)
+
+        if self.nsi_template == 'pyapp_msvcrt.nsi':
+            shutil.copy2(pjoin(_PKGDIR, 'windowsversion.nsh'), self.build_dir)
 
     def run_nsis(self):
         """Runs makensis using the specified .nsi file
