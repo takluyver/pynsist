@@ -98,6 +98,13 @@ Section "!${PRODUCT_NAME}" sec_app
                    "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
                    "NoRepair" 1
+
+  ; Check if we need to reboot
+  IfRebootFlag 0 noreboot
+    MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" \
+                /SD IDNO IDNO noreboot
+      Reboot
+  noreboot:
 SectionEnd
 
 Section "Uninstall"
