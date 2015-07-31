@@ -54,6 +54,7 @@ class NSISFileWriter(object):
             'arch_tag': '.amd64' if (installerbuilder.py_bitness==64) else '',
             'pjoin': ntpath.join,
             'single_shortcut': len(installerbuilder.shortcuts) == 1,
+            'pynsist_pkg_dir': _PKGDIR,
         }
 
         if installerbuilder.py_format == 'bundled':

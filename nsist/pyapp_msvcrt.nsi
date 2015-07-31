@@ -1,6 +1,7 @@
 [% extends "pyapp.nsi" %]
 
 [% block sections %]
+!addplugindir [[ pynsist_pkg_dir ]]
 !include windowsversion.nsh
 !include x64.nsh
 
@@ -36,10 +37,10 @@ Section "-msvcrt"
 
   DetailPrint "Need to install MSVCRT 2015. This may take a few minutes."
   DetailPrint "Downloading $0"
-  NSISdl::download "$0" "$INSTDIR\msvcrt.msu"
+  inetc::get /RESUME "" "$0" "$INSTDIR\msvcrt.msu"
   Pop $2
   DetailPrint "Download finished ($2)"
-  ${If} $2 == "success"
+  ${If} $2 == "OK"
     DetailPrint "Running wusa to install update package"
     ExecWait 'wusa "$INSTDIR\msvcrt.msu" /quiet /norestart' $1
     Delete "$INSTDIR\msvcrt.msu"
