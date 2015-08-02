@@ -108,14 +108,53 @@ Python section
 
 .. describe:: version
 
-  The Python version to download and bundle with your application. At present,
-  this needs to be at least ``3.3.0``.
+  The Python version to download and bundle with your application, e.g. ``3.4.3``.
+  Python 3.3 or later and 2.7 are supported.
 
 .. describe:: bitness (optional)
 
   ``32`` or ``64``, to use 32-bit (x86) or 64-bit (x64) Python. On Windows, this
   defaults to the version you're using, so that compiled modules will match. On
   other platforms, it defaults to 32-bit.
+
+.. describe:: format (optional)
+
+  - ``installer`` includes a copy of the Python MSI installer in your application
+    and runs it at install time, setting up Python systemwide. This is the
+    default for now.
+  - ``bundled`` includes an embeddable Python build, which will be installed as
+    part of your application. This is available for Python 3.5 and above.
+
+.. _python_bundled:
+
+Bundled Python
+~~~~~~~~~~~~~~
+
+.. versionadded:: 1.6
+   Experimental support for bundling Python into the application.
+
+Using ``format = bundled``, an embeddable Python build will be downloaded at
+build time and packaged along with the application. When the installer runs, it
+will create a ``Python`` subfolder inside the install directory with the files
+Python needs to run.
+
+This has the advantage of producing smaller installers (~7.5 MB for a trivial
+application), and more standalone installations. But it has a number of
+limitations:
+
+- This option is only available for Python 3.5 and above. These versions of
+  Python have dropped support for Windows XP, so your application will only work
+  on Windows Vista and newer.
+- Installing in Windows Vista to 8.1 (inclusive) may need an internet connection
+  to download the necessary `Visual C++ runtime
+  <http://www.microsoft.com/en-us/download/details.aspx?id=48145>`__. This isn't
+  needed on Windows 10, which includes the necessary files.
+- The embeddable Python builds don't include ``tkinter``, to save space.
+  Applications with a tkinter GUI can't easily use bundled Python. Workarounds
+  may be found in the future.
+- The user cannot easily install extra Python packages in the application's
+  Python. If your application has plugins based on Python packages, this might
+  require extra thought about how and where plugins are installed.
 
 Include section
 ---------------

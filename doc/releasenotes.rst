@@ -1,6 +1,12 @@
 Release notes
 =============
 
+Version 1.6
+-----------
+
+* Experimental support for creating installers that :ref:`bundle Python with the
+  application <python_bundled>`.
+
 Version 1.5
 -----------
 
