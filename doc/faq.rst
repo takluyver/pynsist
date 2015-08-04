@@ -40,6 +40,21 @@ list them in the ``files`` key of the ``[Include]`` section of the config file.
 Your code can find them relative to the location of the launch script running your
 application (``sys.modules['__main__'].__file__``).
 
+Code signing
+------------
+
+People trying to use your installer will see an 'Unknown publisher' warning.
+To avoid this, you can sign it with a digital certificate. See
+`Mozilla's instructions on signing executables using Mono
+<https://developer.mozilla.org/en-US/docs/Signing_an_executable_with_Authenticode>`__.
+
+Signing requires a certificate from a trusted provider. These typically cost
+hundreds of dollars, but Certum `offers a certificate
+<https://www.certum.eu/certum/cert,offer_en_open_source_cs.xml>`__ for open
+source projects for €14 at the time of writing. You will need documents to prove
+your identity. I haven't used a Certum certificate, and this isn't an
+endorsement.
+
 Alternatives
 ------------
 
