@@ -107,7 +107,7 @@ class InstallerBuilder(object):
         if self.py_bitness == 32:
             self.py_qualifier += '-32'
         self.py_format = py_format
-        if self._py_version_tuple >= (3, 5):
+        if self.py_version_tuple >= (3, 5):
             if py_format not in {'installer', 'bundled'}:
                 raise InputError('py_format', py_format, "installer or bundled")
         else:
@@ -121,7 +121,7 @@ class InstallerBuilder(object):
         if self.nsi_template is None:
             if self.py_format == 'bundled':
                 self.nsi_template = 'pyapp_msvcrt.nsi'
-            elif self._py_version_tuple < (3, 3):
+            elif self.py_version_tuple < (3, 3):
                 self.nsi_template = 'pyapp_w_pylauncher.nsi'
             else:
                 self.nsi_template = 'pyapp_installpy.nsi'
@@ -135,7 +135,7 @@ class InstallerBuilder(object):
     _py_version_pattern = re.compile(r'\d\.\d+\.\d+$')
 
     @property
-    def _py_version_tuple(self):
+    def py_version_tuple(self):
         parts = self.py_version.split('.')
         return int(parts[0]), int(parts[1])
 
@@ -147,26 +147,42 @@ class InstallerBuilder(object):
         s = self.appname + '_' + self.version + '.exe'
         return s.replace(' ', '_')
 
+    def _python_download_url_filename(self):
+        version = self.py_version
+        bitness = self.py_bitness
+        if self.py_version_tuple >= (3, 5):
+            if self.py_format == 'bundled':
+                filename = 'python-{}-embed-{}.zip'.format(version,
+                                           'amd64' if bitness==64 else 'win32')
+            else:
+                filename = 'python-{}{}.exe'.format(version,
+                                            '-amd64' if bitness==64 else '')
+        else:
+            filename = 'python-{0}{1}.msi'.format(version,
+                                            '.amd64' if bitness==64 else '')
+
+        version_minus_prerelease = re.sub(r'(a|b|rc)\d+$', '', self.py_version)
+        return 'https://www.python.org/ftp/python/{0}/{1}'.format(
+                version_minus_prerelease, filename), filename
+
     def fetch_python(self):
         """Fetch the MSI for the specified version of Python.
         
         It will be placed in the build directory.
         """
-        version = self.py_version
-        arch_tag = '.amd64' if (self.py_bitness==64) else ''
-        url = 'https://python.org/ftp/python/{0}/python-{0}{1}.msi'.format(version, arch_tag)
-        target = pjoin(self.build_dir, 'python-{0}{1}.msi'.format(version, arch_tag))
-        if os.path.isfile(target):
-            logger.info('Python MSI already in build directory.')
-            return
-        logger.info('Downloading Python MSI...')
-        download(url, target)
+        url, filename = self._python_download_url_filename()
+
+        cache_file = get_cache_dir(ensure_existence=True) / filename
+        if not cache_file.is_file():
+            logger.info('Downloading Python installer...')
+            logger.info('Getting %s', url)
+            download(url, cache_file)
+
+        logger.info('Copying Python installer to build directory')
+        shutil.copy2(str(cache_file), self.build_dir)
 
     def fetch_python_embeddable(self):
-        arch_tag = 'amd64' if (self.py_bitness==64) else 'win32'
-        filename = 'python-{}-embed-{}.zip'.format(self.py_version, arch_tag)
-        url = 'https://www.python.org/ftp/python/{}/{}'.format(
-            re.sub(r'(a|b|rc)\d+$', '', self.py_version), filename)
+        url, filename = self._python_download_url_filename()
         cache_file = get_cache_dir(ensure_existence=True) / filename
         if not cache_file.is_file():
             logger.info('Downloading embeddable Python build...')

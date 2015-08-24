@@ -11,11 +11,19 @@
 
 [% block sections %]
 Section "Python ${PY_VERSION}" sec_py
-  File "python-${PY_VERSION}${ARCH_TAG}.msi"
+
   DetailPrint "Installing Python ${PY_MAJOR_VERSION}, ${BITNESS} bit"
-  ExecWait 'msiexec /i "$INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi" \
+  [% if ib.py_version_tuple >= (3, 5) %]
+    [% set filename = 'python-' ~ ib.py_version ~ ('-amd64' if ib.py_bitness==64 else '') ~ '.exe' %]
+    File "[[filename]]"
+    ExecWait '"$INSTDIR\[[filename]]" /p Include_test=0'
+  [% else %]
+    [% set filename = 'python-' ~ ib.py_version ~ ('.amd64' if ib.py_bitness==64 else '') ~ '.msi' %]
+    File "[[filename]]"
+    ExecWait 'msiexec /i "$INSTDIR\[[filename]]" \
             /qb ALLUSERS=1 TARGETDIR="$COMMONFILES${BITNESS}\Python\${PY_MAJOR_VERSION}"'
-  Delete $INSTDIR\python-${PY_VERSION}${ARCH_TAG}.msi
+  [% endif %]
+  Delete $INSTDIR\[[filename]]
 SectionEnd
 
 [[ super() ]]
