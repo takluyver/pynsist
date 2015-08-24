@@ -166,10 +166,11 @@ class InstallerBuilder(object):
         arch_tag = 'amd64' if (self.py_bitness==64) else 'win32'
         filename = 'python-{}-embed-{}.zip'.format(self.py_version, arch_tag)
         url = 'https://www.python.org/ftp/python/{}/{}'.format(
-            re.sub(r'b\d+$', '', self.py_version), filename)
+            re.sub(r'(a|b|rc)\d+$', '', self.py_version), filename)
         cache_file = get_cache_dir(ensure_existence=True) / filename
         if not cache_file.is_file():
             logger.info('Downloading embeddable Python build...')
+            logger.info('Getting %s', url)
             download(url, cache_file)
 
         logger.info('Unpacking Python...')
