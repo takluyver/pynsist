@@ -1,4 +1,5 @@
 # Extracts all dependencies and places them in the pynsist_pkgs folder
+# You might need to rename the "7z" calls to "7za" depending on your distribution
 
 mkdir pynsist_pkgs
 
@@ -19,7 +20,7 @@ cp -r bindings/* pynsist_pkgs
 rm -r bindings
 
 # Copy the noarch and specified architecture dependencies into the gnome folder
-array=( ATK Base GDK GDKPixbuf GTK JPEG Pango WebP TIFF )
+array=( ATK Base GDK GDKPixbuf GTK HarfBuzz JPEG Pango WebP TIFF )
 
 for i in "${array[@]}"
 do
