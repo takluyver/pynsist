@@ -73,11 +73,11 @@ When the pygi-aio bundle is installed on a Windows-machine, the installer perfor
 
 An example are the glib-schemas which are required for the GtkFileChooserDialog to work properly. The script ``2_extract.sh`` will automatically call the following command to compile the glib-schemas:
 
-Note: If your application uses glib-schemas (e.g. default-settings stored in gsettings) you will need to place the schemas for your application into that folder and recompile it before packaging it with Pynsist.
-
 ::
 
     glib-compile-schemas pynsist_pkgs/gnome/share/glib-2.0/schemas/
+
+Note: If your application uses glib-schemas (e.g. default-settings stored in gsettings) you will need to place the schemas for your application into that folder and recompile it before packaging it with Pynsist.
 
 See also:
 
