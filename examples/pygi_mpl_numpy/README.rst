@@ -77,8 +77,9 @@ An example are the glib-schemas which are required for the GtkFileChooserDialog 
 
     glib-compile-schemas pynsist_pkgs/gnome/share/glib-2.0/schemas/
 
+Note: If your application uses glib-schemas (e.g. default-settings stored in gsettings) you will need to place the schemas for your application into that folder and recompile it before packaging it with Pynsist.
+
 See also:
 
  - https://github.com/takluyver/pynsist/issues/43
  - https://sourceforge.net/p/pygobjectwin32/tickets/12/
-
