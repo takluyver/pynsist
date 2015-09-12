@@ -16,14 +16,14 @@ Section "Python ${PY_VERSION}" sec_py
   [% if ib.py_version_tuple >= (3, 5) %]
     [% set filename = 'python-' ~ ib.py_version ~ ('-amd64' if ib.py_bitness==64 else '') ~ '.exe' %]
     File "[[filename]]"
-    ExecWait '"$INSTDIR\[[filename]]" /p Include_test=0'
+    ExecWait '"$INSTDIR\[[filename]]" /passive Include_test=0 InstallAllUsers=1'
   [% else %]
     [% set filename = 'python-' ~ ib.py_version ~ ('.amd64' if ib.py_bitness==64 else '') ~ '.msi' %]
     File "[[filename]]"
     ExecWait 'msiexec /i "$INSTDIR\[[filename]]" \
             /qb ALLUSERS=1 TARGETDIR="$COMMONFILES${BITNESS}\Python\${PY_MAJOR_VERSION}"'
   [% endif %]
-  Delete $INSTDIR\[[filename]]
+  Delete "$INSTDIR\[[filename]]"
 SectionEnd
 
 [[ super() ]]
