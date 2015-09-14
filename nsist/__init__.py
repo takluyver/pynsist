@@ -27,7 +27,7 @@ from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
 from .util import download, text_types, get_cache_dir
 
-__version__ = '1.5'
+__version__ = '1.6'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
