@@ -20,7 +20,10 @@ def download(url, target):
     """
     if isinstance(target, Path):
         target = str(target)
-    r = requests.get(url, stream=True)
+
+    from . import __version__
+    headers = {'user-agent': 'Pynsist/'+__version__}
+    r = requests.get(url, headers=headers, stream=True)
     r.raise_for_status()
     with open(target, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024): 
