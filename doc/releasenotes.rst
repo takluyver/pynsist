@@ -6,6 +6,11 @@ Version 1.6
 
 * Experimental support for creating installers that :ref:`bundle Python with the
   application <python_bundled>`.
+* Support for Python 3.5 installers.
+* The user agent is set when downloading Python builds, so downloads from
+  Pynsist can be identified.
+* New example applications using PyGI, numpy and matplotlib.
+* Fixed a bug with different path separators in ``exclude`` patterns.
 
 Version 1.5
 -----------

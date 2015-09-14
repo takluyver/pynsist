@@ -138,8 +138,8 @@ build time and packaged along with the application. When the installer runs, it
 will create a ``Python`` subfolder inside the install directory with the files
 Python needs to run.
 
-This has the advantage of producing smaller installers (~7.5 MB for a trivial
-application), and more standalone installations. But it has a number of
+This has the advantage of producing smaller, quicker installers (~7.5 MB for a
+trivial application), and more standalone installations. But it has a number of
 limitations:
 
 - This option is only available for Python 3.5 and above. These versions of
