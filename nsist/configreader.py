@@ -73,7 +73,7 @@ CONFIG_VALIDATORS = {
         ('exclude', False),
     ]),
     'Python': SectionValidator([
-        ('version', True),
+        ('version', False),
         ('bitness', False),
         ('format', False),
     ]),
