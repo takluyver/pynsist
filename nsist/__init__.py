@@ -68,7 +68,7 @@ class InstallerBuilder(object):
     
     :param str appname: Application name
     :param str version: Application version
-    :param list shortcuts: Dictionary keyed by shortcut name, containing
+    :param dict shortcuts: Dictionary keyed by shortcut name, containing
             dictionaries whose keys match the fields of :ref:`shortcut_config`
             in the config file
     :param str icon: Path to an icon for the application
