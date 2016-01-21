@@ -1,6 +1,0 @@
-This is an example that uses PyQt4 binary packages.
-
-To make the installer on a non-Windows system, first run fetch_pyqt_windows.sh.
-This will download a PyQt Windows installer from Sourceforge, unpack the files
-from it, and copy the necessary ones into pynsist_pkgs where pynsist will
-pick them up.
