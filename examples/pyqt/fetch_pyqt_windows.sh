@@ -11,7 +11,7 @@ BITNESS=32
 
 INSTALLER_FILE=PyQt4-${PYQT_VERSION}-gpl-Py${PY_VERSION}-Qt${QT_VERSION}-x${BITNESS}.exe
 URL=http://sourceforge.net/projects/pyqt/files/PyQt4/PyQt-${PYQT_VERSION}/${INSTALLER_FILE}
-#wget -O "$INSTALLER_FILE" "$URL"
+wget -O "$INSTALLER_FILE" "$URL"
 
 rm -rf pyqt4-windows
 mkdir pyqt4-windows
