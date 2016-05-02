@@ -173,6 +173,14 @@ the line with the key:
    A list of importable package and module names to include in the installer.
    Specify only top-level packages, i.e. without a ``.`` in the name.
 
+.. describe:: pypi_wheels (optional)
+
+   A list of packages to download from PyPI, in the format ``name==version``.
+   These must be available as wheels; Pynsist will not try to download sdists
+   or eggs.
+
+   .. versionadded:: 1.7
+
 .. describe:: files (optional)
 
    Extra files or directories to be installed with your application.

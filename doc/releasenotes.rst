@@ -1,6 +1,13 @@
 Release notes
 =============
 
+Version 1.7
+-----------
+
+* Support for downloading packages as wheels from PyPI, and a new
+  `PyQt5 example <https://github.com/takluyver/pynsist/tree/master/examples/pyqt>`__
+  which uses this feature.
+
 Version 1.6
 -----------
 
