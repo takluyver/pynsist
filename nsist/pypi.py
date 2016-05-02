@@ -3,6 +3,7 @@ import errno
 import hashlib
 import logging
 import re
+import zipfile
 
 import yarg
 from requests_download import download, HashTracker
@@ -20,7 +21,7 @@ def find_pypi_release(requirement):
 
 class NoWheelError(Exception): pass
 
-class WheelFinder(object):
+class WheelDownloader(object):
     def __init__(self, requirement, py_version, bitness):
         self.requirement = requirement
         self.py_version = py_version
@@ -98,7 +99,7 @@ class WheelFinder(object):
             return None
         return release_dir / rel.filename
 
-    def find(self):
+    def fetch(self):
         p = self.check_cache()
         if p is not None:
             return p
@@ -139,3 +140,17 @@ class CachedRelease(object):
     def __init__(self, filename):
         self.filename = filename
         self.package_type = 'wheel' if filename.endswith('.whl') else ''
+
+def extract_wheel(whl_file, target_dir):
+    with zipfile.ZipFile(str(whl_file), mode='r') as zf:
+        names = zf.namelist()
+        # TODO: Do anything with data and dist-info folders?
+        pkg_files = [n for n in names \
+                     if not n.split('/')[0].endswith(('.data', '.dist-info'))]
+        zf.extractall(target_dir, members=pkg_files)
+
+def fetch_pypi_wheels(requirements, target_dir, py_version, bitness):
+    for req in requirements:
+        wd = WheelDownloader(req, py_version, bitness)
+        whl_file = wd.fetch()
+        extract_wheel(whl_file, target_dir)

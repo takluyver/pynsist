@@ -69,6 +69,7 @@ CONFIG_VALIDATORS = {
     ]),
     'Include': SectionValidator([
         ('packages', False),
+        ('pypi_wheels', False),
         ('files', False),
         ('exclude', False),
     ]),
