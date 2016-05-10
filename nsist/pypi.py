@@ -27,11 +27,9 @@ class WheelDownloader(object):
         self.py_version = py_version
         self.bitness = bitness
 
-        if '==' in requirement:
-            self.name, self.version = requirement.split('==', 1)
-        else:
-            self.name = requirement
-            self.version = None
+        if requirement.count('==') != 1:
+            raise ValueError("Requirement {!r} did not match name==version")
+        self.name, self.version = requirement.split('==', 1)
 
     def score_platform(self, platform):
         target = 'win_amd64' if self.bitness == 64 else 'win32'
@@ -104,9 +102,6 @@ class WheelDownloader(object):
         if p is not None:
             return p
 
-        pypi_info = yarg.get(self.name)
-        if self.version is None:
-            self.version = pypi_info.latest_release_id
         release_list = yarg.get(self.name).release(self.version)
         preferred_release = self.pick_best_wheel(release_list)
         if preferred_release is None:
