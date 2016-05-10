@@ -6,7 +6,7 @@ environment:
 
 install:
   - cinst nsis
-  - "%PYTHON%\\python.exe -m pip install requests jinja2 nose"
+  - "%PYTHON%\\python.exe -m pip install requests requests_download jinja2 yarg nose"
 
 build: off
 
