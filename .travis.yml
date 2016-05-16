@@ -8,7 +8,7 @@ python:
 script: nosetests
 # Ensure dependencies are installed
 install:
-  - pip install requests requests_download jinja2 yarg
+  - pip install requests requests_download jinja2 yarg win_cli_launchers
   - if [[ ${TRAVIS_PYTHON_VERSION} == '2.7' ]]; then pip install configparser pathlib; fi
   - if [[ ${TRAVIS_PYTHON_VERSION} == '3.3' ]]; then pip install pathlib; fi
 
