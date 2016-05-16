@@ -80,6 +80,13 @@ Section "!${PRODUCT_NAME}" sec_app
   [% endif %]
   SetOutPath "$INSTDIR"
   [% endblock install_shortcuts %]
+
+  [% block install_commands %]
+  [% if has_commands %]
+    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_rewrite_shebangs.py" "$INSTDIR\bin"'
+    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_system_path.py" add "$INSTDIR\bin"'
+  [% endif %]
+  [% endblock install_commands %]
   
   ; Byte-compile Python files.
   DetailPrint "Byte-compiling Python modules..."
@@ -112,6 +119,14 @@ Section "Uninstall"
   Delete $INSTDIR\uninstall.exe
   Delete "$INSTDIR\${PRODUCT_ICON}"
   RMDir /r "$INSTDIR\pkgs"
+
+  ; Remove ourselves from %PATH%
+  [% block uninstall_commands %]
+  [% if has_commands %]
+    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_system_path" remove "$INSTDIR\bin"'
+  [% endif %]
+  [% endblock uninstall_commands %]
+
   ; Uninstall files
   [% for file, destination in ib.install_files %]
     Delete "[[pjoin(destination, file)]]"

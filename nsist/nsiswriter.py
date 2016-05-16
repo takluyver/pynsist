@@ -55,6 +55,7 @@ class NSISFileWriter(object):
             'pjoin': ntpath.join,
             'single_shortcut': len(installerbuilder.shortcuts) == 1,
             'pynsist_pkg_dir': _PKGDIR,
+            'has_commands': len(installerbuilder.commands) > 0,
         }
 
         if installerbuilder.py_format == 'bundled':
