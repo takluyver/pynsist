@@ -20,7 +20,7 @@ def rewrite(path):
     if contents[0].strip() != b'#!python':
         return
 
-    contents[0] = b'#!' + b_python_exe + b'\n'
+    contents[0] = b'#!"' + b_python_exe + b'"\n'
 
     with open(path, 'wb') as f:
         f.writelines(contents)

@@ -76,7 +76,8 @@ class InstallerBuilder(object):
             in the config file
     :param str icon: Path to an icon for the application
     :param list packages: List of strings for importable packages to include
-    :param list commands: List of dicts for commands to define.
+    :param dict commands: Dictionary keyed by command name, containing dicts
+            defining the commands, as in the config file.
     :param list pypi_wheel_reqs: Package specifications to fetch from PyPI as wheels
     :param list extra_files: List of 2-tuples (file, destination) of files to include
     :param list exclude: Paths of files to exclude that would otherwise be included
@@ -100,7 +101,7 @@ class InstallerBuilder(object):
         self.exclude = [os.path.normpath(p) for p in (exclude or [])]
         self.extra_files = extra_files or []
         self.pypi_wheel_reqs = pypi_wheel_reqs or []
-        self.commands = commands or []
+        self.commands = commands or {}
 
         # Python options
         self.py_version = py_version
@@ -452,6 +453,9 @@ if __name__ == '__main__':
                 self.fetch_pylauncher()
         
         self.prepare_shortcuts()
+
+        if self.commands:
+            self.prepare_commands()
         
         # Packages
         self.prepare_packages()
@@ -492,6 +496,7 @@ def main(argv=None):
     try:
         cfg = configreader.read_and_validate(config_file)
         shortcuts = configreader.read_shortcuts_config(cfg)
+        commands = configreader.read_commands_config(cfg)
     except configreader.InvalidConfig as e:
         logger.error('Error parsing configuration file:')
         logger.error(str(e))
@@ -504,6 +509,7 @@ def main(argv=None):
             version = appcfg['version'],
             icon = appcfg.get('icon', DEFAULT_ICON),
             shortcuts = shortcuts,
+            commands=commands,
             packages = cfg.get('Include', 'packages', fallback='').splitlines(),
             pypi_wheel_reqs = cfg.get('Include', 'pypi_wheels', fallback='').splitlines(),
             extra_files = configreader.read_extra_files(cfg),

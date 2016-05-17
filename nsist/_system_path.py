@@ -190,3 +190,6 @@ def main():
     elif sys.argv[1] == 'remove':
         remove_from_system_path(sys.argv[2])
         broadcast_environment_settings_change()
+
+if __name__ == '__main__':
+    main()

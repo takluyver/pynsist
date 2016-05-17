@@ -20,8 +20,7 @@ if __name__ == '__main__':
 
 def prepare_bin_directory(target, commands, bitness=32):
     exe_src = win_cli_launchers.find_exe('x64' if bitness == 64 else 'x86')
-    for command in commands:
-        name = command['name']
+    for name, command in commands.items():
         shutil.copy(exe_src, str(target / (name+'.exe')))
 
         specified_preamble = command.get('extra_preamble', None)

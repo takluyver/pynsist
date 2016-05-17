@@ -87,6 +87,10 @@ CONFIG_VALIDATORS = {
         ('console', False),
         ('extra_preamble', False),
     ]),
+    'Command': SectionValidator([
+        ('entry_point', True),
+        ('extra_preamble', False),
+    ])
 }
 
 class InvalidConfig(ValueError):
@@ -102,6 +106,8 @@ def read_and_validate(config_file):
             CONFIG_VALIDATORS[section].check(config, section)
         elif section.startswith('Shortcut '):
             CONFIG_VALIDATORS['Shortcut'].check(config, section)
+        elif section.startswith('Command '):
+            CONFIG_VALIDATORS['Command'].check(config, section)
         else:
             valid_section_names = CONFIG_VALIDATORS.keys()
             err_msg = ("{0} is not a valid section header. Must "
@@ -134,7 +140,7 @@ def read_shortcuts_config(cfg):
     There is one shortcut per 'Shortcut <name>' section, and one for the
     Application section.
     
-    Returns a list of dictionaries with the fields from the shortcut sections.
+    Returns a dict of dicts with the fields from the shortcut sections.
     The optional 'icon' and 'console' fields will be filled with their
     default values if not supplied.
     """
@@ -175,3 +181,21 @@ def read_shortcuts_config(cfg):
     _check_shortcut(appcfg['name'], appcfg, 'Application')
 
     return shortcuts
+
+def read_commands_config(cfg):
+    """Read and verify the command definitions from the config file.
+
+    Returns a dict of dicts, keyed by command name, containing the values from
+    the command sections of the config file.
+    """
+    commands = {}
+    for section in cfg.sections():
+        if section.startswith("Command "):
+            name = section[len("Command "):]
+            commands[name] = cc = dict(cfg[section])
+            if ('extra_preamble' in cc) and \
+                    not os.path.isfile(cc['extra_preamble']):
+                raise InvalidConfig('extra_preamble file %r does not exist' %
+                                    cc['extra_preamble'])
+
+    return commands
