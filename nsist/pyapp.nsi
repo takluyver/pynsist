@@ -123,7 +123,7 @@ Section "Uninstall"
   ; Remove ourselves from %PATH%
   [% block uninstall_commands %]
   [% if has_commands %]
-    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_system_path" remove "$INSTDIR\bin"'
+    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_system_path.py" remove "$INSTDIR\bin"'
   [% endif %]
   [% endblock uninstall_commands %]
 
