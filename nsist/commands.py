@@ -4,7 +4,7 @@ import win_cli_launchers
 
 from .util import text_types
 
-SCRIPT_TEMPLATE = """#!python
+SCRIPT_TEMPLATE = u"""#!python
 import sys, os
 installdir = os.path.dirname(os.path.dirname(__file__))
 pkgdir = os.path.join(installdir, 'pkgs')
