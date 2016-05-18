@@ -8,7 +8,7 @@ from nsist import commands, _rewrite_shebangs
 
 cmds = {'acommand': {
                 'entry_point': 'somemod:somefunc',
-                'extra_preamble': io.StringIO('import extra')
+                'extra_preamble': io.StringIO(u'import extra')
            }}
 
 def test_prepare_bin_dir():
