@@ -25,8 +25,10 @@ def rewrite(path):
     with open(path, 'wb') as f:
         f.writelines(contents)
 
-def main():
-    target_dir = sys.argv[1]
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+    target_dir = argv[1]
     for path in glob.glob(os.path.join(target_dir, '*-script.py')):
         rewrite(path)
 
