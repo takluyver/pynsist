@@ -99,7 +99,34 @@ shortcuts by defining sections titled :samp:`Shortcut {Name}`. For example:
 
    These options all work the same way as in the Application section.
 
-.. versionadded:: 0.2
+
+.. _command_config:
+
+Command sections
+----------------
+
+.. versionadded:: 1.7
+
+Your application can install commands to be run from the Windows command prompt.
+This is not standard practice for desktop applications on Windows, but if your
+application specifically provides a command line interface, you can define
+one or more sections titled :samp:`Command {name}`::
+
+    [Command guessnumber]
+    entry_point=guessnumber:main
+
+If you use this, the installer will modify the system :envvar:`PATH` environment
+variable.
+
+.. describe:: entry_point
+
+   As with shortcuts, this specifies the Python function to call, in the format
+   ``module:function``.
+
+.. describe:: extra_preamble (optional)
+
+   As for shortcuts, a file containing extra code to run before importing the
+   module from ``entry_point``. This should rarely be needed.
 
 .. _cfg_python:
 

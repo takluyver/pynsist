@@ -8,6 +8,8 @@ Version 1.7
   `PyQt5 <https://github.com/takluyver/pynsist/tree/master/examples/pyqt>`__ and
   `Pyglet <https://github.com/takluyver/pynsist/tree/master/examples/pyglet>`__
   examples which use this feature.
+* Applications can include commands to run at the Windows command prompt. See
+  :ref:`command_config`.
 
 Version 1.6
 -----------

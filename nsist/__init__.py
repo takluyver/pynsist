@@ -6,6 +6,7 @@ import logging
 import ntpath
 import operator
 import os
+from pathlib import Path
 import re
 import shutil
 from subprocess import call
@@ -23,6 +24,7 @@ if os.name == 'nt':
 else:
     winreg = None
 
+from .commands import prepare_bin_directory
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
 from .pypi import fetch_pypi_wheels
@@ -74,7 +76,9 @@ class InstallerBuilder(object):
             in the config file
     :param str icon: Path to an icon for the application
     :param list packages: List of strings for importable packages to include
-    :param list pypi_reqs: Package specifications to fetch from PyPI as wheels
+    :param dict commands: Dictionary keyed by command name, containing dicts
+            defining the commands, as in the config file.
+    :param list pypi_wheel_reqs: Package specifications to fetch from PyPI as wheels
     :param list extra_files: List of 2-tuples (file, destination) of files to include
     :param list exclude: Paths of files to exclude that would otherwise be included
     :param str py_version: Full version of Python to bundle
@@ -88,7 +92,7 @@ class InstallerBuilder(object):
                 py_bitness=DEFAULT_BITNESS, py_format='installer',
                 build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
-                exclude=None, pypi_wheel_reqs=None):
+                exclude=None, pypi_wheel_reqs=None, commands=None):
         self.appname = appname
         self.version = version
         self.shortcuts = shortcuts
@@ -97,6 +101,7 @@ class InstallerBuilder(object):
         self.exclude = [os.path.normpath(p) for p in (exclude or [])]
         self.extra_files = extra_files or []
         self.pypi_wheel_reqs = pypi_wheel_reqs or []
+        self.commands = commands or {}
 
         # Python options
         self.py_version = py_version
@@ -340,6 +345,16 @@ if __name__ == '__main__':
         copy_modules(self.packages, build_pkg_dir,
                      py_version=self.py_version, exclude=self.exclude)
 
+    def prepare_commands(self):
+        command_dir = Path(self.build_dir) / 'bin'
+        if command_dir.is_dir():
+            shutil.rmtree(str(command_dir))
+        command_dir.mkdir()
+        prepare_bin_directory(command_dir, self.commands, bitness=self.py_bitness)
+        self.install_dirs.append((command_dir.name, '$INSTDIR'))
+        self.extra_files.append((pjoin(_PKGDIR, '_system_path.py'), '$INSTDIR'))
+        self.extra_files.append((pjoin(_PKGDIR, '_rewrite_shebangs.py'), '$INSTDIR'))
+
     def copytree_ignore_callback(self, directory, files):
         """This is being called back by our shutil.copytree call to implement the
         'exclude' feature.
@@ -438,6 +453,9 @@ if __name__ == '__main__':
                 self.fetch_pylauncher()
         
         self.prepare_shortcuts()
+
+        if self.commands:
+            self.prepare_commands()
         
         # Packages
         self.prepare_packages()
@@ -478,6 +496,7 @@ def main(argv=None):
     try:
         cfg = configreader.read_and_validate(config_file)
         shortcuts = configreader.read_shortcuts_config(cfg)
+        commands = configreader.read_commands_config(cfg)
     except configreader.InvalidConfig as e:
         logger.error('Error parsing configuration file:')
         logger.error(str(e))
@@ -490,6 +509,7 @@ def main(argv=None):
             version = appcfg['version'],
             icon = appcfg.get('icon', DEFAULT_ICON),
             shortcuts = shortcuts,
+            commands=commands,
             packages = cfg.get('Include', 'packages', fallback='').splitlines(),
             pypi_wheel_reqs = cfg.get('Include', 'pypi_wheels', fallback='').splitlines(),
             extra_files = configreader.read_extra_files(cfg),
