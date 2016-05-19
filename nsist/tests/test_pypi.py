@@ -1,12 +1,18 @@
 from nose.tools import *
-from testpath import assert_isfile
+from os.path import join as pjoin
+from testpath import assert_isfile, assert_isdir
+from testpath.tempdir import TemporaryDirectory
 
-from nsist.pypi import WheelDownloader, CachedRelease
+from nsist.pypi import WheelDownloader, extract_wheel, CachedRelease
 
 def test_download():
     wd = WheelDownloader("astsearch==0.1.2", "3.5.1", 64)
     wheel = wd.fetch()
     assert_isfile(wheel)
+
+    with TemporaryDirectory() as td:
+        extract_wheel(wheel, target_dir=td)
+        assert_isfile(pjoin(td, 'astsearch.py'))
 
 # To exclude this, run:  nosetests -a '!network'
 test_download.network = 1
