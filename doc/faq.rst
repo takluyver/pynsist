@@ -83,6 +83,14 @@ And some disadvantages:
 * pynsist only makes Windows installers.
 
 Popular freeze tools also try to automatically detect what packages you're using.
-pynsist could do the same thing, but in my experience, it's complex and often
+Pynsist could do the same thing, but in my experience, this detection is complex and often
 misses things, so for now it expects an explicit list of the packages
 your application needs.
+
+Another alternative is `conda constructor https://github.com/conda/constructor`__,
+which builds an installer out of conda packages. Conda packages are more
+flexible than PyPI packages, and many libraries are already packaged, but you
+have to make a conda package of your own code as well before using conda
+constructor to make an installer.
+Conda constructor can also make Linux and Mac installers, but unlike Pynsist, it
+can't make a Windows installer from Linux or Mac.
