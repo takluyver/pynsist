@@ -1,6 +1,6 @@
 This example shows how to package a program that uses the PyGI-bindings of Gtk (or PyGObject). Python 3.4.3 64-bit will be used together with 64-bit dependencies.
 
-The example program conists of a window with a matplotlib-plot and a button that triggers the window to close.
+The example program consists of a window with a matplotlib-plot and a button that triggers the window to close.
 
 Requirements
 ------------
