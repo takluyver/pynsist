@@ -4,7 +4,7 @@ people who don't have Python installed.
 
 At present, pynsist requires Python 3.3 or above, or Python 2.7.
 
-For more information, see `the documentation <http://pynsist.readthedocs.org/en/latest/>`_
+For more information, see `the documentation <https://pynsist.readthedocs.io/en/latest/>`_
 and `the examples <https://github.com/takluyver/pynsist/tree/master/examples>`_.
 
 Quickstart
