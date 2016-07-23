@@ -83,6 +83,7 @@ class InstallerBuilder(object):
     :param list exclude: Paths of files to exclude that would otherwise be included
     :param str py_version: Full version of Python to bundle
     :param int py_bitness: Bitness of bundled Python (32 or 64)
+    :param str py_format: 'installer' or 'bundled'
     :param str build_dir: Directory to run the build in
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
@@ -415,7 +416,7 @@ if __name__ == '__main__':
         self.install_files.sort(key=operator.itemgetter(1))
         nsis_writer.write(self.nsi_file)
 
-        if self.nsi_template == 'pyapp_msvcrt.nsi':
+        if self.py_format == 'bundled':
             shutil.copy2(pjoin(_PKGDIR, 'windowsversion.nsh'), self.build_dir)
 
     def run_nsis(self):
