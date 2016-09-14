@@ -80,18 +80,9 @@ class WheelDownloader(object):
         return best
 
     def check_cache(self):
-        dist_dir = get_cache_dir() / 'pypi' / self.name
-        if not dist_dir.is_dir():
+        release_dir = get_cache_dir() / 'pypi' / self.name / self.version
+        if not release_dir.is_dir():
             return None
-
-        if self.version:
-            release_dir = dist_dir / self.version
-        else:
-            versions = [p.name for p in dist_dir.iterdir()]
-            if not versions:
-                return None
-            latest = max(versions, key=LooseVersion)
-            release_dir = dist_dir / latest
 
         rel = self.pick_best_wheel(CachedRelease(p.name)
                                    for p in release_dir.iterdir())
