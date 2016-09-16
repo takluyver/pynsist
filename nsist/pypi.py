@@ -28,7 +28,7 @@ class WheelDownloader(object):
         self.bitness = bitness
 
         if requirement.count('==') != 1:
-            raise ValueError("Requirement {!r} did not match name==version")
+            raise ValueError("Requirement {!r} did not match name==version".format(requirement))
         self.name, self.version = requirement.split('==', 1)
 
     def score_platform(self, platform):
