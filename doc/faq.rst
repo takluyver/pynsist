@@ -87,7 +87,7 @@ Pynsist could do the same thing, but in my experience, this detection is complex
 misses things, so for now it expects an explicit list of the packages
 your application needs.
 
-Another alternative is `conda constructor https://github.com/conda/constructor`__,
+Another alternative is `conda constructor <https://github.com/conda/constructor>`__,
 which builds an installer out of conda packages. Conda packages are more
 flexible than PyPI packages, and many libraries are already packaged, but you
 have to make a conda package of your own code as well before using conda
