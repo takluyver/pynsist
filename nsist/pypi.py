@@ -91,6 +91,8 @@ class WheelDownloader(object):
                                    for p in release_dir.iterdir())
         if rel is None:
             return None
+
+        logger.info('Using cached wheel: %s', rel.filename)
         return release_dir / rel.filename
 
     def fetch(self):
