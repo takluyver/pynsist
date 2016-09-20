@@ -1,9 +1,10 @@
 from nose.tools import *
 from os.path import join as pjoin
+from pathlib import Path
 from testpath import assert_isfile, assert_isdir
 from testpath.tempdir import TemporaryDirectory
 
-from nsist.pypi import WheelDownloader, extract_wheel, CachedRelease
+from nsist.pypi import WheelDownloader, extract_wheel, CachedRelease, merge_dir_to
 
 def test_download():
     wd = WheelDownloader("astsearch==0.1.2", "3.5.1", 64)
@@ -78,3 +79,33 @@ def test_pick_best_wheel():
         CachedRelease('astsearch-0.1.2-py2.py3-none-win_amd64.whl'),
     ]
     assert_equal(wd.pick_best_wheel(releases), releases[1])
+
+def test_merge_dir_to():
+    with TemporaryDirectory() as td1, TemporaryDirectory() as td2:
+        td1 = Path(td1)
+        td2 = Path(td2)
+        with (td1 / 'ab').open('w') as f:
+            f.write(u"original")
+        with (td2 / 'ab').open('w') as f:
+            f.write(u"alternate")
+
+        (td1 / 'subdir').mkdir()
+        with (td1 / 'subdir' / 'foo').open('w'): pass
+        (td2 / 'subdir').mkdir()
+        with (td2 / 'subdir' / 'bar').open('w'): pass
+
+        merge_dir_to(td2, td1)
+
+        assert_isfile(td1 / 'subdir' / 'foo')
+        assert_isfile(td1 / 'subdir' / 'bar')
+        with (td1 / 'ab').open() as f:
+            assert_equal(f.read(), u"alternate")
+
+        # Test with conflicts
+        (td1 / 'conflict').mkdir()
+        with (td2 / 'conflict').open('w'): pass
+
+        with assert_raises(RuntimeError):
+            merge_dir_to(td2, td1)
+        with assert_raises(RuntimeError):
+            merge_dir_to(td1, td2)
