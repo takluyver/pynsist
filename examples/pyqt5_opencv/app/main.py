@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.uic import loadUi
 
-from camera import CameraDevice
+from .camera import CameraDevice
 
 UI_PATH = os.path.dirname(os.path.abspath(__file__))
 
