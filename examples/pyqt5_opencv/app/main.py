@@ -21,12 +21,14 @@ class MainWindow(QMainWindow):
 
         self.thread = QThread()
 
-        self.camera = CameraDevice()
-        self.camera.frame_ready.connect(self.update_video_label)
-
-        self.ui.video.setMinimumSize(*self.camera.size)
-
-        self.camera.moveToThread(self.thread)
+        try:
+            self.camera = CameraDevice()
+        except ValueError:
+            self.ui.video.setText("Device not found!\n\nIs FFMPEG available?")
+        else:
+            self.camera.frame_ready.connect(self.update_video_label)
+            self.ui.video.setMinimumSize(*self.camera.size)
+            self.camera.moveToThread(self.thread)
 
     @pyqtSlot(QImage)
     def update_video_label(self, image):

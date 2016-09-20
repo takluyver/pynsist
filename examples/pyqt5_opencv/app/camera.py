@@ -12,10 +12,13 @@ class CameraDevice(QObject):
     def __init__(self, device_id=-1):
         super().__init__()
         self.capture = cv2.VideoCapture(device_id)
-
         self.timer = QTimer()
+
+        if not self.capture.isOpened():
+            raise ValueError("Device not found")
+
         self.timer.timeout.connect(self.read_frame)
-        self.timer.setInterval(1000/self.fps)
+        self.timer.setInterval(1000 / self.fps)
         self.timer.start()
 
     def __del__(self):
