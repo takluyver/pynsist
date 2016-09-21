@@ -54,6 +54,14 @@ Section "-msvcrt"
   # This WUSA exit code means a reboot is needed.
   ${If} $1 = 0x00240005
     SetRebootFlag true
+  ${Else}
+    IntOp $0 $1 & 0x80000000
+    ${If} $0 <> 0
+      MessageBox MB_OK "Failed to install important update! \
+            ${PRODUCT_NAME} will not run until you install the Visual C++ \
+            redistributable for Visual Studio 2015.\
+            $\n$\nhttp://www.microsoft.com/en-us/download/details.aspx?id=48145"
+    ${EndIf}
   ${EndIf}
 
   skip_msvcrt:

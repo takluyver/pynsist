@@ -12,6 +12,8 @@ Version 1.8
 * Installers using :ref:`bundled Python <python_bundled>` may need a Windows
   update package for the Microsoft C runtime. They now download this from the
   `RawGit <https://rawgit.com/>`__ CDN, rather than hitting GitHub directly.
+* If the Windows update package fails to install, an error message will be
+  displayed.
 
 Version 1.7
 -----------
