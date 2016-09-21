@@ -2,7 +2,10 @@ from distutils.version import LooseVersion
 import errno
 import hashlib
 import logging
+from pathlib import Path
 import re
+import shutil
+from tempfile import mkdtemp
 import zipfile
 
 import yarg
@@ -88,6 +91,8 @@ class WheelDownloader(object):
                                    for p in release_dir.iterdir())
         if rel is None:
             return None
+
+        logger.info('Using cached wheel: %s', rel.filename)
         return release_dir / rel.filename
 
     def fetch(self):
@@ -129,13 +134,65 @@ class CachedRelease(object):
         self.filename = filename
         self.package_type = 'wheel' if filename.endswith('.whl') else ''
 
+def merge_dir_to(src, dst):
+    """Merge all files from one directory into another.
+
+    Subdirectories will be merged recursively. If filenames are the same, those
+    from src will overwrite those in dst. If a regular file clashes with a
+    directory, an error will occur.
+    """
+    for p in src.iterdir():
+        if p.is_dir():
+            dst_p = dst / p.name
+            if dst_p.is_dir():
+                merge_dir_to(p, dst_p)
+            elif dst_p.is_file():
+                raise RuntimeError('Directory {} clashes with file {}'
+                                   .format(p, dst_p))
+            else:
+                shutil.copytree(str(p), str(dst_p))
+        else:
+            # Copy regular file
+            dst_p = dst / p.name
+            if dst_p.is_dir():
+                raise RuntimeError('File {} clashes with directory {}'
+                                   .format(p, dst_p))
+            shutil.copy2(str(p), str(dst_p))
+
 def extract_wheel(whl_file, target_dir):
+    """Extract importable modules from a wheel to the target directory
+    """
+    # Extract to temporary directory
+    td = Path(mkdtemp())
     with zipfile.ZipFile(str(whl_file), mode='r') as zf:
-        names = zf.namelist()
-        # TODO: Do anything with data and dist-info folders?
-        pkg_files = [n for n in names \
-                     if not n.split('/')[0].endswith(('.data', '.dist-info'))]
-        zf.extractall(target_dir, members=pkg_files)
+        zf.extractall(str(td))
+
+    # Move extra lib files out of the .data subdirectory
+    for p in td.iterdir():
+        if p.suffix == '.data':
+            if (p / 'purelib').is_dir():
+                merge_dir_to(p / 'purelib', td)
+            if (p / 'platlib').is_dir():
+                merge_dir_to(p / 'platlib', td)
+
+    # Copy to target directory
+    target = Path(target_dir)
+    copied_something = False
+    for p in td.iterdir():
+        if p.suffix not in {'.data', '.dist-info'}:
+            if p.is_dir():
+                shutil.copytree(str(p), str(target / p.name))
+            else:
+                shutil.copy2(str(p), str(target))
+            copied_something = True
+
+    if not copied_something:
+        raise RuntimeError("Did not find any files to extract from wheel {}"
+                           .format(whl_file))
+
+    # Clean up temporary directory
+    shutil.rmtree(str(td))
+
 
 def fetch_pypi_wheels(requirements, target_dir, py_version, bitness):
     for req in requirements:
