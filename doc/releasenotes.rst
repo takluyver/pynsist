@@ -1,6 +1,23 @@
 Release notes
 =============
 
+Version 1.8
+-----------
+
+* New example applications using:
+  - PyQt5 with QML
+  - `Pywebview <https://github.com/r0x0r/pywebview>`__
+* The code to pick an appropriate wheel now considers wheels with Python version
+  specific ABI tags like ``cp35m``, as well as the stable ABI tags like ``abi3``.
+* Fixed a bug with fetching a wheel when another version of the same package
+  is already cached.
+* Fixed a bug in extracting files from certain wheels.
+* Installers using :ref:`bundled Python <python_bundled>` may need a Windows
+  update package for the Microsoft C runtime. They now download this from the
+  `RawGit <https://rawgit.com/>`__ CDN, rather than hitting GitHub directly.
+* If the Windows update package fails to install, an error message will be
+  displayed.
+
 Version 1.7
 -----------
 
