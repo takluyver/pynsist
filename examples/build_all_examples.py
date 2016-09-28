@@ -9,6 +9,7 @@ example_cfgs = [
     'pygtk/installer.cfg',
     'pygtk_mpl_numpy/installer.cfg',
     'pygi_mpl_numpy/installer.cfg',
+    'pyqt5_opencv/installer.cfg',
 ]
 
 examples_dir = os.path.dirname(os.path.abspath(__file__))
