@@ -18,7 +18,7 @@ class CameraDevice(QObject):
             raise ValueError("Device not found")
 
         self.timer.timeout.connect(self.read_frame)
-        self.timer.setInterval(1000 / self.fps)
+        self.timer.setInterval(1000/self.fps)
         self.timer.start()
 
     def __del__(self):
@@ -28,7 +28,7 @@ class CameraDevice(QObject):
     @property
     def fps(self):
         """Frames per second."""
-        return self.capture.get(cv2.CAP_PROP_FPS)
+        return int(self.capture.get(cv2.CAP_PROP_FPS))
 
     @property
     def size(self):
