@@ -10,14 +10,14 @@ from PyQt5.uic import loadUi
 
 from .camera import CameraDevice
 
-UI_PATH = os.path.dirname(os.path.abspath(__file__))
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.ui = loadUi(os.path.join(UI_PATH, 'mainwindow.ui'), self)
+        self.ui = loadUi(os.path.join(THIS_DIR, 'mainwindow.ui'), self)
 
         self.thread = QThread()
 
