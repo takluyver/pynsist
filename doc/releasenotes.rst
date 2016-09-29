@@ -6,6 +6,7 @@ Version 1.8
 
 * New example applications using:
   - PyQt5 with QML
+  - OpenCV and PyQt5
   - `Pywebview <https://github.com/r0x0r/pywebview>`__
 * The code to pick an appropriate wheel now considers wheels with Python version
   specific ABI tags like ``cp35m``, as well as the stable ABI tags like ``abi3``.
