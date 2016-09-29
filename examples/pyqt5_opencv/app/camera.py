@@ -9,7 +9,7 @@ class CameraDevice(QObject):
 
     frame_ready = pyqtSignal(QImage)
 
-    def __init__(self, device_id=-1):
+    def __init__(self, device_id=0):
         super().__init__()
         self.capture = cv2.VideoCapture(device_id)
         self.timer = QTimer()
