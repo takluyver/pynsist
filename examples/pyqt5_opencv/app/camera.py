@@ -18,7 +18,7 @@ class CameraDevice(QObject):
             raise ValueError("Device not found")
 
         self.timer.timeout.connect(self.read_frame)
-        self.timer.setInterval(1000/self.fps)
+        self.timer.setInterval(1000 / (self.fps or 30))
         self.timer.start()
 
     def __del__(self):
