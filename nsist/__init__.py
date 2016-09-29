@@ -30,7 +30,7 @@ from .nsiswriter import NSISFileWriter
 from .pypi import fetch_pypi_wheels
 from .util import download, text_types, get_cache_dir
 
-__version__ = '1.7'
+__version__ = '1.8'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
