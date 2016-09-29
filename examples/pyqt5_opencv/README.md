@@ -9,6 +9,3 @@ The application requires some sort of camera to display.
 
 - FFMPEG
 - Visual C++ Redistributable for Visual Studio 2015
-
-#### TODO
-- [ ] Test future `opencv-python` package release
