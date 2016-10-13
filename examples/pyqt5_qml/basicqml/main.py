@@ -19,7 +19,8 @@ class JSManager(QtCore.QObject):
         threading.Thread(target=go).start()
 
 
-app = QtGui.QGuiApplication(sys.argv)
-QtQml.qmlRegisterType(JSManager, 'JSManager', 1, 0, 'JSManager')
-engine = QtQml.QQmlApplicationEngine(os.path.join(THIS_DIR, "main.qml"))
-app.exec_()
+def main():
+    app = QtGui.QGuiApplication(sys.argv)
+    QtQml.qmlRegisterType(JSManager, 'JSManager', 1, 0, 'JSManager')
+    engine = QtQml.QQmlApplicationEngine(os.path.join(THIS_DIR, "main.qml"))
+    app.exec_()
