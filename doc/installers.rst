@@ -38,6 +38,12 @@ You can override this by setting :func:`sys.excepthook`.
 
 This is only provided if you specify your application using ``entry_point``.
 
+You can also debug an installed application by using the installed Python to
+launch the application. This will show tracebacks in the Command Prompt.
+In the installation directory run::
+
+       C:\\Program Files\\Application>Python\\python.exe "Application.launch.pyw"
+
 Working directory
 -----------------
 
