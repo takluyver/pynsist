@@ -18,7 +18,7 @@ Section "-msvcrt"
     ${ElseIf} $R0 == "7"
       StrCpy $0 "https://cdn.rawgit.com/takluyver/pynsist/msvcrt-tag1/x64/Windows6.1-KB2999226-x64.msu"
     ${ElseIf} $R0 == "Vista"
-      StrCpy $0 "https://cdn.rawgit.com/takluyver/pynsist/msvcrt-tag1/x64/Windows6-KB2999226-x64.msu"
+      StrCpy $0 "https://cdn.rawgit.com/takluyver/pynsist/msvcrt-tag1/x64/Windows6.0-KB2999226-x64.msu"
     ${EndIf}
   ${Else}
     ${If} $R0 == "8.1"
@@ -28,7 +28,7 @@ Section "-msvcrt"
     ${ElseIf} $R0 == "7"
       StrCpy $0 "https://cdn.rawgit.com/takluyver/pynsist/msvcrt-tag1/x86/Windows6.1-KB2999226-x86.msu"
     ${ElseIf} $R0 == "Vista"
-      StrCpy $0 "https://cdn.rawgit.com/takluyver/pynsist/msvcrt-tag1/x86/Windows6-KB2999226-x86.msu"
+      StrCpy $0 "https://cdn.rawgit.com/takluyver/pynsist/msvcrt-tag1/x86/Windows6.0-KB2999226-x86.msu"
     ${EndIf}
   ${EndIf}
 
