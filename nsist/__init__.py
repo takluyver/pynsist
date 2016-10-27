@@ -437,9 +437,6 @@ if __name__ == '__main__':
         self.install_files.sort(key=operator.itemgetter(1))
         nsis_writer.write(self.nsi_file)
 
-        if self.py_format == 'bundled':
-            shutil.copy2(pjoin(_PKGDIR, 'windowsversion.nsh'), self.build_dir)
-
     def run_nsis(self):
         """Runs makensis using the specified .nsi file
         
