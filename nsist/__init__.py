@@ -141,6 +141,7 @@ class InstallerBuilder(object):
         # To be filled later
         self.install_files = []
         self.install_dirs = []
+        self.msvcrt_files = []
     
     _py_version_pattern = re.compile(r'\d\.\d+\.\d+$')
 
@@ -211,6 +212,20 @@ class InstallerBuilder(object):
             z.extractall(python_dir)
 
         self.install_dirs.append(('Python', '$INSTDIR'))
+
+    def prepare_msvcrt(self):
+        arch = 'x64' if self.py_bitness == 64 else 'x86'
+        src = pjoin(_PKGDIR, 'msvcrt', arch)
+        dst = pjoin(self.build_dir, 'msvcrt')
+        self.msvcrt_files = sorted(os.listdir(src))
+
+        try:
+            shutil.rmtree(dst)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+        shutil.copytree(src, dst)
 
     def fetch_pylauncher(self):
         """Fetch the MSI for PyLauncher (required for Python2.x).
@@ -448,6 +463,7 @@ if __name__ == '__main__':
 
         if self.py_format == 'bundled':
             self.fetch_python_embeddable()
+            self.prepare_msvcrt()
         else:
             self.fetch_python()
             if self.py_version < '3.3':
