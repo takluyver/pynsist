@@ -1,6 +1,16 @@
 Release notes
 =============
 
+Version 1.9
+-----------
+
+* The C Runtime needed for bundled Python is now installed 'app-local', rather
+  than downloading and installing Windows Update packages at install time. This
+  is considerably simpler, but the app-local runtime will not be updated by
+  Windows Update. A new ``include_msvcrt`` config option allows the developer to
+  exclude the app-local runtime - their applications will then depend on the
+  runtime being installed systemwide.
+
 Version 1.8
 -----------
 
