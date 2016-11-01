@@ -84,6 +84,8 @@ class InstallerBuilder(object):
     :param str py_version: Full version of Python to bundle
     :param int py_bitness: Bitness of bundled Python (32 or 64)
     :param str py_format: 'installer' or 'bundled'
+    :param bool inc_msvcrt: True to include the Microsoft C runtime with 'bundled'
+            Python. Ignored when py_format='installer'.
     :param str build_dir: Directory to run the build in
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
@@ -91,7 +93,7 @@ class InstallerBuilder(object):
     def __init__(self, appname, version, shortcuts, icon=DEFAULT_ICON,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
                 py_bitness=DEFAULT_BITNESS, py_format='installer',
-                build_dir=DEFAULT_BUILD_DIR,
+                inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None, pypi_wheel_reqs=None, commands=None):
         self.appname = appname
@@ -123,6 +125,7 @@ class InstallerBuilder(object):
         else:
             if py_format != 'installer':
                 raise InputError('py_format', py_format, "installer (for Python < 3.5)")
+        self.inc_msvcrt = inc_msvcrt
 
         # Build details
         self.build_dir = build_dir
@@ -130,7 +133,10 @@ class InstallerBuilder(object):
         self.nsi_template = nsi_template
         if self.nsi_template is None:
             if self.py_format == 'bundled':
-                self.nsi_template = 'pyapp_msvcrt.nsi'
+                if self.inc_msvcrt:
+                    self.nsi_template = 'pyapp_msvcrt.nsi'
+                else:
+                    self.nsi_template = 'pyapp.nsi'
             elif self.py_version_tuple < (3, 3):
                 self.nsi_template = 'pyapp_w_pylauncher.nsi'
             else:
@@ -141,6 +147,7 @@ class InstallerBuilder(object):
         # To be filled later
         self.install_files = []
         self.install_dirs = []
+        self.msvcrt_files = []
     
     _py_version_pattern = re.compile(r'\d\.\d+\.\d+$')
 
@@ -211,6 +218,20 @@ class InstallerBuilder(object):
             z.extractall(python_dir)
 
         self.install_dirs.append(('Python', '$INSTDIR'))
+
+    def prepare_msvcrt(self):
+        arch = 'x64' if self.py_bitness == 64 else 'x86'
+        src = pjoin(_PKGDIR, 'msvcrt', arch)
+        dst = pjoin(self.build_dir, 'msvcrt')
+        self.msvcrt_files = sorted(os.listdir(src))
+
+        try:
+            shutil.rmtree(dst)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+
+        shutil.copytree(src, dst)
 
     def fetch_pylauncher(self):
         """Fetch the MSI for PyLauncher (required for Python2.x).
@@ -416,9 +437,6 @@ if __name__ == '__main__':
         self.install_files.sort(key=operator.itemgetter(1))
         nsis_writer.write(self.nsi_file)
 
-        if self.py_format == 'bundled':
-            shutil.copy2(pjoin(_PKGDIR, 'windowsversion.nsh'), self.build_dir)
-
     def run_nsis(self):
         """Runs makensis using the specified .nsi file
         
@@ -448,6 +466,8 @@ if __name__ == '__main__':
 
         if self.py_format == 'bundled':
             self.fetch_python_embeddable()
+            if self.inc_msvcrt:
+                self.prepare_msvcrt()
         else:
             self.fetch_python()
             if self.py_version < '3.3':
@@ -517,6 +537,7 @@ def main(argv=None):
             py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
             py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
             py_format = cfg.get('Python', 'format', fallback='installer'),
+            inc_msvcrt = cfg.getboolean('Python', 'include_msvcrt', fallback=True),
             build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
             installer_name = cfg.get('Build', 'installer_name', fallback=None),
             nsi_template = cfg.get('Build', 'nsi_template', fallback=None),

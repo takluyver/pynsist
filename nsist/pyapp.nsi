@@ -46,7 +46,8 @@ Section "!${PRODUCT_NAME}" sec_app
   SetOutPath "$INSTDIR\pkgs"
   File /r "pkgs\*.*"
   SetOutPath "$INSTDIR"
-  
+
+  [% block install_files %]
   ; Install files
   [% for destination, group in grouped_files %]
     SetOutPath "[[destination]]"
@@ -60,6 +61,7 @@ Section "!${PRODUCT_NAME}" sec_app
     SetOutPath "[[ pjoin(destination, dir) ]]"
     File /r "[[dir]]\*.*"
   [% endfor %]
+  [% endblock install_files %]
   
   [% block install_shortcuts %]
   ; Install shortcuts
@@ -127,6 +129,7 @@ Section "Uninstall"
   [% endif %]
   [% endblock uninstall_commands %]
 
+  [% block uninstall_files %]
   ; Uninstall files
   [% for file, destination in ib.install_files %]
     Delete "[[pjoin(destination, file)]]"
@@ -135,6 +138,8 @@ Section "Uninstall"
   [% for dir, destination in ib.install_dirs %]
     RMDir /r "[[pjoin(destination, dir)]]"
   [% endfor %]
+  [% endblock uninstall_files %]
+
   [% block uninstall_shortcuts %]
   ; Uninstall shortcuts
   [% if single_shortcut %]

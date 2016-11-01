@@ -77,6 +77,7 @@ CONFIG_VALIDATORS = {
         ('version', False),
         ('bitness', False),
         ('format', False),
+        ('include_msvcrt', False),
     ]),
     'Shortcut': SectionValidator([
         ('entry_point', False),

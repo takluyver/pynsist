@@ -152,13 +152,32 @@ Python section
   - ``bundled`` includes an embeddable Python build, which will be installed as
     part of your application. This is available for Python 3.5 and above.
 
+.. describe:: include_msvcrt (optional)
+
+  This option is only relevant with ``format = bundled``. The default is ``true``,
+  which will include an app-local copy of the Microsoft Visual C++ Runtime,
+  required for Python to run. The installer will only install this if it doesn't
+  detect a system installation of the runtime.
+
+  Setting this to ``false`` will not include the C++ Runtime. Your application may
+  not run for all users until they install it manually (`download from Microsoft
+  <https://www.microsoft.com/en-us/download/details.aspx?id=48145>`__). You may
+  prefer to do this for security reasons: the separately installed runtime will
+  get updates through Windows Update, but app-local copies will not.
+
+  Users on Windows 10 should already have the runtime installed systemwide, so
+  this does won't affect them. Users on Windows Vista, 7, 8 or 8.1 *may* already
+  have it, depending on what else is installed.
+
+  .. versionadded:: 1.9
+
 .. _python_bundled:
 
 Bundled Python
 ~~~~~~~~~~~~~~
 
 .. versionadded:: 1.6
-   Experimental support for bundling Python into the application.
+   Support for bundling Python into the application.
 
 Using ``format = bundled``, an embeddable Python build will be downloaded at
 build time and packaged along with the application. When the installer runs, it
@@ -172,9 +191,8 @@ limitations:
 - This option is only available for Python 3.5 and above. These versions of
   Python have dropped support for Windows XP, so your application will only work
   on Windows Vista and newer.
-- Installing in Windows Vista to 8.1 (inclusive) may need an internet connection
-  to download the necessary `Visual C++ runtime
-  <http://www.microsoft.com/en-us/download/details.aspx?id=48145>`__. This isn't
+- Installing in Windows Vista to 8.1 (inclusive) may install an app-local copy
+  of the Visual C++ runtime (see above). This isn't
   needed on Windows 10, which includes the necessary files.
 - The embeddable Python builds don't include ``tkinter``, to save space.
   Applications with a tkinter GUI can't easily use bundled Python. Workarounds
