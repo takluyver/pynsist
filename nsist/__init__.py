@@ -83,7 +83,8 @@ class InstallerBuilder(object):
     :param list exclude: Paths of files to exclude that would otherwise be included
     :param str py_version: Full version of Python to bundle
     :param int py_bitness: Bitness of bundled Python (32 or 64)
-    :param str py_format: 'installer' or 'bundled'
+    :param str py_format: 'installer' or 'bundled'. Default 'bundled' for Python
+            >= 3.6, 'installer' for older versions.
     :param bool inc_msvcrt: True to include the Microsoft C runtime with 'bundled'
             Python. Ignored when py_format='installer'.
     :param str build_dir: Directory to run the build in
@@ -92,7 +93,7 @@ class InstallerBuilder(object):
     """
     def __init__(self, appname, version, shortcuts, icon=DEFAULT_ICON,
                 packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
-                py_bitness=DEFAULT_BITNESS, py_format='installer',
+                py_bitness=DEFAULT_BITNESS, py_format=None,
                 inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None, pypi_wheel_reqs=None, commands=None):
@@ -118,13 +119,19 @@ class InstallerBuilder(object):
         self.py_major_version = self.py_qualifier = '.'.join(self.py_version.split('.')[:2])
         if self.py_bitness == 32:
             self.py_qualifier += '-32'
-        self.py_format = py_format
-        if self.py_version_tuple >= (3, 5):
-            if py_format not in {'installer', 'bundled'}:
-                raise InputError('py_format', py_format, "installer or bundled")
+
+        if py_format is not None:
+            self.py_format = py_format
+        elif self.py_version_tuple >= (3, 6):
+            self.py_format = 'bundled'
         else:
-            if py_format != 'installer':
-                raise InputError('py_format', py_format, "installer (for Python < 3.5)")
+            self.py_format = 'installer'
+        if self.py_version_tuple >= (3, 5):
+            if self.py_format not in {'installer', 'bundled'}:
+                raise InputError('py_format', self.py_format, "installer or bundled")
+        else:
+            if self.py_format != 'installer':
+                raise InputError('py_format', self.py_format, "installer (for Python < 3.5)")
         self.inc_msvcrt = inc_msvcrt
 
         # Build details
@@ -536,7 +543,7 @@ def main(argv=None):
             extra_files = configreader.read_extra_files(cfg),
             py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
             py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
-            py_format = cfg.get('Python', 'format', fallback='installer'),
+            py_format = cfg.get('Python', 'format', fallback=None),
             inc_msvcrt = cfg.getboolean('Python', 'include_msvcrt', fallback=True),
             build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
             installer_name = cfg.get('Build', 'installer_name', fallback=None),

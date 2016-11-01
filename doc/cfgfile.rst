@@ -148,9 +148,14 @@ Python section
 
   - ``installer`` includes a copy of the Python MSI installer in your application
     and runs it at install time, setting up Python systemwide. This is the
-    default for now.
+    default for Python up to 3.5.
   - ``bundled`` includes an embeddable Python build, which will be installed as
-    part of your application. This is available for Python 3.5 and above.
+    part of your application. This is available for Python 3.5 and above, and is
+    the default for Python 3.6 and above.
+
+  .. versionchanged:: 1.9
+
+     The default switched to ``bundled`` for Python 3.6 and above.
 
 .. describe:: include_msvcrt (optional)
 

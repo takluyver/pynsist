@@ -4,6 +4,10 @@ Release notes
 Version 1.9
 -----------
 
+* When building an installer with Python 3.6 or above, :ref:`bundled Python
+  <python_bundled>` is now the default. For Python up to 3.5, 'installer' remains
+  the default format. You can override the default by specifying ``format`` in
+  the :ref:`cfg_python` of the config file.
 * The C Runtime needed for bundled Python is now installed 'app-local', rather
   than downloading and installing Windows Update packages at install time. This
   is considerably simpler, but the app-local runtime will not be updated by
