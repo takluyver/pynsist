@@ -17,6 +17,10 @@ Application section
 
   The version number of your application.
 
+.. describe:: publisher (optional)
+
+  The publisher name that shows up in the *Add or Remove programs* control panel.
+
 .. describe:: entry_point
 
    The function to launch your application, in the format ``module:function``.
