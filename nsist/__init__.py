@@ -91,14 +91,15 @@ class InstallerBuilder(object):
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
     """
-    def __init__(self, appname, version, shortcuts, icon=DEFAULT_ICON,
-                packages=None, extra_files=None, py_version=DEFAULT_PY_VERSION,
-                py_bitness=DEFAULT_BITNESS, py_format=None,
-                inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
+    def __init__(self, appname, version, shortcuts, publisher=None,
+                icon=DEFAULT_ICON, packages=None, extra_files=None,
+                py_version=DEFAULT_PY_VERSION, py_bitness=DEFAULT_BITNESS,
+                py_format=None, inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None, pypi_wheel_reqs=None, commands=None):
         self.appname = appname
         self.version = version
+        self.publisher = publisher
         self.shortcuts = shortcuts
         self.icon = icon
         self.packages = packages or []
@@ -535,6 +536,7 @@ def main(argv=None):
         InstallerBuilder(
             appname = appcfg['name'],
             version = appcfg['version'],
+            publisher = appcfg.get('publisher', None),
             icon = appcfg.get('icon', DEFAULT_ICON),
             shortcuts = shortcuts,
             commands=commands,
