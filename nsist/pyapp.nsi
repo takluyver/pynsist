@@ -6,10 +6,21 @@
 !define ARCH_TAG "[[arch_tag]]"
 !define INSTALLER_NAME "[[ib.installer_name]]"
 !define PRODUCT_ICON "[[icon]]"
+
+; Marker file to tell the uninstaller that it's a user installation
+!define USER_INSTALL_MARKER _user_install_marker
  
 SetCompressor lzma
 
-RequestExecutionLevel admin
+!define MULTIUSER_EXECUTIONLEVEL Highest
+!define MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER
+!define MULTIUSER_MUI
+!define MULTIUSER_INSTALLMODE_COMMANDLINE
+!define MULTIUSER_INSTALLMODE_INSTDIR "[[ib.appname]]"
+[% if ib.py_bitness == 64 %]
+!define MULTIUSER_INSTALLMODE_FUNCTION correct_prog_files
+[% endif %]
+!include MultiUser.nsh
 
 [% block modernui %]
 ; Modern UI installer stuff 
@@ -20,6 +31,7 @@ RequestExecutionLevel admin
 ; UI pages
 [% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
+!insertmacro MULTIUSER_PAGE_INSTALLMODE
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -29,7 +41,6 @@ RequestExecutionLevel admin
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${INSTALLER_NAME}"
-InstallDir "$PROGRAMFILES${BITNESS}\${PRODUCT_NAME}"
 ShowInstDetails show
 
 Section -SETTINGS
@@ -41,11 +52,16 @@ SectionEnd
 
 Section "!${PRODUCT_NAME}" sec_app
   SectionIn RO
-  SetShellVarContext all
   File ${PRODUCT_ICON}
   SetOutPath "$INSTDIR\pkgs"
   File /r "pkgs\*.*"
   SetOutPath "$INSTDIR"
+
+  ; Marker file for per-user install
+  StrCmp $MultiUser.InstallMode CurrentUser 0 +3
+    FileOpen $0 "$INSTDIR\${USER_INSTALL_MARKER}" w
+    FileClose $0
+    SetFileAttributes "$INSTDIR\${USER_INSTALL_MARKER}" HIDDEN
 
   [% block install_files %]
   ; Install files
@@ -124,6 +140,10 @@ SectionEnd
 
 Section "Uninstall"
   SetShellVarContext all
+  IfFileExists "$INSTDIR\${USER_INSTALL_MARKER}" 0 +3
+    SetShellVarContext current
+    Delete "$INSTDIR\${USER_INSTALL_MARKER}"
+
   Delete $INSTDIR\uninstall.exe
   Delete "$INSTDIR\${PRODUCT_ICON}"
   RMDir /r "$INSTDIR\pkgs"
@@ -175,3 +195,20 @@ Function .onMouseOverSection
     
     [% endblock mouseover_messages %]
 FunctionEnd
+
+Function .onInit
+  !insertmacro MULTIUSER_INIT
+FunctionEnd
+
+Function un.onInit
+  !insertmacro MULTIUSER_UNINIT
+FunctionEnd
+
+[% if ib.py_bitness == 64 %]
+Function correct_prog_files
+  ; The multiuser machinery doesn't know about the different Program files
+  ; folder for 64-bit applications. Override the install dir it set.
+  StrCmp $MultiUser.InstallMode AllUsers 0 +2
+    StrCpy $INSTDIR "$PROGRAMFILES64\${MULTIUSER_INSTALLMODE_INSTDIR}"
+FunctionEnd
+[% endif %]
