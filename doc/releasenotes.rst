@@ -1,6 +1,13 @@
 Release notes
 =============
 
+Version 1.10
+------------
+
+* New optional field ``publisher``, to provide a publisher name in the uninstall
+  list.
+* The uninstall information in the registry now also includes ``DisplayVersion``.
+
 Version 1.9
 -----------
 

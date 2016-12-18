@@ -21,6 +21,8 @@ Application section
 
   The publisher name that shows up in the *Add or Remove programs* control panel.
 
+  .. versionadded:: 1.10
+
 .. describe:: entry_point
 
    The function to launch your application, in the format ``module:function``.
