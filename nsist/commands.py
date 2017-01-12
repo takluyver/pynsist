@@ -10,6 +10,7 @@ installdir = os.path.dirname(os.path.dirname(__file__))
 pkgdir = os.path.join(installdir, 'pkgs')
 sys.path.insert(0, pkgdir)
 os.environ['PYTHONPATH'] = pkgdir + os.pathsep + os.environ.get('PYTHONPATH', '')
+os.chdir(os.path.join(installdir, 'Python'))
 
 {extra_preamble}
 
