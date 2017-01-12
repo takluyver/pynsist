@@ -105,6 +105,11 @@ shortcuts by defining sections titled :samp:`Shortcut {Name}`. For example:
 
    These options all work the same way as in the Application section.
 
+Microsoft offers guidance on `what shortcuts to include in the Start screen/menu
+<https://msdn.microsoft.com/en-us/library/windows/desktop/jj673981(v=vs.85).aspx#decide_the_right_entry_points_to_include_in_the_start_screen>`__.
+Most applications should only need one shortcut, and things like help and
+settings should be accessed inside the app rather than as separate shortcuts.
+
 
 .. _command_config:
 
