@@ -11,6 +11,9 @@ pkgdir = os.path.join(installdir, 'pkgs')
 sys.path.insert(0, pkgdir)
 os.environ['PYTHONPATH'] = pkgdir + os.pathsep + os.environ.get('PYTHONPATH', '')
 
+# Allowing .dll files in Python directory to be found
+os.environ['PATH'] += ';' + os.path.dirname(sys.executable)
+
 {extra_preamble}
 
 if __name__ == '__main__':
