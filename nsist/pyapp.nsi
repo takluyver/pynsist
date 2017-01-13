@@ -67,19 +67,15 @@ Section "!${PRODUCT_NAME}" sec_app
   ; Install shortcuts
   ; The output path becomes the working directory for shortcuts
   SetOutPath "%HOMEDRIVE%\%HOMEPATH%"
-  [% if single_shortcut %]
-    [% for scname, sc in ib.shortcuts.items() %]
-    CreateShortCut "$SMPROGRAMS\[[scname]].lnk" "[[sc['target'] ]]" \
-      '[[ sc['parameters'] ]]' "$INSTDIR\[[ sc['icon'] ]]"
-    [% endfor %]
-  [% else %]
-    [# Multiple shortcuts: create a directory for them #]
-    CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
-    [% for scname, sc in ib.shortcuts.items() %]
-    CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\[[scname]].lnk" "[[sc['target'] ]]" \
-      '[[ sc['parameters'] ]]' "$INSTDIR\[[ sc['icon'] ]]"
-    [% endfor %]
-  [% endif %]
+  CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
+  [% for scname, sc in ib.shortcuts.items() %]
+  SearchPath $0 "[[sc['target'] ]].exe"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\[[scname]].lnk" $0 \
+    '[[ sc['parameters'] ]]' "$INSTDIR\[[ sc['icon'] ]]"
+  [% endfor %]
+  ; Create shortcut to uninstaller
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall ${PRODUCT_NAME}.lnk" \
+    "$INSTDIR\uninstall.exe"
   SetOutPath "$INSTDIR"
   [% endblock install_shortcuts %]
 
@@ -123,8 +119,11 @@ Section "!${PRODUCT_NAME}" sec_app
 SectionEnd
 
 Section "Uninstall"
+  # Ask the user whether they really wish to uninstall - last chance to back out
+  MessageBox MB_OKCANCEL "Uninstall ${PRODUCT_NAME}.  Are you sure?" IDOK Ok
+    Abort
+  Ok:
   SetShellVarContext all
-  Delete $INSTDIR\uninstall.exe
   Delete "$INSTDIR\${PRODUCT_ICON}"
   RMDir /r "$INSTDIR\pkgs"
 
@@ -148,14 +147,10 @@ Section "Uninstall"
 
   [% block uninstall_shortcuts %]
   ; Uninstall shortcuts
-  [% if single_shortcut %]
-    [% for scname in ib.shortcuts %]
-      Delete "$SMPROGRAMS\[[scname]].lnk"
-    [% endfor %]
-  [% else %]
-    RMDir /r "$SMPROGRAMS\${PRODUCT_NAME}"
-  [% endif %]
+  RMDir /r "$SMPROGRAMS\${PRODUCT_NAME}"
+  ; Uninstall the uninstaller
   [% endblock uninstall_shortcuts %]
+  Delete $INSTDIR\uninstall.exe
   RMDir $INSTDIR
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 SectionEnd
