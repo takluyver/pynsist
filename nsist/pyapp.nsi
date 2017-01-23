@@ -40,6 +40,7 @@ SectionEnd
 [% block sections %]
 
 Section "!${PRODUCT_NAME}" sec_app
+  SetRegView [[ib.py_bitness]]
   SectionIn RO
   SetShellVarContext all
   File ${PRODUCT_ICON}
@@ -123,6 +124,7 @@ Section "!${PRODUCT_NAME}" sec_app
 SectionEnd
 
 Section "Uninstall"
+  SetRegView [[ib.py_bitness]]
   SetShellVarContext all
   Delete $INSTDIR\uninstall.exe
   Delete "$INSTDIR\${PRODUCT_ICON}"
