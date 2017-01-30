@@ -181,7 +181,10 @@ def extract_wheel(whl_file, target_dir):
     for p in td.iterdir():
         if p.suffix not in {'.data', '.dist-info'}:
             if p.is_dir():
-                shutil.copytree(str(p), str(target / p.name))
+                # If the dst directory already exists, this will combine them.
+                # shutil.copytree will not combine them.
+                target.joinpath(p.name).mkdir(exist_ok = True)
+                merge_dir_to(p, target / p.name)
             else:
                 shutil.copy2(str(p), str(target))
             copied_something = True
