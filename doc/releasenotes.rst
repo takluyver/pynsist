@@ -7,6 +7,13 @@ Version 1.10
 * New optional field ``publisher``, to provide a publisher name in the uninstall
   list.
 * The uninstall information in the registry now also includes ``DisplayVersion``.
+* The directory containing ``python.exe`` is now added to the ``%PATH%``
+  environment variable when your application runs. This fixes a DLL loading
+  issue for PyQt5 if you use bundled Python.
+* When installing a 64-bit application, the uninstall registry keys are now
+  added to the 64-bit view of the registry.
+* Fixed an error when using wheels which install files into the same package,
+  such as ``PyQt5`` and ``PyQtCharts``.
 
 Version 1.9
 -----------
