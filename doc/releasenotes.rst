@@ -13,7 +13,7 @@ Version 1.10
 * When installing a 64-bit application, the uninstall registry keys are now
   added to the 64-bit view of the registry.
 * Fixed an error when using wheels which install files into the same package,
-  such as ``PyQt5`` and ``PyQtCharts``.
+  such as ``PyQt5`` and ``PyQtChart``.
 
 Version 1.9
 -----------
