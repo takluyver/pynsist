@@ -297,6 +297,8 @@ the line with the key:
        exclude=pkgs/PySide/examples
          data_dir/ignoredfile
 
+.. _build_config:
+
 Build section
 -------------
 
