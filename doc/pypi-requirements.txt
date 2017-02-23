@@ -1,2 +1,5 @@
 jinja2
 requests
+win_cli_launchers
+yarg
+requests_download
