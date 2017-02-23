@@ -1,8 +1,11 @@
 import os
 import errno
+import logging
 from pathlib import Path
 import requests
 import sys
+
+logger = logging.getLogger(__name__)
 
 PY3 = sys.version_info[0] >= 3
 
@@ -43,6 +46,10 @@ def get_cache_dir(ensure_existence=False):
     else:
         # Windows (hopefully)
         local = os.environ.get('LOCALAPPDATA', None) or (os.path.expanduser('~\\AppData\\Local'))
+        if local.startswith('~'):
+            logger.warning("Could not find cache directory. Please set any of "
+                           "these environment variables: "
+                           "LOCALAPPDATA, HOME, USERPROFILE or HOMEPATH")
         p = Path(local, 'pynsist')
 
     if ensure_existence:
