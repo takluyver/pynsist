@@ -20,6 +20,8 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
 
+import pynsist
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -55,7 +57,7 @@ copyright = u'2014, Thomas Kluyver'
 # built documents.
 #
 # The short X.Y version.
-version = '1.9'
+version = pynsist.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
