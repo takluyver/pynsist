@@ -64,11 +64,11 @@ class InputError(ValueError):
 
 class InstallerBuilder(object):
     """Controls building an installer. This includes three main steps:
-    
+
     1. Arranging the necessary files in the build directory.
     2. Filling out the template NSI file to control NSIS.
     3. Running ``makensis`` to build the installer.
-    
+
     :param str appname: Application name
     :param str version: Application version
     :param dict shortcuts: Dictionary keyed by shortcut name, containing
@@ -151,12 +151,12 @@ class InstallerBuilder(object):
                 self.nsi_template = 'pyapp_installpy.nsi'
 
         self.nsi_file = pjoin(self.build_dir, 'installer.nsi')
-        
+
         # To be filled later
         self.install_files = []
         self.install_dirs = []
         self.msvcrt_files = []
-    
+
     _py_version_pattern = re.compile(r'\d\.\d+\.\d+$')
 
     @property
@@ -166,7 +166,7 @@ class InstallerBuilder(object):
 
     def make_installer_name(self):
         """Generate the filename of the installer exe
-        
+
         e.g. My_App_1.0.exe
         """
         s = self.appname + '_' + self.version + '.exe'
@@ -192,7 +192,7 @@ class InstallerBuilder(object):
 
     def fetch_python(self):
         """Fetch the MSI for the specified version of Python.
-        
+
         It will be placed in the build directory.
         """
         url, filename = self._python_download_url_filename()
@@ -243,7 +243,7 @@ class InstallerBuilder(object):
 
     def fetch_pylauncher(self):
         """Fetch the MSI for PyLauncher (required for Python2.x).
-    
+
         It will be placed in the build directory.
         """
         arch_tag = '.amd64' if (self.py_bitness == 64) else ''
@@ -288,10 +288,10 @@ if __name__ == '__main__':
     from {module} import {func}
     {func}()
 """
-    
+
     def write_script(self, entrypt, target, extra_preamble=''):
         """Write a launcher script from a 'module:function' entry point
-        
+
         py_version and py_bitness are used to write an appropriate shebang line
         for the PEP 397 Windows launcher.
         """
@@ -306,11 +306,11 @@ if __name__ == '__main__':
 
     def prepare_shortcuts(self):
         """Prepare shortcut files in the build directory.
-        
+
         If entry_point is specified, write the script. If script is specified,
         copy to the build directory. Prepare target and parameters for these
         shortcuts.
-        
+
         Also copies shortcut icons
         """
         files = set()
@@ -346,12 +346,12 @@ if __name__ == '__main__':
             shutil.copy2(sc['icon'], self.build_dir)
             sc['icon'] = os.path.basename(sc['icon'])
             files.add(sc['icon'])
-    
+
         self.install_files.extend([(f, '$INSTDIR') for f in files])
-    
+
     def prepare_packages(self):
         """Move requested packages into the build directory.
-        
+
         If a pynsist_pkgs directory exists, it is copied into the build
         directory as pkgs/ . Any packages not already there are found on
         sys.path and copied in.
@@ -447,7 +447,7 @@ if __name__ == '__main__':
 
     def run_nsis(self):
         """Runs makensis using the specified .nsi file
-        
+
         Returns the exit code.
         """
         try:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
             self.fetch_python()
             if self.py_version < '3.3':
                 self.fetch_pylauncher()
-        
+
         self.prepare_shortcuts()
 
         if self.commands:
             self.prepare_commands()
-        
+
         # Packages
         self.prepare_packages()
-        
+
         # Extra files
         self.copy_extra_files()
 
@@ -500,15 +500,44 @@ if __name__ == '__main__':
             if not exitcode:
                 logger.info('Installer written to %s', pjoin(self.build_dir, self.installer_name))
 
+
+def get_installer_builder_args(config):
+    def get_boolean(s):
+        if s.lower() in ('1', 'yes', 'true', 'on'):
+            return True
+        if s.lower() in ('0', 'no', 'false', 'off'):
+            return False
+        raise ValueError('ValueError: Not a boolean: {}'.format(s))
+
+    appcfg = config['Application']
+    args = {}
+    args['appname'] = appcfg['name'].strip()
+    args['version'] = appcfg['version'].strip()
+    args['publisher'] = appcfg['publisher'].strip() if 'publisher' in appcfg else None
+    args['icon'] = appcfg.get('icon', DEFAULT_ICON).strip()
+    args['packages'] = config.get('Include', 'packages', fallback='').strip().splitlines()
+    args['pypi_wheel_reqs'] = config.get('Include', 'pypi_wheels', fallback='').strip().splitlines()
+    args['extra_files'] = configreader.read_extra_files(config)
+    args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION).strip()
+    args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)
+    args['py_format'] = config.get('Python', 'format').strip() if 'format' in config['Python'] else None
+    inc_msvcrt = config.get('Python', 'include_msvcrt', fallback='True')
+    args['inc_msvcrt'] = get_boolean(inc_msvcrt.strip())
+    args['build_dir'] = config.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR).strip()
+    args['installer_name'] = config.get('Build', 'installer_name') if 'installer_name' in config['Build'] else None
+    args['nsi_template'] = config.get('Build', 'nsi_template').strip() if 'nsi_template' in config['Build'] else None
+    args['exclude'] = config.get('Include', 'exclude', fallback='').strip().splitlines()
+    return args
+
 def main(argv=None):
     """Make an installer from the command line.
-    
+
     This parses command line arguments and a config file, and calls
     :func:`all_steps` with the extracted information.
     """
     logger.setLevel(logging.INFO)
     logger.handlers = [logging.StreamHandler()]
-    
+
     import argparse
     argp = argparse.ArgumentParser(prog='pynsist')
     argp.add_argument('config_file')
@@ -516,7 +545,7 @@ def main(argv=None):
         help='Prepare files and folders, stop before calling makensis. For debugging.'
     )
     options = argp.parse_args(argv)
-    
+
     dirname, config_file = os.path.split(options.config_file)
     if dirname:
         os.chdir(dirname)
@@ -530,28 +559,11 @@ def main(argv=None):
         logger.error('Error parsing configuration file:')
         logger.error(str(e))
         sys.exit(1)
-    appcfg = cfg['Application']
+
+    args = get_installer_builder_args(cfg)
 
     try:
-        InstallerBuilder(
-            appname = appcfg['name'],
-            version = appcfg['version'],
-            publisher = appcfg.get('publisher', None),
-            icon = appcfg.get('icon', DEFAULT_ICON),
-            shortcuts = shortcuts,
-            commands=commands,
-            packages = cfg.get('Include', 'packages', fallback='').splitlines(),
-            pypi_wheel_reqs = cfg.get('Include', 'pypi_wheels', fallback='').splitlines(),
-            extra_files = configreader.read_extra_files(cfg),
-            py_version = cfg.get('Python', 'version', fallback=DEFAULT_PY_VERSION),
-            py_bitness = cfg.getint('Python', 'bitness', fallback=DEFAULT_BITNESS),
-            py_format = cfg.get('Python', 'format', fallback=None),
-            inc_msvcrt = cfg.getboolean('Python', 'include_msvcrt', fallback=True),
-            build_dir = cfg.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR),
-            installer_name = cfg.get('Build', 'installer_name', fallback=None),
-            nsi_template = cfg.get('Build', 'nsi_template', fallback=None),
-            exclude = cfg.get('Include', 'exclude', fallback='').splitlines(),
-        ).run(makensis=(not options.no_makensis))
+        InstallerBuilder(**args).run(makensis=(not options.no_makensis))
     except InputError as e:
         logger.error("Error in config values:")
         logger.error(str(e))
