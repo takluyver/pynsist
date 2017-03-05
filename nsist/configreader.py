@@ -11,12 +11,12 @@ class SectionValidator(object):
             key is mandatory
         """
         self.keys = keys
-    
+
     def check(self, config, section_name):
         """
         validates the section, if this is the correct validator for it
         returns True if this is the correct validator for this section
-        
+
         raises InvalidConfig if something inside the section is wrong
         """
         self._check_mandatory_fields(section_name, config[section_name])
@@ -33,7 +33,7 @@ class SectionValidator(object):
                                 section_name,
                                 key_name)
                     raise InvalidConfig(err_msg)
-    
+
     def _check_invalid_keys(self, section_name, section):
         for key in section:
             key_name = str(key)
@@ -116,12 +116,12 @@ def read_and_validate(config_file):
                        "be one of these: {1}").format(
                        section,
                        ', '.join(['"%s"' % n for n in valid_section_names]))
-            raise InvalidConfig(err_msg)    
+            raise InvalidConfig(err_msg)
     return config
 
 def read_extra_files(cfg):
     """Read the list of extra files from the config file.
-    
+
     Returns a list of 2-tuples: (file, destination_directory), which can be
     passed as the ``extra_files`` parameter to :class:`nsist.InstallerBuilder`.
     """
@@ -138,10 +138,10 @@ def read_extra_files(cfg):
 
 def read_shortcuts_config(cfg):
     """Read and verify the shortcut definitions from the config file.
-    
+
     There is one shortcut per 'Shortcut <name>' section, and one for the
     Application section.
-    
+
     Returns a dict of dicts with the fields from the shortcut sections.
     The optional 'icon' and 'console' fields will be filled with their
     default values if not supplied.
@@ -201,3 +201,36 @@ def read_commands_config(cfg):
                                     cc['extra_preamble'])
 
     return commands
+
+
+def get_installer_builder_args(config):
+    from . import (DEFAULT_BITNESS,
+                    DEFAULT_BUILD_DIR,
+                    DEFAULT_ICON,
+                    DEFAULT_PY_VERSION)
+    def get_boolean(s):
+        if s.lower() in ('1', 'yes', 'true', 'on'):
+            return True
+        if s.lower() in ('0', 'no', 'false', 'off'):
+            return False
+        raise ValueError('ValueError: Not a boolean: {}'.format(s))
+
+    appcfg = config['Application']
+    args = {}
+    args['appname'] = appcfg['name'].strip()
+    args['version'] = appcfg['version'].strip()
+    args['publisher'] = appcfg['publisher'].strip() if 'publisher' in appcfg else None
+    args['icon'] = appcfg.get('icon', DEFAULT_ICON).strip()
+    args['packages'] = config.get('Include', 'packages', fallback='').strip().splitlines()
+    args['pypi_wheel_reqs'] = config.get('Include', 'pypi_wheels', fallback='').strip().splitlines()
+    args['extra_files'] = read_extra_files(config)
+    args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION).strip()
+    args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)
+    args['py_format'] = config.get('Python', 'format').strip() if 'format' in config['Python'] else None
+    inc_msvcrt = config.get('Python', 'include_msvcrt', fallback='True')
+    args['inc_msvcrt'] = get_boolean(inc_msvcrt.strip())
+    args['build_dir'] = config.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR).strip()
+    args['installer_name'] = config.get('Build', 'installer_name') if 'installer_name' in config['Build'] else None
+    args['nsi_template'] = config.get('Build', 'nsi_template').strip() if 'nsi_template' in config['Build'] else None
+    args['exclude'] = config.get('Include', 'exclude', fallback='').strip().splitlines()
+    return args

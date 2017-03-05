@@ -24,6 +24,7 @@ if os.name == 'nt':
 else:
     winreg = None
 
+from .configreader import get_installer_builder_args
 from .commands import prepare_bin_directory
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
@@ -499,35 +500,6 @@ if __name__ == '__main__':
 
             if not exitcode:
                 logger.info('Installer written to %s', pjoin(self.build_dir, self.installer_name))
-
-
-def get_installer_builder_args(config):
-    def get_boolean(s):
-        if s.lower() in ('1', 'yes', 'true', 'on'):
-            return True
-        if s.lower() in ('0', 'no', 'false', 'off'):
-            return False
-        raise ValueError('ValueError: Not a boolean: {}'.format(s))
-
-    appcfg = config['Application']
-    args = {}
-    args['appname'] = appcfg['name'].strip()
-    args['version'] = appcfg['version'].strip()
-    args['publisher'] = appcfg['publisher'].strip() if 'publisher' in appcfg else None
-    args['icon'] = appcfg.get('icon', DEFAULT_ICON).strip()
-    args['packages'] = config.get('Include', 'packages', fallback='').strip().splitlines()
-    args['pypi_wheel_reqs'] = config.get('Include', 'pypi_wheels', fallback='').strip().splitlines()
-    args['extra_files'] = configreader.read_extra_files(config)
-    args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION).strip()
-    args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)
-    args['py_format'] = config.get('Python', 'format').strip() if 'format' in config['Python'] else None
-    inc_msvcrt = config.get('Python', 'include_msvcrt', fallback='True')
-    args['inc_msvcrt'] = get_boolean(inc_msvcrt.strip())
-    args['build_dir'] = config.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR).strip()
-    args['installer_name'] = config.get('Build', 'installer_name') if 'installer_name' in config['Build'] else None
-    args['nsi_template'] = config.get('Build', 'nsi_template').strip() if 'nsi_template' in config['Build'] else None
-    args['exclude'] = config.get('Include', 'exclude', fallback='').strip().splitlines()
-    return args
 
 def main(argv=None):
     """Make an installer from the command line.

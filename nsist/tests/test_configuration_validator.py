@@ -4,7 +4,6 @@ import os
 from nose.tools import *
 
 from .. import configreader
-from .. import get_installer_builder_args
 
 
 DATA_FILES = os.path.join(os.path.dirname(__file__), 'data_files')
@@ -12,10 +11,7 @@ DATA_FILES = os.path.join(os.path.dirname(__file__), 'data_files')
 def test_valid_config():
     configfile = os.path.join(DATA_FILES, 'valid_config.cfg')
     config = configreader.read_and_validate(configfile)
-    print(config['Application'])
-    print('Application' in config)
-    print(config.has_section('Application'))
-    # assert False
+    assert config.has_section('Application')
 
 def test_valid_config_with_shortcut():
     configfile = os.path.join(DATA_FILES, 'valid_config_with_shortcut.cfg')
@@ -49,7 +45,7 @@ def test_valid_config_with_values_starting_on_new_line():
     assert config.get('Include', 'exclude') == '\nsomething'
     assert config.get('Include', 'files') == '\nLICENSE\ndata_files/'
 
-    args = get_installer_builder_args(config)
+    args = configreader.get_installer_builder_args(config)
     assert args['appname'] == 'My App'
     assert args['version'] == '1.0'
     assert args['publisher'] == 'Test'
