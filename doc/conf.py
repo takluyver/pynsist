@@ -23,7 +23,7 @@ print('sys.path after addition:')
 for d in sys.path:
     print(' ', d)
 
-import pynsist
+import nsist
 
 # -- General configuration ------------------------------------------------
 
@@ -60,7 +60,7 @@ copyright = u'2014, Thomas Kluyver'
 # built documents.
 #
 # The short X.Y version.
-version = pynsist.__version__
+version = nsist.__version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
