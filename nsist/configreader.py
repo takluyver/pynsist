@@ -102,7 +102,8 @@ def read_and_validate(config_file):
     # Interpolation interferes with Windows-style environment variables, so
     # it's disabled for now.
     config = configparser.ConfigParser(interpolation=None)
-    config.read(config_file)
+    if config.read(config_file) == []:
+        raise InvalidConfig("Config file not found: %r" % config_file)
     for section in config.sections():
         if section in CONFIG_VALIDATORS:
             CONFIG_VALIDATORS[section].check(config, section)

@@ -15,6 +15,7 @@ Version 1.10
 * Fixed an error when using wheels which install files into the same package,
   such as ``PyQt5`` and ``PyQtChart``.
 * Issue a warning when we can't find the cache directory on Windows.
+* Clearer error if the specified config file is not found.
 
 Version 1.9
 -----------
