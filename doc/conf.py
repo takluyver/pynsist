@@ -17,7 +17,11 @@ import os
 from os.path import dirname, abspath
 
 project_dir = dirname(dirname(abspath(__file__)))
+print('project_dir=%r', project_dir)
 sys.path.insert(0, project_dir)
+print('sys.path after addition:')
+for d in sys.path:
+    print(' ', d)
 
 import pynsist
 
