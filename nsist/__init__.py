@@ -525,8 +525,6 @@ def main(argv=None):
     from . import configreader
     try:
         cfg = configreader.read_and_validate(config_file)
-        shortcuts = configreader.read_shortcuts_config(cfg)
-        commands = configreader.read_commands_config(cfg)
     except configreader.InvalidConfig as e:
         logger.error('Error parsing configuration file:')
         logger.error(str(e))

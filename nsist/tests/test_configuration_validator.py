@@ -12,6 +12,8 @@ def test_valid_config():
     configfile = os.path.join(DATA_FILES, 'valid_config.cfg')
     config = configreader.read_and_validate(configfile)
     assert config.has_section('Application')
+    args = configreader.get_installer_builder_args(config)
+    assert args['py_version'] == '3.4.0'
 
 def test_valid_config_with_shortcut():
     configfile = os.path.join(DATA_FILES, 'valid_config_with_shortcut.cfg')
@@ -24,21 +26,6 @@ def test_valid_config_with_values_starting_on_new_line():
     assert len(config.sections()) == len(sections)
     for section in sections:
         assert section in config
-        assert config.has_section(section)
-
-    assert config.get('Application', 'name') == '\nMy App'
-    assert config.get('Application', 'version') == '\n1.0'
-    assert config.get('Application', 'publisher') == '\nTest'
-    assert config.get('Application', 'entry_point') == '\nmyapp:main'
-    assert config.get('Application', 'icon') == '\nmyapp.ico'
-
-    assert config.get('Python', 'version') == '\n3.6.0'
-    assert config.get('Python', 'bitness') == '\n64'
-    assert config.get('Python', 'format') == '\nbundled'
-    assert config.get('Python', 'include_msvcrt') == '\nTrue'
-
-    assert config.get('Build', 'directory') == '\nbuild/'
-    assert config.get('Build', 'nsi_template') == '\ntemplate.nsi'
 
     assert config.get('Include', 'packages') == '\nrequests\nbs4'
     assert config.get('Include', 'pypi_wheels') == '\nhtml5lib'
@@ -48,6 +35,8 @@ def test_valid_config_with_values_starting_on_new_line():
     args = configreader.get_installer_builder_args(config)
     assert args['appname'] == 'My App'
     assert args['version'] == '1.0'
+    assert args['shortcuts']['My App']['entry_point'] == 'myapp:main'
+    assert args['commands'] == {}
     assert args['publisher'] == 'Test'
     # assert args['entry_point'] == '\nmyapp:main'
     assert args['icon'] == 'myapp.ico'

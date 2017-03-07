@@ -10,6 +10,8 @@ Version 1.10
 * The directory containing ``python.exe`` is now added to the ``%PATH%``
   environment variable when your application runs. This fixes a DLL loading
   issue for PyQt5 if you use bundled Python.
+* Lists in the config file, such as ``packages`` and ``pypi_wheels`` can now
+  begin on the line after the key.
 * When installing a 64-bit application, the uninstall registry keys are now
   added to the 64-bit view of the registry.
 * Fixed an error when using wheels which install files into the same package,

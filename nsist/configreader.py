@@ -209,29 +209,24 @@ def get_installer_builder_args(config):
                     DEFAULT_BUILD_DIR,
                     DEFAULT_ICON,
                     DEFAULT_PY_VERSION)
-    def get_boolean(s):
-        if s.lower() in ('1', 'yes', 'true', 'on'):
-            return True
-        if s.lower() in ('0', 'no', 'false', 'off'):
-            return False
-        raise ValueError('ValueError: Not a boolean: {}'.format(s))
 
     appcfg = config['Application']
     args = {}
-    args['appname'] = appcfg['name'].strip()
-    args['version'] = appcfg['version'].strip()
-    args['publisher'] = appcfg['publisher'].strip() if 'publisher' in appcfg else None
-    args['icon'] = appcfg.get('icon', DEFAULT_ICON).strip()
+    args['appname'] = appcfg['name']
+    args['version'] = appcfg['version']
+    args['shortcuts'] = read_shortcuts_config(config)
+    args['commands'] = read_commands_config(config)
+    args['publisher'] = appcfg.get('publisher', None)
+    args['icon'] = appcfg.get('icon', DEFAULT_ICON)
     args['packages'] = config.get('Include', 'packages', fallback='').strip().splitlines()
     args['pypi_wheel_reqs'] = config.get('Include', 'pypi_wheels', fallback='').strip().splitlines()
     args['extra_files'] = read_extra_files(config)
-    args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION).strip()
+    args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION)
     args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)
-    args['py_format'] = config.get('Python', 'format').strip() if 'format' in config['Python'] else None
-    inc_msvcrt = config.get('Python', 'include_msvcrt', fallback='True')
-    args['inc_msvcrt'] = get_boolean(inc_msvcrt.strip())
-    args['build_dir'] = config.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR).strip()
-    args['installer_name'] = config.get('Build', 'installer_name') if 'installer_name' in config['Build'] else None
-    args['nsi_template'] = config.get('Build', 'nsi_template').strip() if 'nsi_template' in config['Build'] else None
+    args['py_format'] = config.get('Python', 'format', fallback=None)
+    args['inc_msvcrt'] = config.getboolean('Python', 'include_msvcrt', fallback=True)
+    args['build_dir'] = config.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR)
+    args['installer_name'] = config.get('Build', 'installer_name', fallback=None)
+    args['nsi_template'] = config.get('Build', 'nsi_template', fallback=None)
     args['exclude'] = config.get('Include', 'exclude', fallback='').strip().splitlines()
     return args
