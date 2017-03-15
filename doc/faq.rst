@@ -40,6 +40,17 @@ list them in the ``files`` key of the ``[Include]`` section of the config file.
 Your code can find them relative to the location of the launch script running your
 application (``sys.modules['__main__'].__file__``).
 
+.. note::
+
+   The techniques above work for fixed data files which you ship with your
+   application. For files which your app will *write*, you should use another
+   location, because an app installed systemwide cannot write files in its
+   install directory. Use the ``APPDATA`` or ``LOCALAPPDATA`` environment
+   variables as locations to write hidden data files (`what's the difference?
+   <https://superuser.com/a/21462/209976>`__)::
+
+       writable_file = os.path.join(os.environ['LOCALAPPDATA'], 'MyApp', 'file.dat')
+
 Code signing
 ------------
 
