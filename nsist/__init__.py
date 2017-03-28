@@ -75,6 +75,7 @@ class InstallerBuilder(object):
     :param dict shortcuts: Dictionary keyed by shortcut name, containing
             dictionaries whose keys match the fields of :ref:`shortcut_config`
             in the config file
+    :param str publisher: Publisher name
     :param str icon: Path to an icon for the application
     :param list packages: List of strings for importable packages to include
     :param dict commands: Dictionary keyed by command name, containing dicts
