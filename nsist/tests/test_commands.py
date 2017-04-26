@@ -18,9 +18,9 @@ def test_prepare_bin_dir():
     with TemporaryDirectory() as td:
         td = Path(td)
         commands.prepare_bin_directory(td, cmds)
-        assert_isfile(td / 'acommand.exe')
+        assert_isfile(str(td / 'acommand.exe'))
         script_file = td / 'acommand-script.py'
-        assert_isfile(script_file)
+        assert_isfile(str(script_file))
 
         with script_file.open() as f:
             script_contents = f.read()

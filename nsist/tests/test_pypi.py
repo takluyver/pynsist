@@ -12,7 +12,7 @@ from nsist.pypi import WheelDownloader, extract_wheel, CachedRelease, merge_dir_
 def test_download():
     wd = WheelDownloader("astsearch==0.1.2", "3.5.1", 64)
     wheel = wd.fetch()
-    assert_isfile(wheel)
+    assert_isfile(str(wheel))
 
     with TemporaryDirectory() as td:
         extract_wheel(wheel, target_dir=td)
@@ -99,8 +99,8 @@ def test_merge_dir_to():
 
         merge_dir_to(td2, td1)
 
-        assert_isfile(td1 / 'subdir' / 'foo')
-        assert_isfile(td1 / 'subdir' / 'bar')
+        assert_isfile(str(td1 / 'subdir' / 'foo'))
+        assert_isfile(str(td1 / 'subdir' / 'bar'))
         with (td1 / 'ab').open() as f:
             assert_equal(f.read(), u"alternate")
 
