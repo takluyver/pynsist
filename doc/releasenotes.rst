@@ -1,6 +1,12 @@
 Release notes
 =============
 
+Version 1.12
+------------
+
+* Fix a bug with unpacking wheels on Python 2.7, by switching to ``pathlib2``
+  for the pathlib backport.
+
 Version 1.11
 ------------
 
