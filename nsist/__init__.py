@@ -6,7 +6,10 @@ import logging
 import ntpath
 import operator
 import os
-from pathlib import Path
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path  # Backport
 import re
 import shutil
 from subprocess import call

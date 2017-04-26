@@ -1,6 +1,9 @@
 import io
 from nose.tools import *
-from pathlib import Path
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path  # Backport
 from testpath.tempdir import TemporaryDirectory
 from testpath import assert_isfile
 

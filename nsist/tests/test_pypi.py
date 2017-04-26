@@ -1,6 +1,9 @@
 from nose.tools import *
 from os.path import join as pjoin
-from pathlib import Path
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path  # Backport
 from testpath import assert_isfile, assert_isdir
 from testpath.tempdir import TemporaryDirectory
 

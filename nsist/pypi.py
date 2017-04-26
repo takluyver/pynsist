@@ -2,7 +2,10 @@ from distutils.version import LooseVersion
 import errno
 import hashlib
 import logging
-from pathlib import Path
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path  # Backport
 import re
 import shutil
 from tempfile import mkdtemp

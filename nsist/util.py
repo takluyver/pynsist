@@ -1,7 +1,10 @@
 import os
 import errno
 import logging
-from pathlib import Path
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path  # Backport
 import requests
 import sys
 
