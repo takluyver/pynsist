@@ -186,7 +186,11 @@ def extract_wheel(whl_file, target_dir):
             if p.is_dir():
                 # If the dst directory already exists, this will combine them.
                 # shutil.copytree will not combine them.
-                target.joinpath(p.name).mkdir(exist_ok = True)
+                try:
+                    target.joinpath(p.name).mkdir()
+                except OSError as e:
+                    if e.errno != errno.EEXIST:
+                        raise
                 merge_dir_to(p, target / p.name)
             else:
                 shutil.copy2(str(p), str(target))
