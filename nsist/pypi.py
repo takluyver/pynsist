@@ -111,9 +111,9 @@ class WheelDownloader(object):
         download_to = get_cache_dir() / 'pypi' / self.name / self.version
         try:
             download_to.mkdir(parents=True)
-        except OSError as e:
-            # Py2 compatible equivalent of FileExistsError
-            if e.errno != errno.EEXIST:
+        except OSError:
+            # Ignore OSError only if the directory exists
+            if not download_to.is_dir():
                 raise
         target = download_to / preferred_release.filename
 
@@ -188,8 +188,8 @@ def extract_wheel(whl_file, target_dir):
                 # shutil.copytree will not combine them.
                 try:
                     target.joinpath(p.name).mkdir()
-                except OSError as e:
-                    if e.errno != errno.EEXIST:
+                except OSError:
+                    if not target.joinpath(p.name).is_dir():
                         raise
                 merge_dir_to(p, target / p.name)
             else:
