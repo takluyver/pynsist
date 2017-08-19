@@ -71,14 +71,28 @@ Code signing
 People trying to use your installer will see an 'Unknown publisher' warning.
 To avoid this, you can sign it with a digital certificate. See
 `Mozilla's instructions on signing executables using Mono
-<https://developer.mozilla.org/en-US/docs/Signing_an_executable_with_Authenticode>`__.
+<https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Build_Instructions/Signing_an_executable_with_Authenticode>`__.
 
-Signing requires a certificate from a trusted provider. These typically cost
-hundreds of dollars, but Certum `offers a certificate
-<https://www.certum.eu/certum/cert,offer_en_open_source_cs.xml>`__ for open
-source projects for €14 at the time of writing. You will need documents to prove
-your identity. I haven't used a Certum certificate, and this isn't an
-endorsement.
+Signing requires a certificate from a provider trusted by Microsoft.
+As of summer 2017, these are the cheapest options I can find:
+
+* Certum's `open source code signing certificate <https://www.certum.eu/certum/cert,offer_en_open_source_cs.xml>`__:
+  €86 for a certificate with a smart card and reader, €28 for a new certificate
+  if you have the hardware. Each certificate is valid for one year.
+  This is only for open source software.
+* Many companies resell Comodo code signing certificates at prices lower than
+  Comodo themselves, especially if you pay for 3–4 years up front.
+  `CodeSignCert <https://codesigncert.com/comodocodesigning>`__ ($59–75 per year),
+  `K Software <http://codesigning.ksoftware.net/>`__ ($67–$84 per year) and
+  `Cheap SSL Security <https://cheapsslsecurity.co.uk/comodo/codesigningcertificate.html>`__ (UK, £54–£64 per year)
+  are a few examples; a search will turn up many more like them.
+
+I haven't used any of these companies, so I'm not making a recommendation.
+Please do your own research before buying from them.
+
+If you find another good way to get a code signing certificate, please make a
+pull request to add it!
+
 
 Alternatives
 ------------
