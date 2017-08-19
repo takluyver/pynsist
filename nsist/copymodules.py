@@ -134,6 +134,8 @@ if not PY2:
                     else:
                         # Don't use our exclude callback if we don't need to,
                         # as it slows things down.
+                        if os.path.exists(dest):
+                            shutil.rmtree(dest)
                         shutil.copytree(
                             pkgdir, dest,
                             ignore=shutil.ignore_patterns('*.pyc')
