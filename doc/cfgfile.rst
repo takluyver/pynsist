@@ -217,6 +217,8 @@ limitations:
   Python. If your application has plugins based on Python packages, this might
   require extra thought about how and where plugins are installed.
 
+.. _cfg_include:
+
 Include section
 ---------------
 
