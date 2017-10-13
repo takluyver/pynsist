@@ -10,7 +10,7 @@ and `the examples <https://github.com/takluyver/pynsist/tree/master/examples>`_.
 Quickstart
 ----------
 
-1. Get the tools. Install `NSIS <http://nsis.sourceforge.net/Download>`_, and
+1. Get the tools. Install `NSIS <https://sourceforge.net/projects/nsis/files/latest/download>`_, and
    then install pynsist from PyPI by running ``pip install pynsist``.
 
 2. Write a config file ``installer.cfg``, like this:
