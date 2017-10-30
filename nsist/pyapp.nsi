@@ -12,7 +12,6 @@
  
 SetCompressor lzma
 
-[% if ib.py_format == 'bundled' %]
 !define MULTIUSER_EXECUTIONLEVEL Highest
 !define MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER
 !define MULTIUSER_MUI
@@ -22,7 +21,6 @@ SetCompressor lzma
 !define MULTIUSER_INSTALLMODE_FUNCTION correct_prog_files
 [% endif %]
 !include MultiUser.nsh
-[% endif %]
 
 [% block modernui %]
 ; Modern UI installer stuff 
@@ -33,9 +31,7 @@ SetCompressor lzma
 ; UI pages
 [% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
-[% if ib.py_format == 'bundled' %]
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
-[% endif %]
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -45,9 +41,6 @@ SetCompressor lzma
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${INSTALLER_NAME}"
-[% if ib.py_format != 'bundled' %]
-InstallDir "$PROGRAMFILES${BITNESS}\${PRODUCT_NAME}"
-[% endif %]
 ShowInstDetails show
 
 Section -SETTINGS
@@ -65,13 +58,11 @@ Section "!${PRODUCT_NAME}" sec_app
   File /r "pkgs\*.*"
   SetOutPath "$INSTDIR"
 
-  [% if ib.py_format == 'bundled' %]
   ; Marker file for per-user install
   StrCmp $MultiUser.InstallMode CurrentUser 0 +3
     FileOpen $0 "$INSTDIR\${USER_INSTALL_MARKER}" w
     FileClose $0
     SetFileAttributes "$INSTDIR\${USER_INSTALL_MARKER}" HIDDEN
-  [% endif %]
 
   [% block install_files %]
   ; Install files
@@ -207,7 +198,6 @@ Function .onMouseOverSection
     [% endblock mouseover_messages %]
 FunctionEnd
 
-[% if ib.py_format == 'bundled' %]
 Function .onInit
   !insertmacro MULTIUSER_INIT
 FunctionEnd
@@ -222,11 +212,5 @@ Function correct_prog_files
   ; folder for 64-bit applications. Override the install dir it set.
   StrCmp $MultiUser.InstallMode AllUsers 0 +2
     StrCpy $INSTDIR "$PROGRAMFILES64\${MULTIUSER_INSTALLMODE_INSTDIR}"
-FunctionEnd
-[% endif %]
-
-[% else %]
-Function .onInit
-  SetShellVarContext all
 FunctionEnd
 [% endif %]

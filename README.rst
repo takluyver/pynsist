@@ -25,7 +25,7 @@ Quickstart
        icon=myapp.ico
 
        [Python]
-       version=3.4.0
+       version=3.6.3
 
        [Include]
        # Importable packages that your application requires, one per line

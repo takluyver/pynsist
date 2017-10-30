@@ -2,16 +2,11 @@ language: python
 python:
   - "3.6"
   - "3.5"
-  - "3.4"
-  - "3.3"
-  - "2.7"
 # command to run tests
 script: nosetests
 # Ensure dependencies are installed
 install:
   - pip install requests requests_download jinja2 yarg win_cli_launchers testpath
-  - if [[ ${TRAVIS_PYTHON_VERSION} == '2.7' ]]; then pip install configparser pathlib2; fi
-  - if [[ ${TRAVIS_PYTHON_VERSION} == '3.3' ]]; then pip install pathlib2; fi
 
 # Enable new Travis stack, should speed up builds
 sudo: false

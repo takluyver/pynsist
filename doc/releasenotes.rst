@@ -1,6 +1,16 @@
 Release notes
 =============
 
+Version 2.0
+-----------
+
+Pynsist 2 only supports 'bundled' Python, and therefore only Python 3.5 and
+above. For 'installer' format Python and older Python versions, use Pynsist 1.x
+(``pip install pynsist<2``).
+
+* Pynsist installers can now install into a per-user directory, allowing them
+  to be used without admin access.
+
 Version 1.12
 ------------
 

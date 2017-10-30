@@ -1,4 +1,9 @@
-This example shows how to package a program that uses the PyGI-bindings of Gtk (or PyGObject). Python 3.4.3 64-bit will be used together with 64-bit dependencies.
+**This example does not currently work**: Pynsist 2 requires Python 3.5 or above,
+but PyGI is only available for Python 3.4 at most (as of October 2017).
+Hopefully it will be possible again in the future.
+
+This example shows how to package a program that uses the PyGI-bindings of Gtk (or PyGObject).
+Python 3.4.3 64-bit will be used together with 64-bit dependencies.
 
 The example program consists of a window with a matplotlib-plot and a button that triggers the window to close.
 
@@ -15,19 +20,14 @@ Debian-style distributions using:
 Building the program
 --------------------
 
-A shell script can be used to download some of the dependencies:
+A shell script can be used to download the PyGI Windows installer:
 
 ::
 
     sh 1_download.sh
 
-The numpy 64-bit wheel can be downloaded here (numpy‑1.9.2+mkl‑cp34‑none‑win_amd64.whl):
-
-http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
-
-Rename it to numpy.whl before starting the second script.
-
-The next script will copy all the dependencies into the ``pynsist_pkgs`` folder.
+The next script will extract the necessary GTK components into the
+``pynsist_pkgs`` folder.
 
 ::
 
