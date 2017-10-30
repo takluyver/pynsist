@@ -223,7 +223,6 @@ def get_installer_builder_args(config):
     args['extra_files'] = read_extra_files(config)
     args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION)
     args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)
-    args['py_format'] = config.get('Python', 'format', fallback=None)
     args['inc_msvcrt'] = config.getboolean('Python', 'include_msvcrt', fallback=True)
     args['build_dir'] = config.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR)
     args['installer_name'] = config.get('Build', 'installer_name', fallback=None)
