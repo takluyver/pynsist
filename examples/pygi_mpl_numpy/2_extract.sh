@@ -1,20 +1,14 @@
 # Extracts all dependencies and places them in the pynsist_pkgs folder
 # You might need to rename the "7z" calls to "7za" depending on your distribution
+set -e
 
 mkdir pynsist_pkgs
 
 # Unzip the bindings
-7z x numpy.whl -onumpy
-7z x matplotlib.exe -omatplotlib
 7z x pygi.exe -opygi
 
-# Copy matplotlib and numpy into the pynsist_pkgs folder and delete the folders
-cp -r matplotlib/PLATLIB/matplotlib pynsist_pkgs
-rm -r matplotlib
-cp -r numpy/numpy pynsist_pkgs
-rm -r numpy
-
 # Copy the PyGI packages into the pynsist_pkgs folder
+# TODO: Update to Python 3.6
 7z x pygi/binding/py3.4-64/py3.4-64.7z -obindings
 cp -r bindings/* pynsist_pkgs
 rm -r bindings
