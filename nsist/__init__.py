@@ -83,7 +83,7 @@ class InstallerBuilder(object):
     :param str py_format: (deprecated) 'bundled'. Use Pynsist 1.x for
             'installer' option.
     :param bool inc_msvcrt: True to include the Microsoft C runtime with 'bundled'
-            Python. Ignored when py_format='installer'.
+            Python.
     :param str build_dir: Directory to run the build in
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
