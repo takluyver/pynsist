@@ -32,7 +32,7 @@ pjoin = os.path.join
 logger = logging.getLogger(__name__)
 
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
-DEFAULT_PY_VERSION = '3.6.1'
+DEFAULT_PY_VERSION = '3.6.3'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
 if os.name == 'nt' and sys.maxsize == (2**63)-1:
