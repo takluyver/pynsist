@@ -6,10 +6,7 @@ import logging
 import ntpath
 import operator
 import os
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path  # Backport
+from pathlib import Path
 import re
 import shutil
 from subprocess import call
@@ -17,13 +14,8 @@ import sys
 import fnmatch
 import zipfile
 
-PY2 = sys.version_info[0] == 2
-
 if os.name == 'nt':
-    if PY2:
-        import _winreg as winreg
-    else:
-        import winreg
+    import winreg
 else:
     winreg = None
 
@@ -34,13 +26,13 @@ from .nsiswriter import NSISFileWriter
 from .pypi import fetch_pypi_wheels
 from .util import download, text_types, get_cache_dir
 
-__version__ = '1.12'
+__version__ = '2.0'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
 
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
-DEFAULT_PY_VERSION = '2.7.13' if PY2 else '3.6.1'
+DEFAULT_PY_VERSION = '3.6.1'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
 DEFAULT_ICON = pjoin(_PKGDIR, 'glossyorb.ico')
 if os.name == 'nt' and sys.maxsize == (2**63)-1:
@@ -88,8 +80,8 @@ class InstallerBuilder(object):
     :param list exclude: Paths of files to exclude that would otherwise be included
     :param str py_version: Full version of Python to bundle
     :param int py_bitness: Bitness of bundled Python (32 or 64)
-    :param str py_format: 'installer' or 'bundled'. Default 'bundled' for Python
-            >= 3.6, 'installer' for older versions.
+    :param str py_format: (deprecated) 'bundled'. Use Pynsist 1.x for
+            'installer' option.
     :param bool inc_msvcrt: True to include the Microsoft C runtime with 'bundled'
             Python. Ignored when py_format='installer'.
     :param str build_dir: Directory to run the build in
@@ -99,7 +91,7 @@ class InstallerBuilder(object):
     def __init__(self, appname, version, shortcuts, publisher=None,
                 icon=DEFAULT_ICON, packages=None, extra_files=None,
                 py_version=DEFAULT_PY_VERSION, py_bitness=DEFAULT_BITNESS,
-                py_format=None, inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
+                py_format='bundled', inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None, pypi_wheel_reqs=None, commands=None):
         self.appname = appname
@@ -119,6 +111,9 @@ class InstallerBuilder(object):
             if not os.environ.get('PYNSIST_PY_PRERELEASE'):
                 raise InputError('py_version', py_version,
                                  "a full Python version like '3.4.0'")
+        if self.py_version_tuple < (3, 5):
+            raise InputError('py_version', py_version,
+                             "Python >= 3.5.0 (use Pynsist 1.x for older Python.")
         self.py_bitness = py_bitness
         if py_bitness not in {32, 64}:
             raise InputError('py_bitness', py_bitness, "32 or 64")
@@ -126,18 +121,11 @@ class InstallerBuilder(object):
         if self.py_bitness == 32:
             self.py_qualifier += '-32'
 
-        if py_format is not None:
-            self.py_format = py_format
-        elif self.py_version_tuple >= (3, 6):
-            self.py_format = 'bundled'
-        else:
-            self.py_format = 'installer'
-        if self.py_version_tuple >= (3, 5):
-            if self.py_format not in {'installer', 'bundled'}:
-                raise InputError('py_format', self.py_format, "installer or bundled")
-        else:
-            if self.py_format != 'installer':
-                raise InputError('py_format', self.py_format, "installer (for Python < 3.5)")
+        if py_format == 'installer':
+            raise InputError('py_format', py_format, "'bundled' (use Pynsist 1.x for 'installer')")
+        elif py_format != 'bundled':
+            raise InputError('py_format', py_format, "'bundled'")
+
         self.inc_msvcrt = inc_msvcrt
 
         # Build details
@@ -145,15 +133,10 @@ class InstallerBuilder(object):
         self.installer_name = installer_name or self.make_installer_name()
         self.nsi_template = nsi_template
         if self.nsi_template is None:
-            if self.py_format == 'bundled':
-                if self.inc_msvcrt:
-                    self.nsi_template = 'pyapp_msvcrt.nsi'
-                else:
-                    self.nsi_template = 'pyapp.nsi'
-            elif self.py_version_tuple < (3, 3):
-                self.nsi_template = 'pyapp_w_pylauncher.nsi'
+            if self.inc_msvcrt:
+                self.nsi_template = 'pyapp_msvcrt.nsi'
             else:
-                self.nsi_template = 'pyapp_installpy.nsi'
+                self.nsi_template = 'pyapp.nsi'
 
         self.nsi_file = pjoin(self.build_dir, 'installer.nsi')
 
@@ -180,38 +163,18 @@ class InstallerBuilder(object):
     def _python_download_url_filename(self):
         version = self.py_version
         bitness = self.py_bitness
-        if self.py_version_tuple >= (3, 5):
-            if self.py_format == 'bundled':
-                filename = 'python-{}-embed-{}.zip'.format(version,
-                                           'amd64' if bitness==64 else 'win32')
-            else:
-                filename = 'python-{}{}.exe'.format(version,
-                                            '-amd64' if bitness==64 else '')
-        else:
-            filename = 'python-{0}{1}.msi'.format(version,
-                                            '.amd64' if bitness==64 else '')
+        filename = 'python-{}-embed-{}.zip'.format(version,
+                                   'amd64' if bitness==64 else 'win32')
 
         version_minus_prerelease = re.sub(r'(a|b|rc)\d+$', '', self.py_version)
         return 'https://www.python.org/ftp/python/{0}/{1}'.format(
                 version_minus_prerelease, filename), filename
 
-    def fetch_python(self):
-        """Fetch the MSI for the specified version of Python.
-
-        It will be placed in the build directory.
-        """
-        url, filename = self._python_download_url_filename()
-
-        cache_file = get_cache_dir(ensure_existence=True) / filename
-        if not cache_file.is_file():
-            logger.info('Downloading Python installer...')
-            logger.info('Getting %s', url)
-            download(url, cache_file)
-
-        logger.info('Copying Python installer to build directory')
-        shutil.copy2(str(cache_file), self.build_dir)
-
     def fetch_python_embeddable(self):
+        """Fetch the embeddable Windows build for the specified Python version
+
+        It will be unpacked into the build directory.
+        """
         url, filename = self._python_download_url_filename()
         cache_file = get_cache_dir(ensure_existence=True) / filename
         if not cache_file.is_file():
@@ -245,21 +208,6 @@ class InstallerBuilder(object):
                 raise
 
         shutil.copytree(src, dst)
-
-    def fetch_pylauncher(self):
-        """Fetch the MSI for PyLauncher (required for Python2.x).
-
-        It will be placed in the build directory.
-        """
-        arch_tag = '.amd64' if (self.py_bitness == 64) else ''
-        url = ("https://bitbucket.org/vinay.sajip/pylauncher/downloads/"
-               "launchwin{0}.msi".format(arch_tag))
-        target = pjoin(self.build_dir, 'launchwin{0}.msi'.format(arch_tag))
-        if os.path.isfile(target):
-            logger.info('PyLauncher MSI already in build directory.')
-            return
-        logger.info('Downloading PyLauncher MSI...')
-        download(url, target)
 
     SCRIPT_TEMPLATE = """#!python{qualifier}
 import sys, os
@@ -340,10 +288,7 @@ if __name__ == '__main__':
                 else:
                     shutil.copy2(sc['script'], self.build_dir)
 
-                if self.py_format == 'bundled':
-                    target = '$INSTDIR\Python\python{}.exe'
-                else:
-                    target = 'py{}'
+                target = '$INSTDIR\Python\python{}.exe'
                 sc['target'] = target.format('' if sc['console'] else 'w')
                 sc['parameters'] = '"%s"' % ntpath.join('$INSTDIR', sc['script'])
                 files.add(os.path.basename(sc['script']))
@@ -477,14 +422,9 @@ if __name__ == '__main__':
             if e.errno != errno.EEXIST:
                 raise e
 
-        if self.py_format == 'bundled':
-            self.fetch_python_embeddable()
-            if self.inc_msvcrt:
-                self.prepare_msvcrt()
-        else:
-            self.fetch_python()
-            if self.py_version < '3.3':
-                self.fetch_pylauncher()
+        self.fetch_python_embeddable()
+        if self.inc_msvcrt:
+            self.prepare_msvcrt()
 
         self.prepare_shortcuts()
 
