@@ -43,7 +43,6 @@ def test_valid_config_with_values_starting_on_new_line():
 
     assert args['py_version'] == '3.6.0'
     assert args['py_bitness'] == 64
-    assert args['py_format'] == 'bundled'
     assert args['inc_msvcrt'] == True
 
     assert args['build_dir'] == 'build/'
