@@ -2,7 +2,9 @@ Pynsist is a tool to build Windows installers for your Python applications. The
 installers bundle Python itself, so you can distribute your application to
 people who don't have Python installed.
 
-Pynsist requires Python 3.5 or above.
+Pynsist 2 requires Python 3.5 or above.
+You can use `Pynsist 1.x <http://pynsist.readthedocs.io/en/1.12/>`_ on
+Python 2.7 and Python 3.3 or above.
 
 For more information, see `the documentation <https://pynsist.readthedocs.io/en/latest/>`_
 and `the examples <https://github.com/takluyver/pynsist/tree/master/examples>`_.
