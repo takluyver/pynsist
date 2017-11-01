@@ -410,6 +410,7 @@ if __name__ == '__main__':
                 makensis = find_makensis_win()
             else:
                 makensis = 'makensis'
+            logger.info('\n~~~ Running makensis ~~~')
             return call([makensis, self.nsi_file])
         except OSError as e:
             # This should catch either the registry key or makensis being absent
