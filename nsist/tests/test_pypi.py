@@ -18,6 +18,25 @@ def test_download():
 # To exclude this, run:  nosetests -a '!network'
 test_download.network = 1
 
+def test_extra_sources():
+    with TemporaryDirectory() as td:
+        src1 = Path(td, 'src1')
+        src1.mkdir()
+        src2 = Path(td, 'src2')
+        src2.mkdir()
+
+        # First one found wins, even if a later one is more specific.
+        expected = (src1 / 'astsearch-0.1.2-py3-none-any.whl')
+        expected.touch()
+        (src2 / 'astsearch-0.1.2-py3-none-win_amd64.whl').touch()
+        wl = WheelLocator("astsearch==0.1.2", "3.5.1", 64,
+                          extra_sources=[src1, src2])
+        assert_equal(wl.check_extra_sources(), expected)
+
+        wl = WheelLocator("astsearch==0.2.0", "3.5.1", 64,
+                          extra_sources=[src1, src2])
+        assert_is(wl.check_extra_sources(), None)
+
 def test_pick_best_wheel():
     wd = WheelLocator("astsearch==0.1.2", "3.5.1", 64)
 
