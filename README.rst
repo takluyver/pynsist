@@ -28,10 +28,14 @@ Quickstart
        version=3.6.3
 
        [Include]
-       # Importable packages that your application requires, one per line
-       packages = requests
-            bs4
-            html5lib
+       # Packages from PyPI that your application requires, one per line
+       # These must have wheels on PyPI:
+       pypi_wheels = requests==2.18.4
+            beautifulsoup4==4.6.0
+            html5lib==0.999999999
+
+       # To bundle packages which don't publish wheels, see the docs on the
+       # config file.
 
        # Other files and folders that should be installed
        files = LICENSE
