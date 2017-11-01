@@ -12,6 +12,7 @@ above. For 'installer' format Python and older Python versions, use Pynsist 1.x
   to be used without admin access.
 * Get wheels for the installer from local directories, by listing the
   directories in ``extra_wheel_sources`` in the ``[Include]`` section.
+* Better error message when copying fails on a namespace package.
 
 Version 1.12
 ------------

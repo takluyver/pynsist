@@ -109,9 +109,13 @@ class ModuleCopier:
         and extract modules and packages from appropriately structured zip
         files.
         """
-        loader = importlib.find_loader(modname, self.path)
+        spec = importlib.machinery.PathFinder.find_spec(modname, self.path)
+        if spec is None:
+            raise ImportError('Could not find %r' % modname)
+        loader = spec.loader
         if loader is None:
-            raise ImportError('Could not find %s' % modname)
+            raise ImportError('Cannot bundle namespace package %r' % modname)
+
         pkg = loader.is_package(modname)
 
         if isinstance(loader, importlib.machinery.ExtensionFileLoader):
