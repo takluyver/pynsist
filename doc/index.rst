@@ -1,11 +1,11 @@
 pynsist |version|
 =================
 
-pynsist is a tool to build Windows installers for your Python applications. The
+Pynsist is a tool to build Windows installers for your Python applications. The
 installers bundle Python itself, so you can distribute your application to
 people who don't have Python installed.
 
-At present, pynsist requires Python 3.3 or above, or Python 2.7.
+Pynsist requires Python 3.5 or above.
 
 Quickstart
 ----------
@@ -28,10 +28,11 @@ Quickstart
        version=3.4.0
 
        [Include]
-       # Importable packages that your application requires, one per line
-       packages = requests
-            bs4
-            html5lib
+       # Packages from PyPI that your application requires, one per line
+       # These must have wheels on PyPI:
+       pypi_wheels = requests==2.18.4
+            beautifulsoup4==4.6.0
+            html5lib==0.999999999
 
        # Other files and folders that should be installed
        files = LICENSE

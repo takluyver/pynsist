@@ -7,9 +7,7 @@ Building installers
    
    .. automethod:: run
 
-   .. automethod:: fetch_python
-
-   .. automethod:: fetch_pylauncher
+   .. automethod:: fetch_python_embeddable
 
    .. automethod:: write_script
 

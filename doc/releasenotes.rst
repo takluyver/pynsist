@@ -42,8 +42,8 @@ Version 1.10
 Version 1.9
 -----------
 
-* When building an installer with Python 3.6 or above, :ref:`bundled Python
-  <python_bundled>` is now the default. For Python up to 3.5, 'installer' remains
+* When building an installer with Python 3.6 or above, bundled Python
+  is now the default. For Python up to 3.5, 'installer' remains
   the default format. You can override the default by specifying ``format`` in
   the :ref:`cfg_python` of the config file.
 * The C Runtime needed for bundled Python is now installed 'app-local', rather
@@ -65,7 +65,7 @@ Version 1.8
 * Fixed a bug with fetching a wheel when another version of the same package
   is already cached.
 * Fixed a bug in extracting files from certain wheels.
-* Installers using :ref:`bundled Python <python_bundled>` may need a Windows
+* Installers using bundled Python may need a Windows
   update package for the Microsoft C runtime. They now download this from the
   `RawGit <https://rawgit.com/>`__ CDN, rather than hitting GitHub directly.
 * If the Windows update package fails to install, an error message will be
@@ -84,8 +84,8 @@ Version 1.7
 Version 1.6
 -----------
 
-* Experimental support for creating installers that :ref:`bundle Python with the
-  application <python_bundled>`.
+* Experimental support for creating installers that bundle Python with the
+  application.
 * Support for Python 3.5 installers.
 * The user agent is set when downloading Python builds, so downloads from
   Pynsist can be identified.
