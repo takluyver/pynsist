@@ -2,6 +2,7 @@
 
 import configparser
 import os.path
+from pathlib import Path
 
 class SectionValidator(object):
     def __init__(self, keys):
@@ -71,6 +72,7 @@ CONFIG_VALIDATORS = {
     'Include': SectionValidator([
         ('packages', False),
         ('pypi_wheels', False),
+        ('extra_wheel_sources', False),
         ('files', False),
         ('exclude', False),
     ]),
@@ -220,6 +222,9 @@ def get_installer_builder_args(config):
     args['icon'] = appcfg.get('icon', DEFAULT_ICON)
     args['packages'] = config.get('Include', 'packages', fallback='').strip().splitlines()
     args['pypi_wheel_reqs'] = config.get('Include', 'pypi_wheels', fallback='').strip().splitlines()
+    args['extra_wheel_sources'] = [Path(p) for p in
+        config.get('Include', 'extra_wheel_sources', fallback='').strip().splitlines()
+    ]
     args['extra_files'] = read_extra_files(config)
     args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION)
     args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)

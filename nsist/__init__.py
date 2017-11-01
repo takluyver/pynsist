@@ -76,6 +76,8 @@ class InstallerBuilder(object):
     :param dict commands: Dictionary keyed by command name, containing dicts
             defining the commands, as in the config file.
     :param list pypi_wheel_reqs: Package specifications to fetch from PyPI as wheels
+    :param extra_wheel_sources: Directory paths to find wheels in.
+    :type extra_wheel_sources: list of Path objects
     :param list extra_files: List of 2-tuples (file, destination) of files to include
     :param list exclude: Paths of files to exclude that would otherwise be included
     :param str py_version: Full version of Python to bundle
@@ -88,12 +90,13 @@ class InstallerBuilder(object):
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
     """
-    def __init__(self, appname, version, shortcuts, publisher=None,
+    def __init__(self, appname, version, *, shortcuts, publisher=None,
                 icon=DEFAULT_ICON, packages=None, extra_files=None,
                 py_version=DEFAULT_PY_VERSION, py_bitness=DEFAULT_BITNESS,
                 py_format='bundled', inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
-                exclude=None, pypi_wheel_reqs=None, commands=None):
+                exclude=None, pypi_wheel_reqs=None, extra_wheel_sources=None,
+                commands=None):
         self.appname = appname
         self.version = version
         self.publisher = publisher
@@ -103,6 +106,7 @@ class InstallerBuilder(object):
         self.exclude = [os.path.normpath(p) for p in (exclude or [])]
         self.extra_files = extra_files or []
         self.pypi_wheel_reqs = pypi_wheel_reqs or []
+        self.extra_wheel_sources = extra_wheel_sources or []
         self.commands = commands or {}
 
         # Python options
@@ -319,7 +323,8 @@ if __name__ == '__main__':
 
         # 2. Wheels from PyPI
         fetch_pypi_wheels(self.pypi_wheel_reqs, build_pkg_dir,
-                          py_version=self.py_version, bitness=self.py_bitness)
+                          py_version=self.py_version, bitness=self.py_bitness,
+                          extra_sources=self.extra_wheel_sources)
 
         # 3. Copy importable modules
         copy_modules(self.packages, build_pkg_dir,

@@ -195,11 +195,6 @@ the line with the key:
       value2
       value3
 
-.. describe:: packages (optional)
-
-   A list of importable package and module names to include in the installer.
-   Specify only top-level packages, i.e. without a ``.`` in the name.
-
 .. describe:: pypi_wheels (optional)
 
    A list of packages to download from PyPI, in the format ``name==version``.
@@ -207,6 +202,21 @@ the line with the key:
    or eggs.
 
    .. versionadded:: 1.7
+
+.. describe:: extra_wheel_sources (optional)
+
+   One or more directory paths in which to find wheels, in addition to fetching
+   from PyPI. Each package will be retrieved from the first source containing a
+   compatible wheel, and all extra sources have priority over PyPI.
+
+   Relative paths are from the directory containing the config file.
+
+   .. versionadded:: 2.0
+
+.. describe:: packages (optional)
+
+   A list of importable package and module names to include in the installer.
+   Specify only top-level packages, i.e. without a ``.`` in the name.
 
 .. describe:: files (optional)
 

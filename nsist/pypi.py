@@ -27,11 +27,12 @@ def find_pypi_release(requirement):
 
 class NoWheelError(Exception): pass
 
-class WheelDownloader(object):
-    def __init__(self, requirement, py_version, bitness):
+class WheelLocator(object):
+    def __init__(self, requirement, py_version, bitness, extra_sources=None):
         self.requirement = requirement
         self.py_version = py_version
         self.bitness = bitness
+        self.extra_sources = extra_sources or []
 
         if requirement.count('==') != 1:
             raise ValueError("Requirement {!r} did not match name==version".format(requirement))
@@ -85,7 +86,30 @@ class WheelDownloader(object):
 
         return best
 
+    def check_extra_sources(self):
+        """Find a compatible wheel in the specified extra_sources directories.
+
+        Returns a Path or None.
+        """
+        whl_filename_prefix = '{name}-{version}-'.format(
+            name=re.sub("[^\w\d.]+", "_", self.name),
+            version=re.sub("[^\w\d.]+", "_", self.version),
+        )
+        for source in self.extra_sources:
+            candidates = [CachedRelease(p.name)
+                          for p in source.iterdir()
+                          if p.name.startswith(whl_filename_prefix)]
+            rel = self.pick_best_wheel(candidates)
+            if rel:
+                path = source / rel.filename
+                logger.info('Using wheel from extra directory: %s', path)
+                return path
+
     def check_cache(self):
+        """Find a wheel previously downloaded from PyPI in the cache.
+
+        Returns a Path or None.
+        """
         release_dir = get_cache_dir() / 'pypi' / self.name / self.version
         if not release_dir.is_dir():
             return None
@@ -98,11 +122,12 @@ class WheelDownloader(object):
         logger.info('Using cached wheel: %s', rel.filename)
         return release_dir / rel.filename
 
-    def fetch(self):
-        p = self.check_cache()
-        if p is not None:
-            return p
+    def get_from_pypi(self):
+        """Download a compatible wheel from PyPI.
 
+        Downloads to the cache directory and returns the destination as a Path.
+        Raises NoWheelError if no compatible wheel is found.
+        """
         release_list = yarg.get(self.name).release(self.version)
         preferred_release = self.pick_best_wheel(release_list)
         if preferred_release is None:
@@ -128,6 +153,18 @@ class WheelDownloader(object):
             raise ValueError('Downloaded wheel corrupted: {}'.format(preferred_release.url))
 
         return target
+
+    def fetch(self):
+        """Find and return a compatible wheel (main interface)"""
+        p = self.check_extra_sources()
+        if p is not None:
+            return p
+
+        p = self.check_cache()
+        if p is not None:
+            return p
+
+        return self.get_from_pypi()
 
 
 class CachedRelease(object):
@@ -204,8 +241,9 @@ def extract_wheel(whl_file, target_dir):
     shutil.rmtree(str(td))
 
 
-def fetch_pypi_wheels(requirements, target_dir, py_version, bitness):
+def fetch_pypi_wheels(requirements, target_dir, py_version, bitness,
+                      extra_sources=None):
     for req in requirements:
-        wd = WheelDownloader(req, py_version, bitness)
-        whl_file = wd.fetch()
+        wl = WheelLocator(req, py_version, bitness, extra_sources)
+        whl_file = wl.fetch()
         extract_wheel(whl_file, target_dir)

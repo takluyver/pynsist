@@ -38,7 +38,8 @@ Quickstart
        files = LICENSE
            data_files/
 
-  See :doc:`cfgfile` for more details about this.
+   See :doc:`cfgfile` for more details about this, including how to bundle
+   packages which don't publish wheels.
 
 3. Run ``pynsist installer.cfg`` to generate your installer. If ``pynsist`` isn't
    found, you can use ``python -m nsist installer.cfg`` instead.

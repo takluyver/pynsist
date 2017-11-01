@@ -10,6 +10,8 @@ above. For 'installer' format Python and older Python versions, use Pynsist 1.x
 
 * Pynsist installers can now install into a per-user directory, allowing them
   to be used without admin access.
+* Get wheels for the installer from local directories, by listing the
+  directories in ``extra_wheel_sources`` in the ``[Include]`` section.
 
 Version 1.12
 ------------
