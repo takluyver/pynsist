@@ -90,7 +90,7 @@ class InstallerBuilder(object):
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
     """
-    def __init__(self, appname, version, *, shortcuts, publisher=None,
+    def __init__(self, appname, version, shortcuts, *, publisher=None,
                 icon=DEFAULT_ICON, packages=None, extra_files=None,
                 py_version=DEFAULT_PY_VERSION, py_bitness=DEFAULT_BITNESS,
                 py_format='bundled', inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
