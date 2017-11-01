@@ -1,16 +1,13 @@
 from nose.tools import *
 from os.path import join as pjoin
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path  # Backport
+from pathlib import Path
 from testpath import assert_isfile, assert_isdir
 from testpath.tempdir import TemporaryDirectory
 
-from nsist.pypi import WheelDownloader, extract_wheel, CachedRelease, merge_dir_to
+from nsist.pypi import WheelLocator, extract_wheel, CachedRelease, merge_dir_to
 
 def test_download():
-    wd = WheelDownloader("astsearch==0.1.2", "3.5.1", 64)
+    wd = WheelLocator("astsearch==0.1.2", "3.5.1", 64)
     wheel = wd.fetch()
     assert_isfile(str(wheel))
 
@@ -22,7 +19,7 @@ def test_download():
 test_download.network = 1
 
 def test_pick_best_wheel():
-    wd = WheelDownloader("astsearch==0.1.2", "3.5.1", 64)
+    wd = WheelLocator("astsearch==0.1.2", "3.5.1", 64)
 
     # Some of the wheel filenames below are impossible combinations - they are
     # there to test the scoring and ranking machinery.
