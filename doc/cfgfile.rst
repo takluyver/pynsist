@@ -197,8 +197,9 @@ the line with the key:
 
 .. describe:: pypi_wheels (optional)
 
-   A list of packages to download from PyPI, in the format ``name==version``.
-   These must be available as wheels; Pynsist will not try to download sdists
+   A list of packages in the format ``name==version`` to download from PyPI or
+   extract from the directories in ``extra_wheel_sources``.
+   These must be available as wheels; Pynsist will not try to use sdists
    or eggs.
 
    .. versionadded:: 1.7
@@ -206,7 +207,8 @@ the line with the key:
 .. describe:: extra_wheel_sources (optional)
 
    One or more directory paths in which to find wheels, in addition to fetching
-   from PyPI. Each package will be retrieved from the first source containing a
+   from PyPI. Each package listed in ``pypi_wheels`` will be retrieved from the
+   first source containing a
    compatible wheel, and all extra sources have priority over PyPI.
 
    Relative paths are from the directory containing the config file.
@@ -217,6 +219,12 @@ the line with the key:
 
    A list of importable package and module names to include in the installer.
    Specify only top-level packages, i.e. without a ``.`` in the name.
+
+   .. note::
+
+      The ``packages`` option finds and copies installed packages from your
+      development environment. Specifying packages in ``pypi_wheels`` instead
+      is more reliable, and works with namespace packages.
 
 .. describe:: files (optional)
 
@@ -247,8 +255,6 @@ the line with the key:
    Python library or extra directory only partially, for example to include
    large monolithic python packages without their samples and test suites to
    achieve a smaller installer file.
-
-   Please note:
 
    * The parameter is expected to contain a list of files *relative to the
      build directory*. Therefore, to include files from a package, you have to
