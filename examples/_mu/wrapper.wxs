@@ -1,4 +1,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+   <!-- UpgradeCode should be the same across versions of one app,
+   but must be different for another app. If you copy this, generate
+   a new UUID for it! -->
    <Product Id="*" UpgradeCode="4981284B-DCB8-4257-91CA-D79EDC94A9E8" 
             Name="Mu Editor" Version="0.0.1" Manufacturer="Trylan Erruh" Language="1033">
       <Package InstallerVersion="200" Compressed="yes" Comments="Windows Installer Package"/>
