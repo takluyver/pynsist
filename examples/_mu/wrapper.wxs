@@ -1,0 +1,29 @@
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+   <Product Id="*" UpgradeCode="4981284B-DCB8-4257-91CA-D79EDC94A9E8" 
+            Name="Mu Editor" Version="0.0.1" Manufacturer="Trylan Erruh" Language="1033">
+      <Package InstallerVersion="200" Compressed="yes" Comments="Windows Installer Package"/>
+      <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
+ 
+      <Directory Id="TARGETDIR" Name="SourceDir">
+		<Directory Id="ProgramFilesFolder">
+            <Directory Id="INSTALLDIR" Name="Mu Editor">
+			</Directory>
+		</Directory>
+		<Directory Id="ProgramMenuFolder">
+		   <Component Id="ApplicationShortcuts" Guid="*">
+			  <Shortcut Id="ApplicationShortcut1" Name="Mu" Description="Run Python code" 
+						Target="[INSTALLDIR]Python\python.exe" Arguments="&quot;[INSTALLDIR]mu.launch.py&quot;"/>
+			  <!-- If this component doesn't have the registry entry below, Wix 
+			  refuses to autogenerate a GUID for it. -->
+			  <RegistryValue Root="HKCU" Key="Software\Trylan Erruh\Mu Editor" 
+						Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+		   </Component>
+         </Directory>
+      </Directory>
+ 
+      <Feature Id="DefaultFeature" Level="1">
+         <ComponentGroupRef Id="ApplicationFiles"/>
+		 <ComponentRef Id="ApplicationShortcuts"/>
+      </Feature>
+   </Product>
+</Wix>
