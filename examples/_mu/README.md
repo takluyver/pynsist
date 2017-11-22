@@ -8,3 +8,8 @@ To build the MSI package:
 2. Run `prep_files.py` in this folder to move some files and call 'heat' to
    make a list of the files.
 3. Run `wixit.py` in this folder to build the msi package.
+
+## Resources
+
+- https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with
+- https://www.firegiant.com/wix/tutorial/getting-started/the-files-inside/
