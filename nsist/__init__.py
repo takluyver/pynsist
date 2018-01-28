@@ -201,7 +201,9 @@ class InstallerBuilder(object):
             z.extractall(python_dir)
 
         # Manipulate any *._pth files so the default paths AND pkgs directory
-        # ends up in sys.path.
+        # ends up in sys.path. Please see:
+        # https://docs.python.org/3/using/windows.html#finding-modules
+        # for more information.
         pth_files = [f for f in os.listdir(python_dir)
                      if os.path.isfile(pjoin(python_dir, f))
                      and f.endswith('._pth')]
