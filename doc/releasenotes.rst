@@ -1,6 +1,14 @@
 Release notes
 =============
 
+Version 2.1
+-----------
+
+* Fix for launching Python subprocesses with the installed packages available
+  for import (:ghpull:`142`).
+* Ensure ``.pth`` files in the installed packages directory are read
+  (:ghpull:`138`).
+
 Version 2.0
 -----------
 

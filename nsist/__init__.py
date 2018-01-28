@@ -26,7 +26,7 @@ from .nsiswriter import NSISFileWriter
 from .pypi import fetch_pypi_wheels
 from .util import download, text_types, get_cache_dir
 
-__version__ = '2.0'
+__version__ = '2.1'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
