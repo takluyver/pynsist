@@ -178,6 +178,9 @@ class InstallerBuilder(object):
         """Fetch the embeddable Windows build for the specified Python version
 
         It will be unpacked into the build directory.
+
+        In addition, any *._pth files found therein will have the pkgs path
+        appended to them.
         """
         url, filename = self._python_download_url_filename()
         cache_file = get_cache_dir(ensure_existence=True) / filename
@@ -196,6 +199,15 @@ class InstallerBuilder(object):
 
         with zipfile.ZipFile(str(cache_file)) as z:
             z.extractall(python_dir)
+
+        # Manipulate any *._pth files so the default paths AND pkgs directory
+        # ends up in sys.path.
+        pth_files = [f for f in os.listdir(python_dir)
+                     if os.path.isfile(pjoin(python_dir, f))
+                     and f.endswith('._pth')]
+        for pth in pth_files:
+            with open(pjoin(python_dir, pth), 'a+b') as f:
+                f.write(b'\r\n..\\pkgs\r\n')
 
         self.install_dirs.append(('Python', '$INSTDIR'))
 
