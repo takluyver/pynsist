@@ -1,0 +1,32 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "nsist"
+author = "Thomas Kluyver"
+author-email = "thomas@kluyver.me.uk"
+dist-name = "pynsist"
+home-page = "https://pynsist.readthedocs.io/en/latest/"
+description-file = "README.rst"
+requires-python = ">=3.5"
+requires = [
+    "requests",
+    "requests_download",
+    "jinja2",
+    "yarg",
+    "win_cli_launchers"
+]
+dev-requires = ["testpath"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Environment :: Win32 (MS Windows)",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development",
+    "Topic :: System :: Installation/Setup",
+    "Topic :: System :: Software Distribution",
+]
+
+[tool.flit.scripts]
+pynsist = "nsist:main"
