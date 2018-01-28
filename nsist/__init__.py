@@ -179,7 +179,7 @@ class InstallerBuilder(object):
 
         It will be unpacked into the build directory.
 
-        In addition, any *._pth files found therein will have the pkgs path
+        In addition, any ``*._pth`` files found therein will have the pkgs path
         appended to them.
         """
         url, filename = self._python_download_url_filename()
