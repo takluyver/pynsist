@@ -209,7 +209,7 @@ class InstallerBuilder(object):
                      and f.endswith('._pth')]
         for pth in pth_files:
             with open(pjoin(python_dir, pth), 'a+b') as f:
-                f.write(b'\r\n..\\pkgs\r\n')
+                f.write(b'\r\n..\\pkgs\r\nimport site\r\n')
 
         self.install_dirs.append(('Python', '$INSTDIR'))
 
