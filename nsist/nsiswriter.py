@@ -46,7 +46,9 @@ class NSISFileWriter(object):
         grouped_files = [(dest, [x[0] for x in group]) for (dest, group) in
             itertools.groupby(self.installerbuilder.install_files, itemgetter(1))
                 ]
-
+        license = None
+        if installerbuilder.license:
+            license = os.path.basename(installerbuilder.license)
         self.namespace = {
             'ib': installerbuilder,
             'grouped_files': grouped_files,
@@ -56,7 +58,8 @@ class NSISFileWriter(object):
             'single_shortcut': len(installerbuilder.shortcuts) == 1,
             'pynsist_pkg_dir': _PKGDIR,
             'has_commands': len(installerbuilder.commands) > 0,
-            'python': '"$INSTDIR\\Python\\python"'
+            'python': '"$INSTDIR\\Python\\python"',
+            'license': license,
         }
 
     def write(self, target):
