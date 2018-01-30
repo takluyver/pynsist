@@ -96,7 +96,7 @@ class InstallerBuilder(object):
                 py_format='bundled', inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None, pypi_wheel_reqs=None, extra_wheel_sources=None,
-                commands=None, license=None):
+                commands=None, license_file=None):
         self.appname = appname
         self.version = version
         self.publisher = publisher
@@ -108,7 +108,7 @@ class InstallerBuilder(object):
         self.pypi_wheel_reqs = pypi_wheel_reqs or []
         self.extra_wheel_sources = extra_wheel_sources or []
         self.commands = commands or {}
-        self.license = license
+        self.license_file = license_file
 
         # Python options
         self.py_version = py_version
@@ -202,9 +202,7 @@ class InstallerBuilder(object):
             z.extractall(python_dir)
 
         # Manipulate any *._pth files so the default paths AND pkgs directory
-        # ends up in sys.path. Please see:
-        # https://docs.python.org/3/using/windows.html#finding-modules
-        # for more information.
+        # ends up in sys.path.
         pth_files = [f for f in os.listdir(python_dir)
                      if os.path.isfile(pjoin(python_dir, f))
                      and f.endswith('._pth')]
@@ -283,7 +281,7 @@ if __name__ == '__main__':
         copy to the build directory. Prepare target and parameters for these
         shortcuts.
 
-        Also copies shortcut icons, and, if specified, the license file.
+        Also copies shortcut icons.
         """
         files = set()
         for scname, sc in self.shortcuts.items():
@@ -315,14 +313,18 @@ if __name__ == '__main__':
             shutil.copy2(sc['icon'], self.build_dir)
             sc['icon'] = os.path.basename(sc['icon'])
             files.add(sc['icon'])
+        self.install_files.extend([(f, '$INSTDIR') for f in files])
 
-        # Copy license
-        if self.license:
-            shutil.copy2(self.license, self.build_dir)
-            license_file_name = os.path.basename(self.license)
+    def copy_license(self):
+        """
+        If a license file has been specified, ensure it's copied into the
+        install directory and added to the install_files list.
+        """
+        if self.license_file:
+            shutil.copy2(self.license_file, self.build_dir)
+            license_file_name = os.path.basename(self.license_file)
             self.install_files.append((license_file_name, '$INSTDIR'))
 
-        self.install_files.extend([(f, '$INSTDIR') for f in files])
 
     def prepare_packages(self):
         """Move requested packages into the build directory.
@@ -454,6 +456,8 @@ if __name__ == '__main__':
             self.prepare_msvcrt()
 
         self.prepare_shortcuts()
+
+        self.copy_license()
 
         if self.commands:
             self.prepare_commands()

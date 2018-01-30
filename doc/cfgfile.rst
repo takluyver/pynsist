@@ -81,7 +81,7 @@ Application section
    If you use the Python API, this parameter can also be passed as a file-like
    object, such as :class:`io.StringIO`.
 
-.. describe:: license (optional)
+.. describe:: license_file (optional)
 
   Path to a text file containing the license under which your software is to
   be distributed. If given, an extra step before installation will check the

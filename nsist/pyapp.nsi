@@ -32,8 +32,8 @@ SetCompressor lzma
 ; UI pages
 [% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
-[% if license %]
-!insertmacro MUI_PAGE_LICENSE [[license]]
+[% if license_file %]
+!insertmacro MUI_PAGE_LICENSE [[license_file]]
 [% endif %]
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 !insertmacro MUI_PAGE_DIRECTORY
