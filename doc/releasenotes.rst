@@ -1,6 +1,17 @@
 Release notes
 =============
 
+Version 2.2
+-----------
+
+* Ensure that if an icon is specified it will be used during install and
+  uninstall, and as the icon for the installer itself (:ghpull:`143`).
+* Add handling of a license file. If a `license_file` is given in the
+  `Application` section of the configuration file an additional step will take
+  place before installation to check the user's agreement to abide by the
+  displayed license. If the license is not given, the extra step is omitted
+  (the default behaviour) (:ghpull:`143`).
+
 Version 2.1
 -----------
 
