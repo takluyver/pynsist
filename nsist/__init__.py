@@ -26,7 +26,7 @@ from .nsiswriter import NSISFileWriter
 from .pypi import fetch_pypi_wheels
 from .util import download, text_types, get_cache_dir
 
-__version__ = '2.0'
+__version__ = '2.1'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
@@ -180,7 +180,7 @@ class InstallerBuilder(object):
 
         It will be unpacked into the build directory.
 
-        In addition, any *._pth files found therein will have the pkgs path
+        In addition, any ``*._pth`` files found therein will have the pkgs path
         appended to them.
         """
         url, filename = self._python_download_url_filename()
@@ -208,7 +208,7 @@ class InstallerBuilder(object):
                      and f.endswith('._pth')]
         for pth in pth_files:
             with open(pjoin(python_dir, pth), 'a+b') as f:
-                f.write(b'\r\n..\\pkgs\r\n')
+                f.write(b'\r\n..\\pkgs\r\nimport site\r\n')
 
         self.install_dirs.append(('Python', '$INSTDIR'))
 

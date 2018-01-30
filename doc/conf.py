@@ -37,7 +37,10 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinxcontrib_github_alt',
 ]
+
+github_project_url = "https://github.com/takluyver/pynsist"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

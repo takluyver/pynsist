@@ -3,3 +3,4 @@ requests
 win_cli_launchers
 yarg
 requests_download
+sphinxcontrib_github_alt
