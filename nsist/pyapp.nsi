@@ -26,11 +26,15 @@ SetCompressor lzma
 ; Modern UI installer stuff 
 !include "MUI2.nsh"
 !define MUI_ABORTWARNING
-!define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+!define MUI_ICON "[[icon]]"
+!define MUI_UNICON "[[icon]]"
 
 ; UI pages
 [% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
+[% if license_file %]
+!insertmacro MUI_PAGE_LICENSE [[license_file]]
+[% endif %]
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES

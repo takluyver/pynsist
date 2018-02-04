@@ -62,8 +62,9 @@ Application section
 
 .. describe:: icon (optional)
 
-  Path to a ``.ico`` file to be used for shortcuts to your application. Pynsist
-  has a default generic icon, but you probably want to replace it.
+  Path to a ``.ico`` file to be used for shortcuts to your application and
+  during the install/uninstall process. Pynsist has a default generic icon, but
+  you probably want to replace it.
 
 .. describe:: console (optional)
 
@@ -79,6 +80,13 @@ Application section
    
    If you use the Python API, this parameter can also be passed as a file-like
    object, such as :class:`io.StringIO`.
+
+.. describe:: license_file (optional)
+
+  Path to a text file containing the license under which your software is to
+  be distributed. If given, an extra step before installation will check the
+  user's agreement to abide by the displayed license. If not given, the extra
+  step is omitted.
 
 .. _shortcut_config:
 

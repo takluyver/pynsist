@@ -63,6 +63,7 @@ CONFIG_VALIDATORS = {
         ('icon', False),
         ('console', False),
         ('extra_preamble', False),
+        ('license_file', False),
     ]),
     'Build': SectionValidator([
         ('directory', False),
@@ -220,6 +221,7 @@ def get_installer_builder_args(config):
     args['commands'] = read_commands_config(config)
     args['publisher'] = appcfg.get('publisher', None)
     args['icon'] = appcfg.get('icon', DEFAULT_ICON)
+    args['license_file'] = appcfg.get('license_file', None)
     args['packages'] = config.get('Include', 'packages', fallback='').strip().splitlines()
     args['pypi_wheel_reqs'] = config.get('Include', 'pypi_wheels', fallback='').strip().splitlines()
     args['extra_wheel_sources'] = [Path(p) for p in
