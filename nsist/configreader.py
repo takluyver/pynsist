@@ -76,6 +76,7 @@ CONFIG_VALIDATORS = {
         ('extra_wheel_sources', False),
         ('files', False),
         ('exclude', False),
+        ('install_commands', False),
     ]),
     'Python': SectionValidator([
         ('version', False),
@@ -235,4 +236,5 @@ def get_installer_builder_args(config):
     args['installer_name'] = config.get('Build', 'installer_name', fallback=None)
     args['nsi_template'] = config.get('Build', 'nsi_template', fallback=None)
     args['exclude'] = config.get('Include', 'exclude', fallback='').strip().splitlines()
+    args['install_commands'] = config.get('Include', 'install_commands', fallback='').strip().splitlines()
     return args
