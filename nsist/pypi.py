@@ -15,7 +15,7 @@ import zipfile
 import yarg
 from requests_download import download, HashTracker
 
-from .util import get_cache_dir
+from .util import get_cache_dir, normalize_path
 
 logger = logging.getLogger(__name__)
 
@@ -261,6 +261,7 @@ def fetch_pypi_wheels(requirements, target_dir, py_version, bitness,
 
 def is_excluded(path, exclude):
     """Return True if path matches an exclude pattern"""
+    path = normalize_path(path)
     for pattern in (exclude or ()):
         if fnmatch.fnmatch(path, pattern):
             return True

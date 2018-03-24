@@ -64,3 +64,8 @@ def get_cache_dir(ensure_existence=False):
                 raise
 
     return p
+
+
+def normalize_path(path):
+    """Normalize paths to contain "/" only"""
+    return os.path.normpath(path).replace('\\', '/')

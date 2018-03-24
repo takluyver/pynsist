@@ -9,6 +9,8 @@ import zipfile, zipimport
 import fnmatch
 from functools import partial
 
+from .util import normalize_path
+
 pjoin = os.path.join
 
 PY2 = sys.version_info[0] == 2
@@ -77,8 +79,7 @@ def copytree_ignore_callback(excludes, pkgdir, modname, directory, files):
     # Filter by file names relative to the build directory
     reldir = os.path.relpath(directory, pkgdir)
     target = os.path.join('pkgs', modname, reldir)
-    files = [os.path.normpath(os.path.join(target, fname)) for fname in files]
-
+    files = [normalize_path(os.path.join(target, fname)) for fname in files]
     # Execute all patterns
     for pattern in excludes + ['*.pyc']:
         ignored.update([

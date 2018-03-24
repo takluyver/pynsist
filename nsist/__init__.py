@@ -24,7 +24,7 @@ from .commands import prepare_bin_directory
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
 from .pypi import fetch_pypi_wheels
-from .util import download, text_types, get_cache_dir
+from .util import download, text_types, get_cache_dir, normalize_path
 
 __version__ = '2.1'
 
@@ -103,7 +103,7 @@ class InstallerBuilder(object):
         self.shortcuts = shortcuts
         self.icon = icon
         self.packages = packages or []
-        self.exclude = [os.path.normpath(p) for p in (exclude or [])]
+        self.exclude = [normalize_path(p) for p in (exclude or [])]
         self.extra_files = extra_files or []
         self.pypi_wheel_reqs = pypi_wheel_reqs or []
         self.extra_wheel_sources = extra_wheel_sources or []
