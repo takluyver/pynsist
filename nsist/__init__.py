@@ -349,7 +349,8 @@ if __name__ == '__main__':
         # 2. Wheels from PyPI
         fetch_pypi_wheels(self.pypi_wheel_reqs, build_pkg_dir,
                           py_version=self.py_version, bitness=self.py_bitness,
-                          extra_sources=self.extra_wheel_sources)
+                          extra_sources=self.extra_wheel_sources,
+                          exclude=self.exclude)
 
         # 3. Copy importable modules
         copy_modules(self.packages, build_pkg_dir,

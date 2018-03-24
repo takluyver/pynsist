@@ -1,5 +1,6 @@
 from distutils.version import LooseVersion
 import errno
+import fnmatch
 import hashlib
 import logging
 try:
@@ -199,13 +200,22 @@ def merge_dir_to(src, dst):
                                    .format(p, dst_p))
             shutil.copy2(str(p), str(dst_p))
 
-def extract_wheel(whl_file, target_dir):
+
+def extract_wheel(whl_file, target_dir, exclude=None):
     """Extract importable modules from a wheel to the target directory
     """
     # Extract to temporary directory
     td = Path(mkdtemp())
     with zipfile.ZipFile(str(whl_file), mode='r') as zf:
-        zf.extractall(str(td))
+        if exclude:
+            basename = Path(Path(target_dir).name)
+            for zpath in zf.namelist():
+                path = basename / zpath
+                if is_excluded(path, exclude):
+                    continue  # Skip excluded paths
+                zf.extract(zpath, path=str(td))
+        else:
+            zf.extractall(str(td))
 
     # Move extra lib files out of the .data subdirectory
     for p in td.iterdir():
@@ -242,8 +252,16 @@ def extract_wheel(whl_file, target_dir):
 
 
 def fetch_pypi_wheels(requirements, target_dir, py_version, bitness,
-                      extra_sources=None):
+                      extra_sources=None, exclude=None):
     for req in requirements:
         wl = WheelLocator(req, py_version, bitness, extra_sources)
         whl_file = wl.fetch()
-        extract_wheel(whl_file, target_dir)
+        extract_wheel(whl_file, target_dir, exclude=exclude)
+
+
+def is_excluded(path, exclude):
+    """Return True if path matches an exclude pattern"""
+    for pattern in (exclude or ()):
+        if fnmatch.fnmatch(path, pattern):
+            return True
+    return False
