@@ -271,7 +271,7 @@ the line with the key:
      shell.
    * If you want to exclude whole subfolders, do *not* put a path separator 
      (e.g. ``/``) at their end.
-   * The exclude patterns are only applied to packages and to directories
+   * The exclude patterns are applied to packages, pypi wheels, and directories
      specified using the ``files`` option. If your ``exclude`` option directly 
      contradicts your ``files`` or ``packages`` option, the files in question
      will be included (you can not exclude a full package/extra directory
