@@ -231,6 +231,7 @@ class InstallerBuilder(object):
     SCRIPT_TEMPLATE = """#!python{qualifier}
 import sys, os
 scriptdir, script = os.path.split(__file__)
+installdir = scriptdir  # for compatibility with commands
 pkgdir = os.path.join(scriptdir, 'pkgs')
 sys.path.insert(0, pkgdir)
 os.environ['PYTHONPATH'] = pkgdir + os.pathsep + os.environ.get('PYTHONPATH', '')
