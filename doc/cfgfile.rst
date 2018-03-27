@@ -277,7 +277,7 @@ the line with the key:
      will be included (you can not exclude a full package/extra directory
      or a single file listed in ``files``).
    * Exclude patterns are applied uniformly across platforms and can use
-     either Unix-style forward-slash (`/`), or Windows-style back-slash (`\`)
+     either Unix-style forward-slash (``/``), or Windows-style back-slash (``\``)
      path separators.  Exclude patterns are normalized so that patterns
      written on Unix will work on Windows, and vice-versa.
 
