@@ -65,6 +65,47 @@ application (``sys.modules['__main__'].__file__``).
 
        writable_file = os.path.join(os.environ['LOCALAPPDATA'], 'MyApp', 'file.dat')
 
+Packaging with tkinter
+----------------------
+
+Because Pynsist makes use of the "bundled" versions of Python the ``tkinter``
+module isn't included by default. If your application relies on ``tkinter`` for
+a GUI then you need to find the following assets:
+
+* The ``tcl`` directory in the root directory of the version of Python you are
+  using in your app. This must be the same bitness and version.
+* The ``_tkinter.pyd``, ``tcl86t.dll`` and ``tk86t.dll`` libraries in the
+  ``DLLs`` directory of the version of Python your are using in your app. As
+  above, these must be the same bitness and version as your target version of
+  Python.
+* The ``_tkinter.lib`` file in the ``libs`` directory of the version of Python
+  you are using in your app. Same caveats as above.
+
+The ``tcl`` directory should be copied into the root of your project and
+renamed to ``lib`` (this is important!).
+
+Create a new directory in the root of your project called ``pynsis_pkgs`` and
+copy over the other four files mentioned above into it (so it contains
+``_tkinter.lib``, ``_tkinter.pyd``, ``tcl86t.dll`` and ``tk86t.dll``).
+
+Finally, in your ``.cfg`` file ensure the ``packages`` section contains
+``tkinter`` and ``_tkinter``, and the ``files`` section contains ``lib`` like
+this::
+
+    packages=
+        tkinter
+        _tkinter
+
+    files=lib
+
+Build your installer and test it. You'll know everything is in the right place
+if the directory into which your application is installed contains a ``lib``
+directory containing the contents of the original ``tcl`` directory and the
+``Python`` directory contains the remaining four files. If things still don't
+work check the bitness and Python version associated with these assets and
+make sure they're the same as the version of Python installed with your
+application.
+
 Code signing
 ------------
 
