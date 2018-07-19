@@ -53,6 +53,11 @@ Section -SETTINGS
 SectionEnd
 
 [% block sections %]
+[% if has_prereq %]
+Section -Prerequisites
+  [[gen_prereq()]]
+SectionEnd
+[% endif %]
 
 Section "!${PRODUCT_NAME}" sec_app
   SetRegView [[ib.py_bitness]]
@@ -160,6 +165,11 @@ Section "Uninstall"
     nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_system_path.py" remove "$INSTDIR\bin"'
   [% endif %]
   [% endblock uninstall_commands %]
+
+  ; Remove prerequisites
+  [% if has_prereq %]
+    RMDir /r "$INSTDIR\\Prerequisites"
+  [% endif %]
 
   [% block uninstall_files %]
   ; Uninstall files
