@@ -100,6 +100,16 @@ class InstallerBuilder(object):
     :param str build_dir: Directory to run the build in
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
+    :param list extra_installers: List of 4-tuples (file (str), message (str), type (int), condition (function)) to other compiled installers to run
+            The different types are as follows:
+                0: The user does not have to do anything
+                1: The user has to say yes or no
+                2: The user has to click ok
+            The condition should be None or a function that returns the following:
+                True: the extra installer should run
+                False: it should be skipped
+                string: A file path to check if it exists
+
     """
     def __init__(self, appname, version, shortcuts, *, publisher=None,
                 icon=DEFAULT_ICON, packages=None, extra_files=None,
@@ -107,7 +117,7 @@ class InstallerBuilder(object):
                 py_format='bundled', inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None, pypi_wheel_reqs=None, extra_wheel_sources=None,
-                commands=None, license_file=None):
+                commands=None, license_file=None, extra_installers=None):
         self.appname = appname
         self.version = version
         self.publisher = publisher
@@ -120,6 +130,7 @@ class InstallerBuilder(object):
         self.extra_wheel_sources = extra_wheel_sources or []
         self.commands = commands or {}
         self.license_file = license_file
+        self.extra_installers = extra_installers or []
 
         # Python options
         self.py_version = py_version
@@ -425,6 +436,72 @@ if __name__ == '__main__':
                 shutil.copy2(file, self.build_dir)
                 self.install_files.append((basename, destination))
 
+    def prepare_extra_installers(self):
+        """Copies the extra installers into the build directory
+        """
+
+        for file, _, _, _ in self.extra_installers:
+            file = file.rstrip('/\\')
+            basename = os.path.basename(file)
+
+            shutil.copy2(file, self.build_dir)
+            self.install_files.append((basename, '$INSTDIR\Prerequisites'))
+
+    def apply_extra_installers(self):
+        """Returns NSI code for the extra installers.
+        See: http://nsis.sourceforge.net/Embedding_other_installers
+        """
+
+        def escapeNewLine(oldText):
+            newText = re.sub("\n", "\\\\n", oldText)
+            return newText
+
+        code = 'SetOutPath "$INSTDIR\\Prerequisites"\n'
+        for i, (file, message, installType, condition) in enumerate(self.extra_installers):
+            file = file.rstrip('/\\')
+            basename = os.path.basename(file)
+            message = re.sub("(?<!\$)\n", "$\n", message) #Account for new lines
+
+            code += f"  Goto prereq_{i}.0_start\n"
+            code += f"  prereq_{i}.0_start:\n"
+            try:
+                if (condition != None):
+                    answer = condition()
+                    if (not answer):
+                        continue
+                    if (isinstance(answer, str)):
+                        #The file must not exist to continue
+                        code += f'    IfFileExists "{escapeNewLine(ensurePathFormat(answer))}" prereq_{i}.0_end prereq_{i}.1_start\n'
+                        code += f"    Goto prereq_{i}.0_end\n"
+                    else:
+                        code += f"    Goto prereq_{i}.1_start\n"
+
+
+                if (installType == 1):
+                    #The user has to say yes or no
+                    code += f"""    MessageBox MB_YESNO "{escapeNewLine(message) or f'Install {escapeNewLine(basename)}?'}" /SD IDYES IDNO prereq_{i}.0_end\n"""
+                    code += f"    Goto prereq_{i}.1_start\n"
+
+                elif (installType == 2):
+                    #The user has to say ok
+                    code += f"""    MessageBox MB_Ok "{escapeNewLine(message) or f'Press Ok to Install {escapeNewLine(basename)}'}"\n"""
+                    code += f"    Goto prereq_{i}.1_start\n"
+
+                #Run the installer
+                code += f"    prereq_{i}.1_start:\n"
+                if (basename.endswith(".exe")):
+                    code += f"""      ExecWait "$INSTDIR\Prerequisites\{escapeNewLine(basename)}"\n"""
+                elif(basename.endswith(".msi")):
+                    code += f"""      ExecWait '"msiexec" /i "$INSTDIR\Prerequisites\{escapeNewLine(basename)}"'\n"""
+                else:
+                    raise InputError('extra_installers file', file, "unknown file type")
+                code += f"      Goto prereq_{i}.0_end\n"
+
+            finally:
+                code += f"  prereq_{i}.0_end:\n"
+
+        return code.rstrip("\n")
+
     def write_nsi(self):
         """Write the NSI file to define the NSIS installer.
 
@@ -472,7 +549,7 @@ if __name__ == '__main__':
 
         self.prepare_shortcuts()
 
-        self.copy_license()
+        self.copy_license() #test2
 
         if self.commands:
             self.prepare_commands()
@@ -482,6 +559,10 @@ if __name__ == '__main__':
 
         # Extra files
         self.copy_extra_files()
+
+        # Extra installers
+        if self.extra_installers:
+            self.prepare_extra_installers()
 
         self.write_nsi()
 
