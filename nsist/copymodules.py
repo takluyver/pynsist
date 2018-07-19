@@ -18,7 +18,11 @@ class ExtensionModuleMismatch(ImportError):
     pass
 
 def pjoin(*args, **kwargs):
-    newPath = re.sub("[/\\\\](?!\\\\)", "\\\\\\\\", os.path.join(*args, **kwargs))
+    newPath = ensurePathFormat(os.path.join(*args, **kwargs))
+    return newPath
+
+def ensurePathFormat(oldPath):
+    newPath = re.sub("[/\\\\](?!\\\\)", "\\\\\\\\", oldPath)
     return newPath
 
 extensionmod_errmsg = """Found an extension module that will not be usable on %s:

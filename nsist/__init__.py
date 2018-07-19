@@ -30,6 +30,14 @@ __version__ = '2.1'
 
 logger = logging.getLogger(__name__)
 
+def pjoin(*args, **kwargs):
+    newPath = ensurePathFormat(os.path.join(*args, **kwargs))
+    return newPath
+
+def ensurePathFormat(oldPath):
+    newPath = re.sub("[/\\\\](?!\\\\)", "\\\\\\\\", oldPath)
+    return newPath
+
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_PY_VERSION = '3.6.3'
 DEFAULT_BUILD_DIR = pjoin('build', 'nsis')
