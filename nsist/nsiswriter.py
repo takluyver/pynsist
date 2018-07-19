@@ -11,6 +11,9 @@ _PKGDIR = os.path.abspath(os.path.dirname(__file__))
 
 PY2 = sys.version_info[0] == 2
 
+def pjoin(*args, **kwargs):
+    newPath = re.sub("[/\\\\](?!\\\\)", "\\\\\\\\", ntpath.join(*args, **kwargs))
+    return newPath
 
 class NSISFileWriter(object):
     """Write an .nsi script file by filling in a template.
@@ -54,7 +57,7 @@ class NSISFileWriter(object):
             'grouped_files': grouped_files,
             'icon': os.path.basename(installerbuilder.icon),
             'arch_tag': '.amd64' if (installerbuilder.py_bitness==64) else '',
-            'pjoin': ntpath.join,
+            'pjoin': pjoin,
             'single_shortcut': len(installerbuilder.shortcuts) == 1,
             'pynsist_pkg_dir': _PKGDIR,
             'has_commands': len(installerbuilder.commands) > 0,

@@ -11,13 +11,15 @@ from functools import partial
 
 from .util import normalize_path
 
-pjoin = os.path.join
-
 PY2 = sys.version_info[0] == 2
 running_python  = '.'.join(str(x) for x in sys.version_info[:2])
 
 class ExtensionModuleMismatch(ImportError):
     pass
+
+def pjoin(*args, **kwargs):
+    newPath = re.sub("[/\\\\](?!\\\\)", "\\\\\\\\", os.path.join(*args, **kwargs))
+    return newPath
 
 extensionmod_errmsg = """Found an extension module that will not be usable on %s:
 %s
