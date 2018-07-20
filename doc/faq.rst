@@ -119,7 +119,9 @@ Code signing
 People trying to use your installer will see an 'Unknown publisher' warning.
 To avoid this, you can sign it with a digital certificate. See
 `Mozilla's instructions on signing executables using Mono
-<https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Build_Instructions/Signing_an_executable_with_Authenticode>`__.
+<https://developer.mozilla.org/en-US/docs/Mozilla/Developer_guide/Build_Instructions/Signing_an_executable_with_Authenticode>`__,
+or `this guide from Adafruit on signing an installer
+<https://learn.adafruit.com/how-to-sign-windows-drivers-installer/making-an-installer#sign-the-installer>`__.
 
 Signing requires a certificate from a provider trusted by Microsoft.
 As of summer 2017, these are the cheapest options I can find:
