@@ -7,6 +7,59 @@
 !define INSTALLER_NAME "[[ib.installer_name]]"
 !define PRODUCT_ICON "[[icon]]"
 
+[% if has_checkDirContains or has_checkDirStartsWith or has_checkDirEndsWith or has_checkDirLike %]
+var str_filePath
+var str_dirPath
+var str_returnVar
+[% endif %]
+
+[% if has_checkDirContains %]
+!macro _checkDirContainsConstructor dirPath filePath 
+  ; Example Input: ${checkDirContains} "$INSTDIR";$str_returnVar = "true"
+  StrCpy $str_dirPath "${dirPath}"
+  StrCpy $str_filePath "${filePath}"
+  Call checkDirContains
+!macroend
+!define checkDirContains '!insertmacro "_checkDirContainsConstructor"'
+[% endif %]
+
+[% if has_checkDirStartsWith %]
+!macro _checkDirStartsWithConstructor dirPath filePath 
+  ; Example Input: ${StrEndsWith} "This" "This is just an example" ;$str_returnVar = "true"
+  ; Example Input: ${StrEndsWith} "missing" "This is another example" ;$str_returnVar = "false"
+  StrCpy $str_dirPath "${dirPath}"
+  StrCpy $str_filePath "${filePath}"
+  Call checkDirStartsWith
+!macroend
+!define checkDirStartsWith '!insertmacro "_checkDirStartsWithConstructor"'
+[% endif %]
+
+[% if has_checkDirEndsWith %]
+!macro _checkDirEndsWithConstructor dirPath filePath 
+  ; Example Input: ${StrEndsWith} "example" "This is just an example" ;$str_returnVar = "true"
+  ; Example Input: ${StrEndsWith} "missing" "This is another example" ;$str_returnVar = "false"
+  StrCpy $str_dirPath "${dirPath}"
+  StrCpy $str_filePath "${filePath}"
+  Call checkDirEndsWith
+!macroend
+!define checkDirEndsWith '!insertmacro "_checkDirEndsWithConstructor"'
+[% endif %]
+
+[% if has_checkDirLike %]
+var str_strContains_var1
+var str_strContains_var2
+var str_strContains_var3
+var str_strContains_var4
+!macro _checkDirLikeConstructor dirPath filePath
+  ; Example Input: ${checkDirLike} "just" "This is just an example" ;$str_returnVar = "true"
+  ; Example Input: ${checkDirLike} "missing" "This is another example" ;$str_returnVar = "false"
+  StrCpy $str_dirPath "${dirPath}"
+  StrCpy $str_filePath "${filePath}"
+  Call checkDirLike
+!macroend
+!define checkDirLike '!insertmacro "_checkDirLikeConstructor"'
+[% endif %]
+
 ; Marker file to tell the uninstaller that it's a user installation
 !define USER_INSTALL_MARKER _user_install_marker
  
@@ -226,5 +279,91 @@ Function correct_prog_files
   ; folder for 64-bit applications. Override the install dir it set.
   StrCmp $MultiUser.InstallMode AllUsers 0 +2
     StrCpy $INSTDIR "$PROGRAMFILES64\${MULTIUSER_INSTALLMODE_INSTDIR}"
+FunctionEnd
+[% endif %]
+
+[% if has_checkDirContains %]
+Function checkDirContains
+
+  ; ; Account for wildcard
+  ; ${checkDirStartsWith} "example" "This is just an example"
+  ; MessageBox MB_OK "At 3 - $str_returnVar , $str_value"
+  ; ${checkDirStartsWith} "missing" "This is just an example"
+  ; MessageBox MB_OK "At 4 - $str_returnVar, $str_value"
+
+  ${If} ${FileExists} "$str_dirPath\\\\$str_filePath"
+    MessageBox MB_OK "$str_filePath exists in $str_dirPath"
+    StrCpy $str_returnVar "true"
+  ${ELSE}
+    MessageBox MB_OK "$str_filePath Does not exist in $str_dirPath"
+    StrCpy $str_returnVar "false"
+  ${EndIf}
+FunctionEnd
+[% endif %]
+
+[% if has_checkDirStartsWith %]
+Function checkDirStartsWith
+  ; Modified Code from http://nsis.sourceforge.net/EnsureEndsWith
+
+  ; TO DO: Make this loop through the given directory
+  ; $str_value will be the current file that it is looking at
+  ; Keep looping until a match is found or all files have been examined
+
+  Push $R0
+  Push $R1
+  Push $R2
+
+  StrLen $R0 $str_filePath ; how long is the ending string
+  IntOp $R1 0 - $R0 ; how far to offset back from the end of the string
+  StrCpy $R2 $str_value $R0 $R1 ;take N chars starting N from the end of str_value put in R2
+  StrCmp $R2 $str_filePath found ;if the last N chars = str_filePath, good.
+  Goto notFound ; This will go to nextFile instead
+  found:
+    StrCpy $str_returnVar "true"
+    Goto done
+  notFound:
+    StrCpy $str_returnVar "false"
+    Goto done
+  done:
+ 
+  Pop $R2
+  Pop $R1
+  Pop $R0
+FunctionEnd
+[% endif %]
+
+[% if has_checkDirEndsWith %]
+Function checkDirEndsWith
+  ; TO DO: Modify checkDirStartsWith
+
+  StrCpy $str_returnVar "true"
+FunctionEnd
+[% endif %]
+
+[% if has_checkDirLike %]
+Function checkDirLike
+  ; Modified Code From kenglish_hi on http://nsis.sourceforge.net/StrContains
+
+  ; TO DO: Make this loop through the given directory
+  ; $str_haystack will be the current file that it is looking at
+  ; Keep looping until a match is found or all files have been examined
+
+  StrCpy $str_returnVar ""
+  StrCpy $str_strContains_var1 -1
+  StrLen $str_strContains_var2 $str_filePath
+  StrLen $str_strContains_var4 $str_haystack
+  loop:
+    IntOp $str_strContains_var1 $str_strContains_var1 + 1
+    StrCpy $str_strContains_var3 $str_haystack $str_strContains_var2 $str_strContains_var1
+    StrCmp $str_strContains_var3 $str_filePath found
+    StrCmp $str_strContains_var1 $str_strContains_var4 notFound ; This will go to nextFile instead
+    Goto loop
+  found:
+    StrCpy $str_returnVar "true"
+    Goto done
+  notFound:
+    StrCpy $str_returnVar "false"
+    Goto done
+  done:
 FunctionEnd
 [% endif %]
