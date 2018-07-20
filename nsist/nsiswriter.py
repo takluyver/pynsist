@@ -68,6 +68,7 @@ class NSISFileWriter(object):
             'has_commands': len(installerbuilder.commands) > 0,
             'has_prereq': len(installerbuilder.extra_installers) > 0,
             'gen_prereq': installerbuilder.apply_extra_installers,
+            'has_checkRegistry': installerbuilder.has_checkRegistry,
             'has_checkDirContains': installerbuilder.has_checkDirContains,
             'has_checkDirStartsWith': installerbuilder.has_checkDirStartsWith,
             'has_checkDirEndsWith': installerbuilder.has_checkDirEndsWith,

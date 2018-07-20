@@ -7,10 +7,24 @@
 !define INSTALLER_NAME "[[ib.installer_name]]"
 !define PRODUCT_ICON "[[icon]]"
 
-[% if has_checkDirContains or has_checkDirStartsWith or has_checkDirEndsWith or has_checkDirLike %]
+[% if has_checkDirContains or has_checkDirStartsWith or has_checkDirEndsWith or has_checkDirLike or has_checkRegistry %]
 var str_filePath
 var str_dirPath
 var str_returnVar
+[% endif %]
+
+[% if has_checkRegistry %]
+var root_key
+var checkBitness
+!macro _checkRegistryConstructor rootKey subKey name bitness
+  ; Example Input: ${checkRegistry} "HKLM" "Software\NSIS" "";$str_returnVar = "true"
+  StrCpy $root_key "${rootKey}"
+  StrCpy $str_dirPath "${subKey}"
+  StrCpy $str_filePath "${name}"
+  StrCpy $checkBitness ${bitness}
+  Call checkRegistry
+!macroend
+!define checkRegistry '!insertmacro "_checkRegistryConstructor"'
 [% endif %]
 
 [% if has_checkDirContains %]
@@ -282,20 +296,55 @@ Function correct_prog_files
 FunctionEnd
 [% endif %]
 
+[% if has_checkRegistry %]
+Function checkRegistry
+  ${Select} $checkBitness
+    ${Case} "64"
+      Setregview 64
+    ${Case} "32"
+      Setregview 32
+    ${CaseElse}
+      SetRegView [[ib.py_bitness]]
+  ${EndSelect}
+  
+  Push $R0
+  ${Select} $root_key
+    ${Case} "HKLM"
+      ReadRegStr $R0 HKLM $str_dirPath $str_filePath
+    ${Case} "HKCR"
+      ReadRegStr $R0 HKCR $str_dirPath $str_filePath
+    ${Case} "HKCU"
+      ReadRegStr $R0 HKCU $str_dirPath $str_filePath
+    ${Case} "HKU"
+      ReadRegStr $R0 HKU $str_dirPath $str_filePath
+    ${Case} "HKCC"
+      ReadRegStr $R0 HKCC $str_dirPath $str_filePath
+    ${Case} "HKDD"
+      ReadRegStr $R0 HKDD $str_dirPath $str_filePath
+    ${Case} "HKPD"
+      ReadRegStr $R0 HKPD $str_dirPath $str_filePath
+    ${Case} "SHCTX"
+      ReadRegStr $R0 SHCTX $str_dirPath $str_filePath
+    ${CaseElse}
+      StrCpy $R0 ""
+  ${EndSelect}
+
+  ${If} $R0 == ""
+    StrCpy $str_returnVar "false"
+  ${ELSE}
+    StrCpy $str_returnVar "true"
+  ${EndIf}
+  ; MessageBox MB_OK $str_returnVar, $R0"
+  Pop $R0
+  SetRegView [[ib.py_bitness]]
+FunctionEnd
+[% endif %]
+
 [% if has_checkDirContains %]
 Function checkDirContains
-
-  ; ; Account for wildcard
-  ; ${checkDirStartsWith} "example" "This is just an example"
-  ; MessageBox MB_OK "At 3 - $str_returnVar , $str_value"
-  ; ${checkDirStartsWith} "missing" "This is just an example"
-  ; MessageBox MB_OK "At 4 - $str_returnVar, $str_value"
-
   ${If} ${FileExists} "$str_dirPath\\\\$str_filePath"
-    MessageBox MB_OK "$str_filePath exists in $str_dirPath"
     StrCpy $str_returnVar "true"
   ${ELSE}
-    MessageBox MB_OK "$str_filePath Does not exist in $str_dirPath"
     StrCpy $str_returnVar "false"
   ${EndIf}
 FunctionEnd

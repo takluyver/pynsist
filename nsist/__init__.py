@@ -113,32 +113,39 @@ class InstallerBuilder(object):
                 If Dictionary: The following are acceptable keys:
                     None: The function should return True or False
 
-                    "contains": The function should return a 2-tuple (directory (str), file or sub directory (str)).
+                    "inRegistry": The function should return a 4-tuple (root key (str), sub key (str), name (str), bitness (str))
+                        The given registry entry must exist to run the extra installer
+                        You can use http://www.nirsoft.net/utils/regscanner.html to search for they key you want.
+
+                    "not_inRegistry": The function should return a 4-tuple (root key (str), sub key (str), name (str), bitness (str))
+                        The given registry entry must not exist to run the extra installer
+
+                    "contains": The function should return a 2-tuple (directory (str), file or sub directory (str))
                         The given directory must contain the given file to run the extra installer
-                        * can be used for the given file to mean 'anything'
+                        * can be used for the given file to mean 'anything'; This will be a directory check instead of a file check
                         None will be interpreted as *
 
-                    "not_contains": The function should return a 2-tuple (directory (str), file or sub directory (str)).
+                    "not_contains": The function should return a 2-tuple (directory (str), file or sub directory (str))
                         The given directory must not contain the given file to run the extra installer
-                        * can be used for the given file to mean 'anything'
+                        * can be used for the given file to mean 'anything'; This will be a directory check instead of a file check
                         None will be interpreted as *
 
-                    "starts_with": The function should return a 2-tuple (directory (str), file or sub directory (str)).
+                    "starts_with": The function should return a 2-tuple (directory (str), file or sub directory (str))
                         The given directory must contain the a file that starts with the given string to run the extra installer
 
-                    "not_starts_with": The function should return a 2-tuple (directory (str), file or sub directory (str)).
+                    "not_starts_with": The function should return a 2-tuple (directory (str), file or sub directory (str))
                         The given directory must not contain the a file that starts with the given string to run the extra installer
 
-                    "ends_with": The function should return a 2-tuple (directory (str), file or sub directory (str)).
+                    "ends_with": The function should return a 2-tuple (directory (str), file or sub directory (str))
                         The given directory must contain the a file that ends with the given string to run the extra installer
 
-                    "not_ends_with": The function should return a 2-tuple (directory (str), file or sub directory (str)).
+                    "not_ends_with": The function should return a 2-tuple (directory (str), file or sub directory (str))
                         The given directory must not contain the a file that ends with the given string to run the extra installer
 
-                    "like": The function should return a 2-tuple (directory (str), file or sub directory (str)).
+                    "like": The function should return a 2-tuple (directory (str), file or sub directory (str))
                         The given directory must contain the a file that contains the given string anywhere to run the extra installer
 
-                    "not_like": The function should return a 2-tuple (directory (str), file or sub directory (str)).
+                    "not_like": The function should return a 2-tuple (directory (str), file or sub directory (str))
                         The given directory must not contain the a file that contains the given string anywhere to run the extra installer
     """
     def __init__(self, appname, version, shortcuts, *, publisher=None,
@@ -161,6 +168,7 @@ class InstallerBuilder(object):
         self.commands = commands or {}
         self.license_file = license_file
         self.extra_installers = extra_installers or []
+        self.has_checkRegistry = False
         self.has_checkDirContains = False
         self.has_checkDirStartsWith = False
         self.has_checkDirEndsWith = False
@@ -481,6 +489,9 @@ if __name__ == '__main__':
             shutil.copy2(file, self.build_dir)
             self.install_files.append((basename, '$INSTDIR\Prerequisites'))
 
+            #Run to set 'has_' variables
+            self.apply_extra_installers()
+
     def apply_extra_installers(self):
         """Returns NSI code for the extra installers.
         See: http://nsis.sourceforge.net/Embedding_other_installers
@@ -490,33 +501,39 @@ if __name__ == '__main__':
             newText = re.sub("\n", "\\\\n", oldText)
             return newText
 
-        def checkDirContains(dirPath, filePath, *args, **kwargs):
+        def checkRegistry(rootKey, subKey, name, bitness, *args, indent = 2, **kwargs):
+            self.has_checkRegistry = True
+            code = f'{" "*indent}${{checkRegistry}} "{escapeNewLine(rootKey)}" "{escapeNewLine(subKey)}" "{escapeNewLine(name)}" "{bitness}" \n'
+            code += evaluateAnswer(*args, indent = indent, **kwargs)
+            return code
+
+        def checkDirContains(dirPath, filePath, *args, indent = 2, **kwargs):
             self.has_checkDirContains = True
             if (not filePath):
                 filePath = "*"
             code = f'{" "*indent}${{checkDirContains}} "{escapeNewLine(ensurePathFormat(dirPath))}" "{escapeNewLine(ensurePathFormat(filePath))}"\n'
-            code += evaluateAnswer(*args, **kwargs)
+            code += evaluateAnswer(*args, indent = indent, **kwargs)
             return code
 
-        def checkDirStartsWith(dirPath, filePath, *args, **kwargs):
+        def checkDirStartsWith(dirPath, filePath, *args, indent = 2, **kwargs):
             self.has_checkDirStartsWith = True
             code = f'{" "*indent}${{checkDirStartsWith}} "{escapeNewLine(ensurePathFormat(dirPath))}" "{escapeNewLine(ensurePathFormat(filePath))}"\n'
-            code += evaluateAnswer(*args, **kwargs)
+            code += evaluateAnswer(*args, indent = indent, **kwargs)
             return code
 
-        def checkDirEndsWith(dirPath, filePath, *args, **kwargs):
+        def checkDirEndsWith(dirPath, filePath, *args, indent = 2, **kwargs):
             self.has_checkDirEndsWith = True
             code = f'{" "*indent}${{checkDirEndsWith}} "{escapeNewLine(ensurePathFormat(dirPath))}" "{escapeNewLine(ensurePathFormat(filePath))}"\n'
-            code += evaluateAnswer(*args, **kwargs)
+            code += evaluateAnswer(*args, indent = indent, **kwargs)
             return code
 
-        def checkDirLike(dirPath, filePath, *args, **kwargs):
+        def checkDirLike(dirPath, filePath, *args, indent = 2, **kwargs):
             self.has_checkDirLike = True
             code = f'{" "*indent}${{checkDirLike}} "{escapeNewLine(ensurePathFormat(dirPath))}" "{escapeNewLine(ensurePathFormat(filePath))}"\n'
-            code += evaluateAnswer(*args, **kwargs)
+            code += evaluateAnswer(*args, indent = indent, **kwargs)
             return code
 
-        def evaluateAnswer(ifTrue = None, ifFalse = None, indent = 2, showDebugMessages = False)
+        def evaluateAnswer(ifTrue = None, ifFalse = None, showDebugMessages = False, indent = 2):
             code = f'{" "*indent}${{If}} $str_returnVar == "true"\n'
             if (showDebugMessages):
                 # code += DetailPrint 
@@ -548,11 +565,21 @@ if __name__ == '__main__':
 
                     nextInstaller = True
                     for j, (conditionType, function) in enumerate(condition.items()):
-                        answer = function()
+                        if (callable(function)):
+                            answer = function()
+                        else:
+                            answer = function
+
                         if (not conditionType):
                             if (not answer):
                                 code += f"    Goto prereq_{i}.0_end\n"
                             break
+
+                        elif (conditionType == "inRegistry"):
+                            code += checkRegistry(answer[0], answer[1], answer[2], answer[3], ifFalse = f"prereq_{i}.0_end", indent = 4)
+
+                        elif (conditionType == "not_inRegistry"):
+                            code += checkRegistry(answer[0], answer[1], answer[2], answer[3], ifTrue = f"prereq_{i}.0_end", indent = 4)
 
                         elif (conditionType == "contains"):
                             code += checkDirContains(answer[0], answer[1], ifFalse = f"prereq_{i}.0_end", indent = 4)
@@ -587,23 +614,22 @@ if __name__ == '__main__':
 
                 if (installType == 1):
                     #The user has to say yes or no
-                    code += f"""      MessageBox MB_YESNO "{escapeNewLine(message) or f'Install {escapeNewLine(basename)}?'}" /SD IDYES IDNO prereq_{i}.0_end\n"""
-                    code += f"      Goto prereq_{i}.1_start\n"
+                    code += f"""    MessageBox MB_YESNO "{escapeNewLine(message) or f'Install {escapeNewLine(basename)}?'}" /SD IDYES IDNO prereq_{i}.0_end\n"""
 
                 elif (installType == 2):
                     #The user has to say ok
-                    code += f"""      MessageBox MB_Ok "{escapeNewLine(message) or f'Press Ok to Install {escapeNewLine(basename)}'}"\n"""
-                    code += f"      Goto prereq_{i}.1_start\n"
+                    code += f"""    MessageBox MB_Ok "{escapeNewLine(message) or f'Press Ok to Install {escapeNewLine(basename)}'}"\n"""
 
                 #Run the installer
-                code += f"      prereq_{i}.1_start:\n"
+                code += f"    Goto prereq_{i}.1_start\n"
+                code += f"    prereq_{i}.1_start:\n"
                 if (basename.endswith(".exe")):
-                    code += f"""        ExecWait "$INSTDIR\Prerequisites\{escapeNewLine(basename)}"\n"""
+                    code += f"""      ExecWait "$INSTDIR\Prerequisites\{escapeNewLine(basename)}"\n"""
                 elif(basename.endswith(".msi")):
-                    code += f"""        ExecWait '"msiexec" /i "$INSTDIR\Prerequisites\{escapeNewLine(basename)}"'\n"""
+                    code += f"""      ExecWait '"msiexec" /i "$INSTDIR\Prerequisites\{escapeNewLine(basename)}"'\n"""
                 else:
                     raise InputError('extra_installers file', file, "unknown file type")
-                code += f"        Goto prereq_{i}.0_end\n"
+                code += f"      Goto prereq_{i}.0_end\n"
 
             finally:
                 code += f"  prereq_{i}.0_end:\n"
