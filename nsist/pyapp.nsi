@@ -71,7 +71,7 @@ Section "!${PRODUCT_NAME}" sec_app
   [% block install_files %]
   ; Install files
   [% for destination, group in grouped_files %]
-    SetOutPath "[[destination]]"
+    SetOutPath "[[ensurePathFormat(destination)]]"
     [% for file in group %]
       File "[[ file ]]"
     [% endfor %]

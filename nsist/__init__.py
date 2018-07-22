@@ -28,8 +28,15 @@ from .util import download, text_types, get_cache_dir, normalize_path
 
 __version__ = '2.1'
 
-pjoin = os.path.join
 logger = logging.getLogger(__name__)
+
+def pjoin(*args, **kwargs):
+    newPath = ensurePathFormat(os.path.join(*args, **kwargs))
+    return newPath
+
+def ensurePathFormat(oldPath):
+    newPath = re.sub("[/\\\\](?!\\\\)", "\\\\\\\\", oldPath)
+    return newPath
 
 _PKGDIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_PY_VERSION = '3.6.3'
@@ -39,6 +46,10 @@ if os.name == 'nt' and sys.maxsize == (2**63)-1:
     DEFAULT_BITNESS = 64
 else:
     DEFAULT_BITNESS = 32
+
+def pjoin(*args, **kwargs):
+    newPath = re.sub("[/\\\\](?!\\\\)", "\\\\\\\\", os.path.join(*args, **kwargs))
+    return newPath
 
 def find_makensis_win():
     """Locate makensis.exe on Windows by querying the registry"""
