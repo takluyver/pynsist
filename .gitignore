@@ -8,3 +8,4 @@ pynsist_pkgs/
 
 # This is a big file, so let it sit here after download
 examples/pygi_mpl_numpy/pygi.exe
+__init__.py

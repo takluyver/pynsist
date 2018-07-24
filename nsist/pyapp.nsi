@@ -144,8 +144,8 @@ Section "!${PRODUCT_NAME}" sec_app
   ; Install files
   [% for destination, group in grouped_files %]
     SetOutPath "[[ensurePathFormat(destination)]]"
-    [% for file in group %]
-      File "[[ file ]]"
+    [% for target, file in group %]
+      File /oname=[[ ensurePathFormat(target) ]] "[[ ensurePathFormat(file) ]]" 
     [% endfor %]
   [% endfor %]
   

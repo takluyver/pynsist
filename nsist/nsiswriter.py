@@ -50,9 +50,16 @@ class NSISFileWriter(object):
         self.installerbuilder = installerbuilder
 
         # Group files by their destination directory
-        grouped_files = [(dest, [x[0] for x in group]) for (dest, group) in
+        grouped_files = [(dest, [(x[0], installerbuilder.extra_files_buildName.get(x, x[0])) for x in group]) for (dest, group) in
             itertools.groupby(self.installerbuilder.install_files, itemgetter(1))
                 ]
+
+        for item in grouped_files:
+            print("@1", item)
+
+        for item in installerbuilder.extra_files_buildName.items():
+            print("@2", item)
+
         license_file = None
         if installerbuilder.license_file:
             license_file = os.path.basename(installerbuilder.license_file)

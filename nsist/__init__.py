@@ -90,6 +90,8 @@ class InstallerBuilder(object):
     :param extra_wheel_sources: Directory paths to find wheels in.
     :type extra_wheel_sources: list of Path objects
     :param list extra_files: List of 2-tuples (file, destination) of files to include
+            Alternatively, a 3-tuple (file, destination, build dir name) can be used 
+            to specify the file name in the build directory
     :param list exclude: Paths of files to exclude that would otherwise be included
     :param str py_version: Full version of Python to bundle
     :param int py_bitness: Bitness of bundled Python (32 or 64)
@@ -163,6 +165,7 @@ class InstallerBuilder(object):
         self.packages = packages or []
         self.exclude = [normalize_path(p) for p in (exclude or [])]
         self.extra_files = extra_files or []
+        self.extra_files_buildName = {}
         self.pypi_wheel_reqs = pypi_wheel_reqs or []
         self.extra_wheel_sources = extra_wheel_sources or []
         self.commands = commands or {}
@@ -453,15 +456,22 @@ if __name__ == '__main__':
         """Copy a list of files into the build directory, and add them to
         install_files or install_dirs as appropriate.
         """
-        for file, destination in self.extra_files:
+        for items in self.extra_files:
+            file, destination = items[0], items[1]
             file = file.rstrip('/\\')
             basename = os.path.basename(file)
 
             if not destination:
                 destination = '$INSTDIR'
+                
+            if (len(items) == 3):
+                buildName = items[2]
+            else:
+                buildName = basename
+            self.extra_files_buildName[(basename, destination)] = buildName
 
+            target_name = pjoin(self.build_dir, buildName)
             if os.path.isdir(file):
-                target_name = pjoin(self.build_dir, basename)
                 if os.path.isdir(target_name):
                     shutil.rmtree(target_name)
                 elif os.path.exists(target_name):
@@ -475,7 +485,8 @@ if __name__ == '__main__':
                     shutil.copytree(file, target_name)
                 self.install_dirs.append((basename, destination))
             else:
-                shutil.copy2(file, self.build_dir)
+
+                shutil.copy2(file, target_name)
                 self.install_files.append((basename, destination))
 
     def prepare_extra_installers(self):
