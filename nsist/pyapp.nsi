@@ -21,7 +21,7 @@ var checkBitness
   StrCpy $root_key "${rootKey}"
   StrCpy $str_dirPath "${subKey}"
   StrCpy $str_filePath "${name}"
-  StrCpy $checkBitness ${bitness}
+  StrCpy $checkBitness "${bitness}"
   Call checkRegistry
 !macroend
 !define checkRegistry '!insertmacro "_checkRegistryConstructor"'
