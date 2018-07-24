@@ -54,12 +54,6 @@ class NSISFileWriter(object):
             itertools.groupby(self.installerbuilder.install_files, itemgetter(1))
                 ]
 
-        for item in grouped_files:
-            print("@1", item)
-
-        for item in installerbuilder.extra_files_buildName.items():
-            print("@2", item)
-
         license_file = None
         if installerbuilder.license_file:
             license_file = os.path.basename(installerbuilder.license_file)
