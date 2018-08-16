@@ -393,7 +393,10 @@ if __name__ == '__main__':
             file = file.rstrip('/\\')
             basename = os.path.basename(file)
 
-            if not destination:
+            if destination:
+                # Normalize destination paths to Windows-style
+                destination = destination.replace('/', '\\')
+            else:
                 destination = '$INSTDIR'
 
             if os.path.isdir(file):
