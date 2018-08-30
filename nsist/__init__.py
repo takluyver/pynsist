@@ -483,12 +483,31 @@ if __name__ == '__main__':
             if not exitcode:
                 logger.info('Installer written to %s', pjoin(self.build_dir, self.installer_name))
 
-def main(argv=None):
-    """Make an installer from the command line.
 
-    This parses command line arguments and a config file, and calls
-    :func:`all_steps` with the extracted information.
+def run_installer_builder(config_file, makensis=True, **kwargs):
+    """Make an installer
+
+    :param str config_file: Path to the configuration file
+    :param bool makensis: Call makensis or not
+    :param **kwargs: Override options specified in the configuration file
+
+    This instantiates an :class:`InstallerBuilder` using the options set in the
+    configuration file. Keyword arguments can be specified to override some of
+    these options. Finally :meth:`InstallerBuilder.run` is called.
     """
+    dirname, config_file = os.path.split(config_file)
+    if dirname:
+        os.chdir(dirname)
+
+    from . import configreader
+    cfg = configreader.read_and_validate(config_file)
+    args = get_installer_builder_args(cfg)
+    args.update(kwargs)
+    InstallerBuilder(**args).run(makensis=makensis)
+
+
+def main(argv=None):
+    """Make an installer from the command line."""
     logger.setLevel(logging.INFO)
     logger.handlers = [logging.StreamHandler()]
 
@@ -500,22 +519,13 @@ def main(argv=None):
     )
     options = argp.parse_args(argv)
 
-    dirname, config_file = os.path.split(options.config_file)
-    if dirname:
-        os.chdir(dirname)
-
-    from . import configreader
     try:
-        cfg = configreader.read_and_validate(config_file)
+        run_installer_builder(options.config_file,
+                              makensis=(not options.no_makensis))
     except configreader.InvalidConfig as e:
         logger.error('Error parsing configuration file:')
         logger.error(str(e))
         sys.exit(1)
-
-    args = get_installer_builder_args(cfg)
-
-    try:
-        InstallerBuilder(**args).run(makensis=(not options.no_makensis))
     except InputError as e:
         logger.error("Error in config values:")
         logger.error(str(e))
