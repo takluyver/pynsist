@@ -151,7 +151,7 @@ class InstallerBuilder(object):
                         The given directory must not contain the a file that contains the given string anywhere to run the extra installer
     """
     def __init__(self, appname, version, shortcuts, *, publisher=None,
-                icon=DEFAULT_ICON, packages=None, extra_files=None,
+                icon=DEFAULT_ICON, packages=None, packages_extraPath=None, extra_files=None,
                 py_version=DEFAULT_PY_VERSION, py_bitness=DEFAULT_BITNESS,
                 py_format='bundled', inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
@@ -163,6 +163,7 @@ class InstallerBuilder(object):
         self.shortcuts = shortcuts
         self.icon = icon
         self.packages = packages or []
+        self.packages_extraPath = packages_extraPath or {}
         self.exclude = [normalize_path(p) for p in (exclude or [])]
         self.extra_files = extra_files or []
         self.extra_files_buildName = {}
@@ -421,7 +422,7 @@ if __name__ == '__main__':
                           exclude=self.exclude)
 
         # 3. Copy importable modules
-        copy_modules(self.packages, build_pkg_dir,
+        copy_modules(self.packages, build_pkg_dir, packages_extraPath=self.packages_extraPath,
                      py_version=self.py_version, exclude=self.exclude)
 
     def prepare_commands(self):

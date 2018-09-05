@@ -106,7 +106,7 @@ class ModuleCopier:
         self.py_version = py_version
         self.path = path if (path is not None) else ([''] + sys.path)
 
-    def copy(self, modname, target, exclude):
+    def copy(self, modname, target, exclude, packages_extraPath = {}):
         """Copy the importable module 'modname' to the directory 'target'.
 
         modname should be a top-level import, i.e. without any dots.
@@ -135,7 +135,14 @@ class ModuleCopier:
                 pkgdir, basename = os.path.split(file)
                 assert basename.startswith('__init__')
                 check_package_for_ext_mods(pkgdir, self.py_version)
-                dest = os.path.join(target, modname)
+
+                for key, value in packages_extraPath.items():
+                    if (os.path.samefile(key, pkgdir)):
+                        dest = os.path.join(target, value, modname)
+                        break
+                else:
+                    dest = os.path.join(target, modname)
+
                 if exclude:
                     shutil.copytree(
                         pkgdir, dest,
@@ -155,7 +162,7 @@ class ModuleCopier:
             copy_zipmodule(loader, modname, target)
 
 
-def copy_modules(modnames, target, py_version, path=None, exclude=None):
+def copy_modules(modnames, target, py_version, path=None, exclude=None, packages_extraPath={}):
     """Copy the specified importable modules to the target directory.
 
     By default, it finds modules in :data:`sys.path` - this can be overridden
@@ -168,7 +175,7 @@ def copy_modules(modnames, target, py_version, path=None, exclude=None):
         if modname in files_in_target_noext:
             # Already there, no need to copy it.
             continue
-        mc.copy(modname, target, exclude)
+        mc.copy(modname, target, exclude, packages_extraPath = packages_extraPath)
 
     if not modnames:
         # NSIS abhors an empty folder, so give it a file to find.
