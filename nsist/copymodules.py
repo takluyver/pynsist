@@ -7,6 +7,7 @@ import sys
 import tempfile
 import zipfile, zipimport
 import fnmatch
+import pkg_resources
 from functools import partial
 
 from .util import normalize_path
@@ -147,6 +148,23 @@ class ModuleCopier:
 
         elif isinstance(loader, zipimport.zipimporter):
             copy_zipmodule(loader, modname, target)
+
+        copy_distribution(modname, target)
+
+def copy_distribution(modname, target):
+    """Copy the metadata directory of the specified module 
+    to the target directory if exists.
+    """
+    try:
+        distribution = pkg_resources.get_distribution(modname)
+    except pkg_resources.DistributionNotFound:
+        # The package metadata is not available. We skip the process.
+        return
+
+    egg_info_path = distribution._provider.egg_info
+    if os.path.exists(egg_info_path):
+        dest = os.path.join(target, os.path.basename(egg_info_path))
+        shutil.copytree(egg_info_path, dest)
 
 
 def copy_modules(modnames, target, py_version, path=None, exclude=None):

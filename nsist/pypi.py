@@ -229,7 +229,7 @@ def extract_wheel(whl_file, target_dir, exclude=None):
     target = Path(target_dir)
     copied_something = False
     for p in td.iterdir():
-        if p.suffix not in {'.data', '.dist-info'}:
+        if p.suffix not in {'.data'}:
             if p.is_dir():
                 # If the dst directory already exists, this will combine them.
                 # shutil.copytree will not combine them.
