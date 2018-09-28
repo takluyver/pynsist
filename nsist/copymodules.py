@@ -162,8 +162,8 @@ def copy_distribution(modname, target):
         return
 
     egg_info_path = distribution._provider.egg_info
+    dest = os.path.join(target, os.path.basename(egg_info_path))
     if os.path.exists(egg_info_path) and not os.path.exists(dest):
-        dest = os.path.join(target, os.path.basename(egg_info_path))
         shutil.copytree(egg_info_path, dest)
 
 
