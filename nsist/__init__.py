@@ -89,6 +89,7 @@ class InstallerBuilder(object):
     :param str build_dir: Directory to run the build in
     :param str installer_name: Filename of the installer to produce
     :param str nsi_template: Path to a template NSI file to use
+    :param list install_commands: Commands to be run after installation
     """
     def __init__(self, appname, version, shortcuts, *, publisher=None,
                 icon=DEFAULT_ICON, packages=None, extra_files=None,
@@ -96,7 +97,7 @@ class InstallerBuilder(object):
                 py_format='bundled', inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None, pypi_wheel_reqs=None, extra_wheel_sources=None,
-                commands=None, license_file=None):
+                commands=None, license_file=None, install_commands=None):
         self.appname = appname
         self.version = version
         self.publisher = publisher
@@ -109,6 +110,7 @@ class InstallerBuilder(object):
         self.extra_wheel_sources = extra_wheel_sources or []
         self.commands = commands or {}
         self.license_file = license_file
+        self.install_commands = install_commands
 
         # Python options
         self.py_version = py_version

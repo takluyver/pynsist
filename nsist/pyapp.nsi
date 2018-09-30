@@ -135,6 +135,11 @@ Section "!${PRODUCT_NAME}" sec_app
   WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
                    "NoRepair" 1
 
+  [% for command in ib.install_commands %]
+    SetOutPath $INSTDIR
+    nsExec::ExecToLog '[[ command ]]'
+  [% endfor %]
+
   ; Check if we need to reboot
   IfRebootFlag 0 noreboot
     MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" \
