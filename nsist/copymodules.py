@@ -7,7 +7,6 @@ import sys
 import tempfile
 import zipfile, zipimport
 import fnmatch
-import pkg_resources
 from functools import partial
 
 from .util import normalize_path
