@@ -41,7 +41,7 @@ class TestInstallerBuilder(unittest.TestCase):
         
         assert preamble_contents in contents
 
-    def test_copy_files(self):
+    def test_copy_extra_files(self):
         files = [
             (pjoin(test_dir, 'data_files', 'dir1', 'eg-data.txt'), '$INSTDIR'),
             (pjoin(test_dir, 'data_files', 'dir2', 'eg-data.txt'), '$INSTDIR\\foo'),
@@ -53,8 +53,8 @@ class TestInstallerBuilder(unittest.TestCase):
         ib.copy_extra_files()
 
         build_dir_files = set(os.listdir(self.target))
-        self.assertEqual(build_dir_files,
-                         {'eg-data.txt', 'eg-data.1.txt', 'subdir', 'subdir.1'})
+        for file in ['eg-data.txt', 'eg-data.1.txt', 'subdir', 'subdir.1']:
+            self.assertIn(file, build_dir_files)
 
         self.assertEqual(ib.install_dirs, [
             ('subdir', '$INSTDIR'),
@@ -64,3 +64,14 @@ class TestInstallerBuilder(unittest.TestCase):
             ('eg-data.txt', '$INSTDIR'),
             ('eg-data.1.txt', '$INSTDIR\\foo'),
         ])
+
+    def test_copy_installer_nsi(self):
+        files = [
+            (pjoin(test_dir, 'data_files', 'dir1', 'installer.nsi'), None),
+        ]
+        ib = InstallerBuilder("Test App", "1.0", {}, extra_files=files,
+                              build_dir=self.target)
+        ib.copy_extra_files()
+
+        assert_is_file(pjoin(self.target, 'installer.1.nsi'))
+        self.assertEqual(ib.install_files, [('installer.1.nsi', '$INSTDIR')])

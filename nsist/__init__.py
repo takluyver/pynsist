@@ -374,9 +374,23 @@ if __name__ == '__main__':
         """Copy a list of files into the build directory, and add them to
         install_files or install_dirs as appropriate.
         """
+        # Create installer.nsi, so that a data file with the same name will
+        # automatically be renamed installer.1.nsi. All the other files needed
+        # in the build directory should already be in place.
+        Path(self.nsi_file).touch()
+
         for file, destination in self.extra_files:
             file = file.rstrip('/\\')
-            basename = os.path.basename(file)
+            in_build_dir = Path(self.build_dir, os.path.basename(file))
+
+            # Find an unused name in the build directory,
+            # similar to the source filename, e.g. foo.1.txt, foo.2.txt, ...
+            stem, suffix = in_build_dir.stem, in_build_dir.suffix
+            n = 1
+            while in_build_dir.exists():
+                name = '{}.{}{}'.format(stem, n, suffix)
+                in_build_dir = in_build_dir.with_name(name)
+                n += 1
 
             if destination:
                 # Normalize destination paths to Windows-style
@@ -385,22 +399,17 @@ if __name__ == '__main__':
                 destination = '$INSTDIR'
 
             if os.path.isdir(file):
-                target_name = pjoin(self.build_dir, basename)
-                if os.path.isdir(target_name):
-                    shutil.rmtree(target_name)
-                elif os.path.exists(target_name):
-                    os.unlink(target_name)
                 if self.exclude:
-                    shutil.copytree(file, target_name,
+                    shutil.copytree(file, str(in_build_dir),
                                     ignore=self.copytree_ignore_callback)
                 else:
                     # Don't use our exclude callback if we don't need to,
                     # as it slows things down.
-                    shutil.copytree(file, target_name)
-                self.install_dirs.append((basename, destination))
+                    shutil.copytree(file, str(in_build_dir))
+                self.install_dirs.append((in_build_dir.name, destination))
             else:
-                shutil.copy2(file, self.build_dir)
-                self.install_files.append((basename, destination))
+                shutil.copy2(file, str(in_build_dir))
+                self.install_files.append((in_build_dir.name, destination))
 
     def write_nsi(self):
         """Write the NSI file to define the NSIS installer.
