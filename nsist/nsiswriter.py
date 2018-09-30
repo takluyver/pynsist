@@ -11,6 +11,13 @@ _PKGDIR = os.path.abspath(os.path.dirname(__file__))
 
 PY2 = sys.version_info[0] == 2
 
+def pjoin(*args, **kwargs):
+    newPath = ensurePathFormat(ntpath.join(*args, **kwargs))
+    return newPath
+
+def ensurePathFormat(oldPath):
+    newPath = re.sub("[/\\\\](?!\\\\)", "\\\\\\\\", oldPath)
+    return newPath
 
 class NSISFileWriter(object):
     """Write an .nsi script file by filling in a template.
@@ -43,9 +50,10 @@ class NSISFileWriter(object):
         self.installerbuilder = installerbuilder
 
         # Group files by their destination directory
-        grouped_files = [(dest, [x[0] for x in group]) for (dest, group) in
+        grouped_files = [(dest, [(x[0], installerbuilder.extra_files_buildName.get(x, x[0])) for x in group]) for (dest, group) in
             itertools.groupby(self.installerbuilder.install_files, itemgetter(1))
                 ]
+
         license_file = None
         if installerbuilder.license_file:
             license_file = os.path.basename(installerbuilder.license_file)
@@ -54,10 +62,18 @@ class NSISFileWriter(object):
             'grouped_files': grouped_files,
             'icon': os.path.basename(installerbuilder.icon),
             'arch_tag': '.amd64' if (installerbuilder.py_bitness==64) else '',
-            'pjoin': ntpath.join,
+            'pjoin': pjoin,
+            'ensurePathFormat': ensurePathFormat,
             'single_shortcut': len(installerbuilder.shortcuts) == 1,
             'pynsist_pkg_dir': _PKGDIR,
             'has_commands': len(installerbuilder.commands) > 0,
+            'has_prereq': len(installerbuilder.extra_installers) > 0,
+            'gen_prereq': installerbuilder.apply_extra_installers,
+            'has_checkRegistry': installerbuilder.has_checkRegistry,
+            'has_checkDirContains': installerbuilder.has_checkDirContains,
+            'has_checkDirStartsWith': installerbuilder.has_checkDirStartsWith,
+            'has_checkDirEndsWith': installerbuilder.has_checkDirEndsWith,
+            'has_checkDirLike': installerbuilder.has_checkDirLike,
             'python': '"$INSTDIR\\Python\\python"',
             'license_file': license_file,
         }
