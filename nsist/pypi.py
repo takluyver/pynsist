@@ -1,12 +1,8 @@
-from distutils.version import LooseVersion
-import errno
+"""Find, download and unpack wheels."""
 import fnmatch
 import hashlib
 import logging
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path  # Backport
+from pathlib import Path
 import re
 import shutil
 from tempfile import mkdtemp
@@ -18,13 +14,6 @@ from requests_download import download, HashTracker
 from .util import get_cache_dir, normalize_path
 
 logger = logging.getLogger(__name__)
-
-def find_pypi_release(requirement):
-    if '==' in requirement:
-        name, version = requirement.split('==', 1)
-        return yarg.get(name).release(version)
-    else:
-        return yarg.get(requirement).latest_release
 
 class NoWheelError(Exception): pass
 
