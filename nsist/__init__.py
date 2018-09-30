@@ -192,11 +192,6 @@ class InstallerBuilder(object):
 
         logger.info('Unpacking Python...')
         python_dir = pjoin(self.build_dir, 'Python')
-        try:
-            shutil.rmtree(python_dir)
-        except OSError as e:
-            if e.errno != errno.ENOENT:
-                raise
 
         with zipfile.ZipFile(str(cache_file)) as z:
             z.extractall(python_dir)
@@ -219,12 +214,6 @@ class InstallerBuilder(object):
         src = pjoin(_PKGDIR, 'msvcrt', arch)
         dst = pjoin(self.build_dir, 'msvcrt')
         self.msvcrt_files = sorted(os.listdir(src))
-
-        try:
-            shutil.rmtree(dst)
-        except OSError as e:
-            if e.errno != errno.ENOENT:
-                raise
 
         shutil.copytree(src, dst)
 
@@ -338,8 +327,6 @@ if __name__ == '__main__':
         """
         logger.info("Copying packages into build directory...")
         build_pkg_dir = pjoin(self.build_dir, 'pkgs')
-        if os.path.isdir(build_pkg_dir):
-            shutil.rmtree(build_pkg_dir)
 
         # 1. Manually prepared packages
         if os.path.isdir('pynsist_pkgs'):
@@ -359,8 +346,6 @@ if __name__ == '__main__':
 
     def prepare_commands(self):
         command_dir = Path(self.build_dir) / 'bin'
-        if command_dir.is_dir():
-            shutil.rmtree(str(command_dir))
         command_dir.mkdir()
         prepare_bin_directory(command_dir, self.commands, bitness=self.py_bitness)
         self.install_dirs.append((command_dir.name, '$INSTDIR'))
@@ -452,11 +437,11 @@ if __name__ == '__main__':
     def run(self, makensis=True):
         """Run all the steps to build an installer.
         """
-        try:
-            os.makedirs(self.build_dir)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise e
+        try:  # Start with a clean build directory
+            shutil.rmtree(self.build_dir)
+        except FileNotFoundError:
+            pass
+        os.makedirs(self.build_dir)
 
         self.fetch_python_embeddable()
         if self.inc_msvcrt:
