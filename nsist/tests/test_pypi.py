@@ -14,6 +14,7 @@ def test_download():
     with TemporaryDirectory() as td:
         extract_wheel(wheel, target_dir=td)
         assert_isfile(pjoin(td, 'astsearch.py'))
+        assert_isfile(pjoin(td, 'astsearch-0.1.2.dist-info', 'METADATA'))
 
 # To exclude this, run:  nosetests -a '!network'
 test_download.network = 1
