@@ -4,7 +4,9 @@ from pathlib import Path
 from testpath import assert_isfile, assert_isdir
 from testpath.tempdir import TemporaryDirectory
 
-from nsist.pypi import WheelLocator, extract_wheel, CachedRelease, merge_dir_to
+from nsist.pypi import (
+    WheelLocator, extract_wheel, CachedRelease, merge_dir_to, NoWheelError,
+)
 
 def test_download():
     wd = WheelLocator("astsearch==0.1.2", "3.5.1", 64)
@@ -15,8 +17,21 @@ def test_download():
         extract_wheel(wheel, target_dir=td)
         assert_isfile(pjoin(td, 'astsearch.py'))
 
-# To exclude this, run:  nosetests -a '!network'
+def test_bad_name():
+    # Packages can't be named after stdlib modules like os
+    wl = WheelLocator("os==1.0", "3.5.1", 64)
+    with assert_raises(NoWheelError):
+        wl.get_from_pypi()
+
+def test_bad_version():
+    wl = WheelLocator("pynsist==0.99.99", "3.5.1", 64)
+    with assert_raises(NoWheelError):
+        wl.get_from_pypi()
+
+# To exclude these, run:  nosetests -a '!network'
 test_download.network = 1
+test_bad_name.network = 1
+test_bad_version.network = 1
 
 def test_extra_sources():
     with TemporaryDirectory() as td:

@@ -129,7 +129,17 @@ class WheelLocator(object):
         Downloads to the cache directory and returns the destination as a Path.
         Raises NoWheelError if no compatible wheel is found.
         """
-        release_list = yarg.get(self.name).release(self.version)
+        try:
+            pypi_pkg = yarg.get(self.name)
+        except yarg.HTTPError as e:
+            if e.status_code == 404:
+                raise NoWheelError("No package named {} found on PyPI".format(self.name))
+            raise
+
+        release_list = pypi_pkg.release(self.version)
+        if release_list is None:
+            raise NoWheelError("No release {0.version} for package {0.name}".format(self))
+
         preferred_release = self.pick_best_wheel(release_list)
         if preferred_release is None:
             raise NoWheelError('No compatible wheels found for {0.name} {0.version}'.format(self))
