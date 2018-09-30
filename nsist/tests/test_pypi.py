@@ -16,6 +16,7 @@ def test_download():
     with TemporaryDirectory() as td:
         extract_wheel(wheel, target_dir=td)
         assert_isfile(pjoin(td, 'astsearch.py'))
+        assert_isfile(pjoin(td, 'astsearch-0.1.2.dist-info', 'METADATA'))
 
 def test_bad_name():
     # Packages can't be named after stdlib modules like os
