@@ -5,30 +5,30 @@ import subprocess
 import glob
 
 from testpath.tempdir import TemporaryDirectory
-from testpath import assert_isfile
+from testpath import assert_isfile, assert_isdir
 from nsist.pypi import fetch_pypi_wheels
 
 class TestLocalWheels(unittest.TestCase):
     def test_matching_one_pattern(self):
         with TemporaryDirectory() as td1:
-            subprocess.call(['pip', 'wheel', 'astsearch==0.1.3', '-w', td1])
+            subprocess.call(['pip', 'wheel', 'requests==2.19.1', '-w', td1])
 
             with TemporaryDirectory() as td2:
                 fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
 
-                assert_isfile(os.path.join(td2, 'astsearch.py'))
-                assert_isfile(os.path.join(td2, 'astsearch-0.1.3.dist-info', 'METADATA'))
+                assert_isdir(os.path.join(td2, 'requests'))
+                assert_isfile(os.path.join(td2, 'requests-2.19.1.dist-info', 'METADATA'))
 
-                assert_isfile(os.path.join(td2, 'astcheck.py'))
-                self.assertTrue(glob.glob(os.path.join(td2, '*.dist-info')))
+                assert_isdir(os.path.join(td2, 'urllib3'))
+                self.assertTrue(glob.glob(os.path.join(td2, 'urllib3*.dist-info')))
 
     def test_duplicate_wheel_files_raise(self):
         with TemporaryDirectory() as td1:
-            subprocess.call(['pip', 'wheel', 'astsearch==0.1.3', '-w', td1])
+            subprocess.call(['pip', 'wheel', 'requests==2.19.1', '-w', td1])
 
             with TemporaryDirectory() as td2:
-                with self.assertRaisesRegex(ValueError, 'wheel distribution astsearch already included'):
-                    fetch_pypi_wheels(['astsearch==0.1.3'], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
+                with self.assertRaisesRegex(ValueError, 'wheel distribution requests already included'):
+                    fetch_pypi_wheels(['requests==2.19.1'], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
 
     def test_invalid_wheel_file_raise(self):
         with TemporaryDirectory() as td1:
