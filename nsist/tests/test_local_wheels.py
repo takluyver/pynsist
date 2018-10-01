@@ -43,8 +43,8 @@ class TestLocalWheels(unittest.TestCase):
             open(os.path.join(td1, 'incompatiblewheel-1.0.0-py2.py3-none-linux_x86_64.whl'), 'w+')
 
             with TemporaryDirectory() as td2:
-                with self.assertRaisesRegex(ValueError, '{0} does not support Windows platform'
-                .format('incompatiblewheel-1.0.0-py2.py3-none-linux_x86_64.whl')):
+                with self.assertRaisesRegex(ValueError, '{0} is not compatible with Python {1} for Windows'
+                .format('incompatiblewheel-1.0.0-py2.py3-none-linux_x86_64.whl', platform.python_version())):
                     fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
 
     def test_incompatible_python_wheel_file_raise(self):
@@ -52,7 +52,7 @@ class TestLocalWheels(unittest.TestCase):
             open(os.path.join(td1, 'incompatiblewheel-1.0.0-py26-none-any.whl'), 'w+')
 
             with TemporaryDirectory() as td2:
-                with self.assertRaisesRegex(ValueError, '{0} does not support Python {1}'
+                with self.assertRaisesRegex(ValueError, '{0} is not compatible with Python {1} for Windows'
                 .format('incompatiblewheel-1.0.0-py26-none-any.whl', platform.python_version())):
                     fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
 
