@@ -11,6 +11,7 @@ import re
 import shutil
 from tempfile import mkdtemp
 import zipfile
+import glob
 
 import yarg
 from requests_download import download, HashTracker
@@ -251,12 +252,16 @@ def extract_wheel(whl_file, target_dir, exclude=None):
     shutil.rmtree(str(td))
 
 
-def fetch_pypi_wheels(requirements, target_dir, py_version, bitness,
-                      extra_sources=None, exclude=None):
-    for req in requirements:
+def fetch_pypi_wheels(wheels_requirements, wheels_paths, target_dir, py_version,
+                      bitness, extra_sources=None, exclude=None):
+    for req in wheels_requirements:
         wl = WheelLocator(req, py_version, bitness, extra_sources)
         whl_file = wl.fetch()
         extract_wheel(whl_file, target_dir, exclude=exclude)
+
+    for glob_path in wheels_paths:
+        for path in glob.glob(glob_path):
+            extract_wheel(path, target_dir, exclude=exclude)
 
 
 def is_excluded(path, exclude):
