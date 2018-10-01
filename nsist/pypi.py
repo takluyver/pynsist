@@ -254,13 +254,18 @@ def extract_wheel(whl_file, target_dir, exclude=None):
 
 def fetch_pypi_wheels(wheels_requirements, wheels_paths, target_dir, py_version,
                       bitness, extra_sources=None, exclude=None):
+    """
+    Gather wheels included explicitly by wheels_pypi parameter 
+    or matching glob paths given in local_wheels parameter.
+    """
     wheel_info_array = []
+    # We try to get the wheels from wheels_pypi requirements parameter
     for req in wheels_requirements:
         wl = WheelLocator(req, py_version, bitness, extra_sources)
         whl_file = wl.fetch() 
         validate_wheel(whl_file, wheel_info_array, py_version)
         extract_wheel(whl_file, target_dir, exclude=exclude)
-
+    # Then from the local_wheels paths parameter
     for glob_path in wheels_paths:
         for path in glob.glob(glob_path):
             logger.info('Include wheel: %s (local_wheels path: %s)', os.path.basename(path), glob_path)
@@ -269,20 +274,36 @@ def fetch_pypi_wheels(wheels_requirements, wheels_paths, target_dir, py_version,
 
 
 def validate_wheel(whl_path, wheel_info_array, py_version):
+    """
+    Verify that the given wheel can safely be included in the current installer.
+    If so, the given wheel info will be included in the given wheel info array.
+    If not, an exception will be raised.
+    """
     wheel_info = info_from_wheel_path(whl_path)
 
-    if [element for element in wheel_info_array if element['distribution'] == wheel_info['distribution']]:
+    # Check that a distribution of same name has not been included before
+    if wheel_info['distribution'] in [item['distribution'] for item in wheel_info_array]:
         raise ValueError('Error, wheel distribution {0} already included'.format(wheel_info['distribution']))
 
+    # Check that the wheel is compatible with the included python version
     search_python_tag = re.search(r'^(\d+).(\d+)', py_version)
-    accepted_python_tags = ['py{0}{1}'.format(search_python_tag.group(1), search_python_tag.group(2)), 'py{0}'.format(search_python_tag.group(1))]
-    if not [element for element in accepted_python_tags if element in wheel_info['python_tag']]:
+    accepted_python_tags = [
+        'py{0}{1}'.format(search_python_tag.group(1), search_python_tag.group(2)), 
+        'py{0}'.format(search_python_tag.group(1)),
+        'cp{0}{1}'.format(search_python_tag.group(1), search_python_tag.group(2)), 
+        'cp{0}'.format(search_python_tag.group(1))]
+    if not set(accepted_python_tags) & set(wheel_info['python_tag'].split('.')):
         raise ValueError('Error, wheel {0} does not support Python {1}'.format(wheel_info['wheel_name'], py_version))
+
+    # Check that the wheel is compatible with Windows platforms
+    if wheel_info['platform_tag'] not in ['any', 'win32']:
+        raise ValueError('Error, wheel {0} does not support Windows platform'.format(wheel_info['platform_tag']))
 
     wheel_info_array.append(wheel_info)
 
 
 def info_from_wheel_path(wheel_path):
+    """Build and wheel object description from the given wheel path"""
     wheel_name = os.path.basename(wheel_path)
     search = re.search(r'^(.*)-(.*)(?:-(.*)|)-(.*)-(.*)-(.*)\.whl$', wheel_name)
     if not search:
@@ -296,7 +317,7 @@ def info_from_wheel_path(wheel_path):
             'build_tag': search.group(3),
             'python_tag': search.group(4),
             'abi_tag': search.group(5),
-            'platform': search.group(6),
+            'platform_tag': search.group(6),
         }
     else:
         return {
@@ -306,7 +327,7 @@ def info_from_wheel_path(wheel_path):
             'build_tag': None,
             'python_tag': search.group(3),
             'abi_tag': search.group(4),
-            'platform': search.group(5),
+            'platform_tag': search.group(5),
         }
 
 
