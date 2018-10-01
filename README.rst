@@ -36,8 +36,8 @@ Quickstart
             beautifulsoup4==4.6.0
             html5lib==0.999999999
 
-       # To bundle packages which don't publish wheels, see the docs on the
-       # config file.
+       # To bundle packages which don't publish wheels, or to include directly wheel files
+       # from a directory, see the docs on the config file.
 
        # Other files and folders that should be installed
        files = LICENSE

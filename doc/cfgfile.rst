@@ -223,6 +223,20 @@ the line with the key:
 
    .. versionadded:: 2.0
 
+.. describe:: local_wheels (optional)
+
+   One or more glob paths that matche one or more wheel files located on the
+   local filesystem. All matching wheel files will be included in the installer.
+   For instance ``wheels\*.whl`` will include all wheel files from the relative
+   folder ``wheels``. 
+   
+   Any included wheel corresponding to the same distribution
+   of a wheel specified in ``pypi_wheels`` will raise an error.
+
+   Relative glob paths are from the directory containing the config file.
+
+   .. versionadded:: 2.2
+
 .. describe:: packages (optional)
 
    A list of importable package and module names to include in the installer.
