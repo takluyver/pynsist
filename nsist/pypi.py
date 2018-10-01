@@ -2,16 +2,16 @@
 import fnmatch
 import hashlib
 import logging
-from pathlib import Path
-import re
-import shutil
-from tempfile import mkdtemp
-import zipfile
 import glob
 import os
-
+import re
+import shutil
 import yarg
+import zipfile
+
+from pathlib import Path
 from requests_download import download, HashTracker
+from tempfile import mkdtemp
 
 from .util import get_cache_dir, normalize_path
 
@@ -84,8 +84,8 @@ class WheelLocator(object):
         Returns a Path or None.
         """
         whl_filename_prefix = '{name}-{version}-'.format(
-            name=re.sub("[^\w\d.]+", "_", self.name),
-            version=re.sub("[^\w\d.]+", "_", self.version),
+            name=re.sub(r'[^\w\d.]+', '_', self.name),
+            version=re.sub(r'[^\w\d.]+', '_', self.version),
         )
         for source in self.extra_sources:
             candidates = [CachedRelease(p.name)

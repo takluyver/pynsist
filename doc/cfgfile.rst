@@ -225,7 +225,7 @@ the line with the key:
 
 .. describe:: local_wheels (optional)
 
-   One or more glob paths that matche one or more wheel files located on the
+   One or more glob paths that match one or more wheel files located on the
    local filesystem. All matching wheel files will be included in the installer.
    For instance ``wheels\*.whl`` will include all wheel files from the relative
    folder ``wheels``. 
