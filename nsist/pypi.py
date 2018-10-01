@@ -1,12 +1,8 @@
-from distutils.version import LooseVersion
-import errno
+"""Find, download and unpack wheels."""
 import fnmatch
 import hashlib
 import logging
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path  # Backport
+from pathlib import Path
 import re
 import shutil
 from tempfile import mkdtemp
@@ -19,13 +15,6 @@ from requests_download import download, HashTracker
 from .util import get_cache_dir, normalize_path
 
 logger = logging.getLogger(__name__)
-
-def find_pypi_release(requirement):
-    if '==' in requirement:
-        name, version = requirement.split('==', 1)
-        return yarg.get(name).release(version)
-    else:
-        return yarg.get(requirement).latest_release
 
 class NoWheelError(Exception): pass
 
@@ -130,7 +119,17 @@ class WheelLocator(object):
         Downloads to the cache directory and returns the destination as a Path.
         Raises NoWheelError if no compatible wheel is found.
         """
-        release_list = yarg.get(self.name).release(self.version)
+        try:
+            pypi_pkg = yarg.get(self.name)
+        except yarg.HTTPError as e:
+            if e.status_code == 404:
+                raise NoWheelError("No package named {} found on PyPI".format(self.name))
+            raise
+
+        release_list = pypi_pkg.release(self.version)
+        if release_list is None:
+            raise NoWheelError("No release {0.version} for package {0.name}".format(self))
+
         preferred_release = self.pick_best_wheel(release_list)
         if preferred_release is None:
             raise NoWheelError('No compatible wheels found for {0.name} {0.version}'.format(self))
@@ -230,7 +229,7 @@ def extract_wheel(whl_file, target_dir, exclude=None):
     target = Path(target_dir)
     copied_something = False
     for p in td.iterdir():
-        if p.suffix not in {'.data', '.dist-info'}:
+        if p.suffix not in {'.data'}:
             if p.is_dir():
                 # If the dst directory already exists, this will combine them.
                 # shutil.copytree will not combine them.

@@ -65,6 +65,8 @@ application (``sys.modules['__main__'].__file__``).
 
        writable_file = os.path.join(os.environ['LOCALAPPDATA'], 'MyApp', 'file.dat')
 
+.. _faq-tkinter:
+
 Packaging with tkinter
 ----------------------
 

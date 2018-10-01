@@ -1,6 +1,22 @@
 Release notes
 =============
 
+Version 2.2
+-----------
+
+* The ``exclude`` option now works to exclude files extracted from wheels
+  (:ghpull:`147`).
+* ``exclude`` patterns work with either slash ``/`` or backslash ``\`` as
+  separators, independent of the platform on which you build the installer
+  (:ghpull:`148`).
+* Destination paths for the ``files`` include option now work with slashes
+  as well as backslashes (:ghpull:`158`).
+* ``extra_preamble`` for start menu shortcuts can now use the ``installdir``
+  variable to get the installation directory. This was already available for
+  commands, so the change makes it easier to use a single preamble for both
+  (:ghpull:`149`).
+* New FAQ entry on :ref:`faq-tkinter` (:ghpull:`146`).
+
 Version 2.1
 -----------
 
