@@ -8,6 +8,7 @@ import shutil
 from tempfile import mkdtemp
 import zipfile
 import glob
+import os
 
 import yarg
 from requests_download import download, HashTracker
@@ -253,14 +254,60 @@ def extract_wheel(whl_file, target_dir, exclude=None):
 
 def fetch_pypi_wheels(wheels_requirements, wheels_paths, target_dir, py_version,
                       bitness, extra_sources=None, exclude=None):
+    wheel_info_array = []
     for req in wheels_requirements:
         wl = WheelLocator(req, py_version, bitness, extra_sources)
-        whl_file = wl.fetch()
+        whl_file = wl.fetch() 
+        validate_wheel(whl_file, wheel_info_array, py_version)
         extract_wheel(whl_file, target_dir, exclude=exclude)
 
     for glob_path in wheels_paths:
         for path in glob.glob(glob_path):
+            logger.info('Include wheel: %s (local_wheels path: %s)', os.path.basename(path), glob_path)
+            validate_wheel(path, wheel_info_array, py_version)
             extract_wheel(path, target_dir, exclude=exclude)
+
+
+def validate_wheel(whl_path, wheel_info_array, py_version):
+    wheel_info = info_from_wheel_path(whl_path)
+
+    if [element for element in wheel_info_array if element['distribution'] == wheel_info['distribution']]:
+        raise ValueError('Error, wheel distribution {0} already included'.format(wheel_info['distribution']))
+
+    search_python_tag = re.search(r'^(\d+).(\d+)', py_version)
+    accepted_python_tags = ['py{0}{1}'.format(search_python_tag.group(1), search_python_tag.group(2)), 'py{0}'.format(search_python_tag.group(1))]
+    if not [element for element in accepted_python_tags if element in wheel_info['python_tag']]:
+        raise ValueError('Error, wheel {0} does not support Python {1}'.format(wheel_info['wheel_name'], py_version))
+
+    wheel_info_array.append(wheel_info)
+
+
+def info_from_wheel_path(wheel_path):
+    wheel_name = os.path.basename(wheel_path)
+    search = re.search(r'^(.*)-(.*)(?:-(.*)|)-(.*)-(.*)-(.*)\.whl$', wheel_name)
+    if not search:
+        raise ValueError('Invalid wheel file name: {0}'.format(wheel_name))
+
+    if search.group(6):
+        return {
+            'wheel_name': wheel_name,
+            'distribution': search.group(1),
+            'version': search.group(2),
+            'build_tag': search.group(3),
+            'python_tag': search.group(4),
+            'abi_tag': search.group(5),
+            'platform': search.group(6),
+        }
+    else:
+        return {
+            'wheel_name': wheel_name,
+            'distribution': search.group(1),
+            'version': search.group(2),
+            'build_tag': None,
+            'python_tag': search.group(3),
+            'abi_tag': search.group(4),
+            'platform': search.group(5),
+        }
 
 
 def is_excluded(path, exclude):
