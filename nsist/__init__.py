@@ -78,8 +78,8 @@ class InstallerBuilder(object):
     :param list pypi_wheel_reqs: Package specifications to fetch from PyPI as wheels
     :param extra_wheel_sources: Directory paths to find wheels in.
     :type extra_wheel_sources: list of Path objects
-    :param local_wheels: Ant-formatted paths of wheels to include
-    :type local_wheels: list of Path objects
+    :param local_wheels: Glob paths matching wheel files to include
+    :type local_wheels: list of glob paths
     :param list extra_files: List of 2-tuples (file, destination) of files to include
     :param list exclude: Paths of files to exclude that would otherwise be included
     :param str py_version: Full version of Python to bundle
