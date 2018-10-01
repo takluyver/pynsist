@@ -296,8 +296,8 @@ def validate_wheel(whl_path, wheel_info_array, py_version):
         raise ValueError('Error, wheel {0} does not support Python {1}'.format(wheel_info['wheel_name'], py_version))
 
     # Check that the wheel is compatible with Windows platforms
-    if wheel_info['platform_tag'] not in ['any', 'win32']:
-        raise ValueError('Error, wheel {0} does not support Windows platform'.format(wheel_info['platform_tag']))
+    if wheel_info['platform_tag'] not in ['any', 'win32', 'win_x86_64']:
+        raise ValueError('Error, wheel {0} does not support Windows platform'.format(wheel_info['wheel_name']))
 
     wheel_info_array.append(wheel_info)
 
