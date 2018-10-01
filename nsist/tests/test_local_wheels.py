@@ -11,24 +11,24 @@ from nsist.pypi import fetch_pypi_wheels
 class TestLocalWheels(unittest.TestCase):
     def test_matching_one_pattern(self):
         with TemporaryDirectory() as td1:
-            subprocess.call(['pip', 'wheel', 'astsearch==0.1.2', '-w', td1])
+            subprocess.call(['pip', 'wheel', 'astsearch==0.1.3', '-w', td1])
 
             with TemporaryDirectory() as td2:
                 fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
 
                 assert_isfile(os.path.join(td2, 'astsearch.py'))
-                assert_isfile(os.path.join(td2, 'astsearch-0.1.2.dist-info', 'METADATA'))
+                assert_isfile(os.path.join(td2, 'astsearch-0.1.3.dist-info', 'METADATA'))
 
                 assert_isfile(os.path.join(td2, 'astcheck.py'))
                 self.assertTrue(glob.glob(os.path.join(td2, '*.dist-info')))
 
     def test_duplicate_wheel_files_raise(self):
         with TemporaryDirectory() as td1:
-            subprocess.call(['pip', 'wheel', 'astsearch==0.1.2', '-w', td1])
+            subprocess.call(['pip', 'wheel', 'astsearch==0.1.3', '-w', td1])
 
             with TemporaryDirectory() as td2:
                 with self.assertRaisesRegex(ValueError, 'wheel distribution astsearch already included'):
-                    fetch_pypi_wheels(['astsearch==0.1.2'], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
+                    fetch_pypi_wheels(['astsearch==0.1.3'], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
 
     def test_invalid_wheel_file_raise(self):
         with TemporaryDirectory() as td1:
