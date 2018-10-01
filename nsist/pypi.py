@@ -267,6 +267,9 @@ def fetch_pypi_wheels(wheels_requirements, wheels_paths, target_dir, py_version,
         extract_wheel(whl_file, target_dir, exclude=exclude)
     # Then from the local_wheels paths parameter
     for glob_path in wheels_paths:
+        paths = glob.glob(glob_path)
+        if not paths:
+            raise ValueError('Error, glob path {0} does not match any wheel file'.format(glob_path))
         for path in glob.glob(glob_path):
             logger.info('Include wheel: %s (local_wheels path: %s)', os.path.basename(path), glob_path)
             validate_wheel(path, wheel_info_array, py_version)

@@ -55,3 +55,10 @@ class TestLocalWheels(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, '{0} does not support Python {1}'
                 .format('incompatiblewheel-1.0.0-py26-none-any.whl', platform.python_version())):
                     fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
+
+    def test_useless_wheel_glob_path_raise(self):
+        with TemporaryDirectory() as td1:
+            with TemporaryDirectory() as td2:
+                with self.assertRaisesRegex(ValueError, 'does not match any wheel file'
+                .format(td1)):
+                    fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
