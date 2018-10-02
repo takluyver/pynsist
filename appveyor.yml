@@ -7,9 +7,9 @@ environment:
 
 install:
   - cinst nsis
-  - "%PYTHON%\\python.exe -m pip install requests requests_download jinja2 yarg nose win_cli_launchers testpath"
+  - "%PYTHON%\\python.exe -m pip install tox"
 
 build: off
 
 test_script:
-  - "%PYTHON%\\python.exe -m nose"
+  - "%PYTHON%\\python.exe -m tox"

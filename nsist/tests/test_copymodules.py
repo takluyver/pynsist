@@ -46,10 +46,10 @@ class TestCopyModules(unittest.TestCase):
         
     @unittest.skipUnless(sys.platform.startswith("win"), "requires Windows")
     def test_copy_wrong_pyversion(self):
-        with self.assertRaisesRegexp(ExtensionModuleMismatch, "on Python 4"):
+        with self.assertRaisesRegex(ExtensionModuleMismatch, "on Python 4"):
             copy_modules(['win_extpkg'], self.target, '4.0.0', sample_path)
         
-        with self.assertRaisesRegexp(ExtensionModuleMismatch, "on Python 4"):
+        with self.assertRaisesRegex(ExtensionModuleMismatch, "on Python 4"):
             copy_modules(['win_extmod'], self.target, '4.0.0', sample_path)
     
     def test_copy_from_zipfile(self):

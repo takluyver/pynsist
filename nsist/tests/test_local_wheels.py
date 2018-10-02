@@ -1,6 +1,7 @@
 import unittest
 import os
 import platform
+import pytest
 import subprocess
 import glob
 
@@ -8,7 +9,10 @@ from testpath.tempdir import TemporaryDirectory
 from testpath import assert_isfile, assert_isdir
 from nsist.pypi import fetch_pypi_wheels
 
+# To exclude tests requiring network on an unplugged machine, use: pytest -m "not network"
+
 class TestLocalWheels(unittest.TestCase):
+    @pytest.mark.network
     def test_matching_one_pattern(self):
         with TemporaryDirectory() as td1:
             subprocess.call(['pip', 'wheel', 'requests==2.19.1', '-w', td1])
@@ -22,6 +26,7 @@ class TestLocalWheels(unittest.TestCase):
                 assert_isdir(os.path.join(td2, 'urllib3'))
                 self.assertTrue(glob.glob(os.path.join(td2, 'urllib3*.dist-info')))
 
+    @pytest.mark.network
     def test_duplicate_wheel_files_raise(self):
         with TemporaryDirectory() as td1:
             subprocess.call(['pip', 'wheel', 'requests==2.19.1', '-w', td1])
@@ -62,7 +67,3 @@ class TestLocalWheels(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'does not match any wheel file'):
                     fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
 
-
-# To exclude these, run:  nosetests -a '!network'
-TestLocalWheels.test_matching_one_pattern.network = 1
-TestLocalWheels.test_duplicate_wheel_files_raise.network = 1
