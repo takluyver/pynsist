@@ -16,12 +16,14 @@ sample_path = [pjoin(test_dir, 'sample_pkgs'),
 
 
 def test_copy_plain(tmpdir):
+    tmpdir = str(tmpdir)
     copy_modules(['plainmod', 'plainpkg'], tmpdir, '3.3.5', sample_path)
     assert_is_file(pjoin(tmpdir, 'plainmod.py'))
     assert_is_dir(pjoin(tmpdir, 'plainpkg'))
 
 @skip_on_windows
 def test_copy_wrong_platform(tmpdir):
+    tmpdir = str(tmpdir)
     with pytest.raises(ExtensionModuleMismatch, match="will not be usable on Windows"):
         copy_modules(['unix_extmod'], tmpdir, '3.3.5', sample_path)
 
@@ -30,12 +32,14 @@ def test_copy_wrong_platform(tmpdir):
 
 @only_on_windows
 def test_copy_windows(tmpdir):
+    tmpdir = str(tmpdir)
     copy_modules(['win_extmod', 'win_extpkg'], tmpdir, running_python, sample_path)
     assert_is_file(pjoin(tmpdir, 'win_extmod.pyd'))
     assert_is_dir(pjoin(tmpdir, 'win_extpkg'))
 
 @only_on_windows
 def test_copy_wrong_pyversion(tmpdir):
+    tmpdir = str(tmpdir)
     with pytest.raises(ExtensionModuleMismatch, match="on Python 4"):
         copy_modules(['win_extpkg'], tmpdir, '4.0.0', sample_path)
 
@@ -43,6 +47,7 @@ def test_copy_wrong_pyversion(tmpdir):
         copy_modules(['win_extmod'], tmpdir, '4.0.0', sample_path)
 
 def test_copy_from_zipfile(tmpdir):
+    tmpdir = str(tmpdir)
     copy_modules(['zippedmod2', 'zippedpkg2'],
                  tmpdir, running_python, sample_path)
 #        assert_is_file(pjoin(tmpdir, 'zippedmod.py'))
@@ -51,5 +56,6 @@ def test_copy_from_zipfile(tmpdir):
     assert_is_dir(pjoin(tmpdir, 'zippedpkg2'))
 
 def test_module_not_found(tmpdir):
+    tmpdir = str(tmpdir)
     with pytest.raises(ImportError):
         copy_modules(['nonexistant'], tmpdir, '3.3.5', sample_path)

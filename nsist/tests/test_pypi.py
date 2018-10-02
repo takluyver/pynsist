@@ -112,8 +112,8 @@ def test_pick_best_wheel():
     assert wd.pick_best_wheel(releases) == releases[1]
 
 def test_merge_dir_to(tmpdir):
-    td1 = Path(tmpdir.mkdir('one'))
-    td2 = Path(tmpdir.mkdir('two'))
+    td1 = Path(str(tmpdir.mkdir('one')))
+    td2 = Path(str(tmpdir.mkdir('two')))
 
     with (td1 / 'ab').open('w') as f:
         f.write(u"original")
