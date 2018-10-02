@@ -34,8 +34,8 @@ def test_bad_version():
         wl.get_from_pypi()
 
 def test_extra_sources(tmpdir):
-    src1 = Path(tmpdir.mkdir('src1'))
-    src2 = Path(tmpdir.mkdir('src2'))
+    src1 = Path(str(tmpdir.mkdir('src1')))
+    src2 = Path(str(tmpdir.mkdir('src2')))
 
     # First one found wins, even if a later one is more specific.
     expected = (src1 / 'astsearch-0.1.2-py3-none-any.whl')
