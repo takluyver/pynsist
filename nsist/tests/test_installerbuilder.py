@@ -9,6 +9,7 @@ from .utils import assert_is_file, test_dir
 sample_preamble = pjoin(test_dir, u'sample_preamble.py')
 
 def test_prepare_shortcuts(tmpdir):
+    tmpdir = str(tmpdir)
     shortcuts = {'sc1': {'entry_point': 'norwegian.blue:parrot',
                          'icon': DEFAULT_ICON,
                          'console': False,

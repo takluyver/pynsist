@@ -11,6 +11,7 @@ from .utils import assert_is_file
 
 @pytest.mark.network
 def test_download(tmpdir):
+    tmpdir = str(tmpdir)
     wd = WheelLocator("astsearch==0.1.2", "3.5.1", 64)
     wheel = wd.fetch()
     assert_is_file(str(wheel))
@@ -33,10 +34,8 @@ def test_bad_version():
         wl.get_from_pypi()
 
 def test_extra_sources(tmpdir):
-    src1 = Path(tmpdir, 'src1')
-    src1.mkdir()
-    src2 = Path(tmpdir, 'src2')
-    src2.mkdir()
+    src1 = Path(str(tmpdir.mkdir('src1')))
+    src2 = Path(str(tmpdir.mkdir('src2')))
 
     # First one found wins, even if a later one is more specific.
     expected = (src1 / 'astsearch-0.1.2-py3-none-any.whl')
@@ -112,12 +111,9 @@ def test_pick_best_wheel():
     ]
     assert wd.pick_best_wheel(releases) == releases[1]
 
-def test_merge_dir_to(tmpdir_factory):
-    td1 = tmpdir_factory.mktemp('td1')
-    td2 = tmpdir_factory.mktemp('td2')
-
-    td1 = Path(td1)
-    td2 = Path(td2)
+def test_merge_dir_to(tmpdir):
+    td1 = Path(str(tmpdir.mkdir('one')))
+    td2 = Path(str(tmpdir.mkdir('two')))
 
     with (td1 / 'ab').open('w') as f:
         f.write(u"original")
