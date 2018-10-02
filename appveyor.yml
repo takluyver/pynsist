@@ -12,4 +12,4 @@ install:
 build: off
 
 test_script:
-  - "%PYTHON%\\python.exe -m tox"
+  - "%PYTHON%\\python.exe -m tox -e python"
