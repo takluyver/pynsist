@@ -270,7 +270,7 @@ def fetch_pypi_wheels(wheels_requirements, wheels_paths, target_dir, py_version,
         paths = glob.glob(glob_path)
         if not paths:
             raise ValueError('Error, glob path {0} does not match any wheel file'.format(glob_path))
-        for path in glob.glob(glob_path):
+        for path in paths:
             logger.info('Collecting wheel file: %s (from: %s)', os.path.basename(path), glob_path)
             validate_wheel(path, distributions, py_version, bitness)
             extract_wheel(path, target_dir, exclude=exclude)

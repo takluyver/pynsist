@@ -59,6 +59,10 @@ class TestLocalWheels(unittest.TestCase):
     def test_useless_wheel_glob_path_raise(self):
         with TemporaryDirectory() as td1:
             with TemporaryDirectory() as td2:
-                with self.assertRaisesRegex(ValueError, 'does not match any wheel file'
-                .format(td1)):
+                with self.assertRaisesRegex(ValueError, 'does not match any wheel file'):
                     fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
+
+
+# To exclude these, run:  nosetests -a '!network'
+TestLocalWheels.test_matching_one_pattern.network = 1
+TestLocalWheels.test_duplicate_wheel_files_raise.network = 1
