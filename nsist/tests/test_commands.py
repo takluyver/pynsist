@@ -12,7 +12,6 @@ cmds = {'acommand': {'entry_point': 'somemod:somefunc',
                      'extra_preamble': io.StringIO(u'import extra')}}
 
 def test_prepare_bin_dir(tmpdir):
-    tmpdir = Path(tmpdir)
     commands.prepare_bin_directory(tmpdir, cmds)
     assert_is_file(str(tmpdir / 'acommand.exe'))
     script_file = tmpdir / 'acommand-script.py'
