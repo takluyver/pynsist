@@ -1,12 +1,13 @@
+# Enable new Travis stack, should speed up builds
+sudo: false
 language: python
 python:
   - "3.6"
   - "3.5"
-# command to run tests
-script: nosetests
+
 # Ensure dependencies are installed
 install:
-  - pip install requests requests_download jinja2 yarg win_cli_launchers testpath
+  - pip install tox-travis
 
-# Enable new Travis stack, should speed up builds
-sudo: false
+# Command to run tests
+script: tox -e python
