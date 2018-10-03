@@ -33,6 +33,7 @@ def test_prepare_shortcuts(tmpdir):
     assert preamble_contents in contents
 
 def test_copy_extra_files(tmpdir):
+    tmpdir = str(tmpdir)
     files = [
         (pjoin(test_dir, 'data_files', 'dir1', 'eg-data.txt'), '$INSTDIR'),
         (pjoin(test_dir, 'data_files', 'dir2', 'eg-data.txt'), '$INSTDIR\\foo'),
@@ -57,6 +58,7 @@ def test_copy_extra_files(tmpdir):
     ]
 
 def test_copy_installer_nsi(tmpdir):
+    tmpdir = str(tmpdir)
     files = [
         (pjoin(test_dir, 'data_files', 'dir1', 'installer.nsi'), None),
     ]
