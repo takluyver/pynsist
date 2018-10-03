@@ -24,7 +24,7 @@ from .commands import prepare_bin_directory
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
 from .wheels import WheelGetter
-from .util import download, text_types, get_cache_dir, normalize_path
+from .util import download, get_cache_dir, normalize_path
 
 __version__ = '2.1'
 
@@ -286,7 +286,7 @@ if __name__ == '__main__':
                                                 + ('' if sc['console'] else 'w')
 
                     specified_preamble = sc.get('extra_preamble', None)
-                    if isinstance(specified_preamble, text_types):
+                    if isinstance(specified_preamble, str):
                         # Filename
                         extra_preamble = io.open(specified_preamble, encoding='utf-8')
                     elif specified_preamble is None:

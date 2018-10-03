@@ -2,7 +2,6 @@ import io
 import shutil
 import win_cli_launchers
 
-from .util import text_types
 
 SCRIPT_TEMPLATE = u"""#!python
 import sys, os
@@ -30,7 +29,7 @@ def prepare_bin_directory(target, commands, bitness=32):
         shutil.copy(exe_src, str(target / (name+'.exe')))
 
         specified_preamble = command.get('extra_preamble', None)
-        if isinstance(specified_preamble, text_types):
+        if isinstance(specified_preamble, str):
             # Filename
             extra_preamble = io.open(specified_preamble, encoding='utf-8')
         elif specified_preamble is None:

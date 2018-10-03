@@ -1,21 +1,10 @@
 import os
-import errno
 import logging
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path  # Backport
+from pathlib import Path
 import requests
 import sys
 
 logger = logging.getLogger(__name__)
-
-PY3 = sys.version_info[0] >= 3
-
-if PY3:
-    text_types = (str,)
-else:
-    text_types = (str, unicode) # analysis:ignore
 
 
 def download(url, target):
@@ -56,12 +45,7 @@ def get_cache_dir(ensure_existence=False):
         p = Path(local, 'pynsist')
 
     if ensure_existence:
-        try:
-            p.mkdir(parents=True)
-        except OSError as e:
-            # Py2 compatible equivalent of FileExistsError
-            if e.errno != errno.EEXIST:
-                raise
+        p.mkdir(parents=True, exist_ok=True)
 
     return p
 
