@@ -1,7 +1,7 @@
 import unittest
 import sys
 
-from os.path import isfile, isdir, exists, dirname
+from os.path import dirname
 
 test_dir = dirname(__file__)
 
