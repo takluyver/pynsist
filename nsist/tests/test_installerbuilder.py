@@ -1,9 +1,9 @@
 import io
-
 from os.path import join as pjoin
+from testpath import assert_isfile
 
 from nsist import InstallerBuilder, DEFAULT_ICON
-from .utils import assert_is_file, test_dir
+from .utils import test_dir
 
 
 sample_preamble = pjoin(test_dir, u'sample_preamble.py')
@@ -18,7 +18,7 @@ def test_prepare_shortcuts(tmpdir):
     ib.prepare_shortcuts()
 
     scfile = pjoin(tmpdir, 'sc1.launch.pyw')
-    assert_is_file(scfile)
+    assert_isfile(scfile)
 
     with io.open(scfile, 'r', encoding='utf-8') as f:
         contents = f.read()

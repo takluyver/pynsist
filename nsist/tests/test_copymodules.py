@@ -2,9 +2,10 @@ import os
 import sys
 
 import pytest
+from testpath import assert_isfile, assert_isdir
 
 from nsist.copymodules import copy_modules, ExtensionModuleMismatch
-from .utils import assert_is_file, assert_is_dir, test_dir, skip_on_windows, only_on_windows
+from .utils import test_dir, skip_on_windows, only_on_windows
 
 pjoin = os.path.join
 running_python = '.'.join(str(x) for x in sys.version_info[:3])
@@ -18,8 +19,8 @@ sample_path = [pjoin(test_dir, 'sample_pkgs'),
 def test_copy_plain(tmpdir):
     tmpdir = str(tmpdir)
     copy_modules(['plainmod', 'plainpkg'], tmpdir, '3.3.5', sample_path)
-    assert_is_file(pjoin(tmpdir, 'plainmod.py'))
-    assert_is_dir(pjoin(tmpdir, 'plainpkg'))
+    assert_isfile(pjoin(tmpdir, 'plainmod.py'))
+    assert_isdir(pjoin(tmpdir, 'plainpkg'))
 
 @skip_on_windows
 def test_copy_wrong_platform(tmpdir):
@@ -34,8 +35,8 @@ def test_copy_wrong_platform(tmpdir):
 def test_copy_windows(tmpdir):
     tmpdir = str(tmpdir)
     copy_modules(['win_extmod', 'win_extpkg'], tmpdir, running_python, sample_path)
-    assert_is_file(pjoin(tmpdir, 'win_extmod.pyd'))
-    assert_is_dir(pjoin(tmpdir, 'win_extpkg'))
+    assert_isfile(pjoin(tmpdir, 'win_extmod.pyd'))
+    assert_isdir(pjoin(tmpdir, 'win_extpkg'))
 
 @only_on_windows
 def test_copy_wrong_pyversion(tmpdir):
@@ -50,10 +51,10 @@ def test_copy_from_zipfile(tmpdir):
     tmpdir = str(tmpdir)
     copy_modules(['zippedmod2', 'zippedpkg2'],
                  tmpdir, running_python, sample_path)
-#        assert_is_file(pjoin(tmpdir, 'zippedmod.py'))
-#        assert_is_dir(pjoin(tmpdir, 'zippedpkg'))
-    assert_is_file(pjoin(tmpdir, 'zippedmod2.py'))
-    assert_is_dir(pjoin(tmpdir, 'zippedpkg2'))
+#        assert_isfile(pjoin(tmpdir, 'zippedmod.py'))
+#        assert_isdir(pjoin(tmpdir, 'zippedpkg'))
+    assert_isfile(pjoin(tmpdir, 'zippedmod2.py'))
+    assert_isdir(pjoin(tmpdir, 'zippedpkg2'))
 
 def test_module_not_found(tmpdir):
     tmpdir = str(tmpdir)

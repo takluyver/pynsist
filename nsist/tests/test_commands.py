@@ -1,21 +1,16 @@
 import io
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path  # Backport
+from testpath import assert_isfile
 
 from nsist import commands, _rewrite_shebangs
-from .utils import assert_is_file
 
 cmds = {'acommand': {'entry_point': 'somemod:somefunc',
                      'extra_preamble': io.StringIO(u'import extra')}}
 
 def test_prepare_bin_dir(tmpdir):
     commands.prepare_bin_directory(tmpdir, cmds)
-    assert_is_file(str(tmpdir / 'acommand.exe'))
+    assert_isfile(str(tmpdir / 'acommand.exe'))
     script_file = tmpdir / 'acommand-script.py'
-    assert_is_file(str(script_file))
+    assert_isfile(str(script_file))
 
     with script_file.open() as f:
         script_contents = f.read()

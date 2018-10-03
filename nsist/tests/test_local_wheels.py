@@ -4,9 +4,9 @@ import platform
 import subprocess
 
 import pytest
+from testpath import assert_isfile, assert_isdir
 
 from nsist.pypi import fetch_pypi_wheels
-from .utils import assert_is_dir, assert_is_file
 
 # To exclude tests requiring network on an unplugged machine, use: pytest -m "not network"
 
@@ -19,10 +19,10 @@ def test_matching_one_pattern(tmpdir):
 
     fetch_pypi_wheels([], [os.path.join(td1, '*.whl')], td2, platform.python_version(), 64)
 
-    assert_is_dir(os.path.join(td2, 'requests'))
-    assert_is_file(os.path.join(td2, 'requests-2.19.1.dist-info', 'METADATA'))
+    assert_isdir(os.path.join(td2, 'requests'))
+    assert_isfile(os.path.join(td2, 'requests-2.19.1.dist-info', 'METADATA'))
 
-    assert_is_dir(os.path.join(td2, 'urllib3'))
+    assert_isdir(os.path.join(td2, 'urllib3'))
     assert glob.glob(os.path.join(td2, 'urllib3*.dist-info'))
 
 @pytest.mark.network

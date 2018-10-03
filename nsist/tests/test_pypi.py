@@ -1,11 +1,11 @@
 from os.path import join as pjoin
 from pathlib import Path
 import pytest
+from testpath import assert_isfile
 
 from nsist.pypi import (
     WheelLocator, extract_wheel, CachedRelease, merge_dir_to, NoWheelError,
 )
-from .utils import assert_is_file
 
 # To exclude tests requiring network on an unplugged machine, use: pytest -m "not network"
 
@@ -14,11 +14,11 @@ def test_download(tmpdir):
     tmpdir = str(tmpdir)
     wd = WheelLocator("astsearch==0.1.2", "3.5.1", 64)
     wheel = wd.fetch()
-    assert_is_file(str(wheel))
+    assert_isfile(wheel)
 
     extract_wheel(wheel, target_dir=tmpdir)
-    assert_is_file(pjoin(tmpdir, 'astsearch.py'))
-    assert_is_file(pjoin(tmpdir, 'astsearch-0.1.2.dist-info', 'METADATA'))
+    assert_isfile(pjoin(tmpdir, 'astsearch.py'))
+    assert_isfile(pjoin(tmpdir, 'astsearch-0.1.2.dist-info', 'METADATA'))
 
 @pytest.mark.network
 def test_bad_name():
@@ -127,8 +127,8 @@ def test_merge_dir_to(tmpdir):
 
     merge_dir_to(td2, td1)
 
-    assert_is_file(str(td1 / 'subdir' / 'foo'))
-    assert_is_file(str(td1 / 'subdir' / 'bar'))
+    assert_isfile(td1 / 'subdir' / 'foo')
+    assert_isfile(td1 / 'subdir' / 'bar')
     with (td1 / 'ab').open() as f:
         assert f.read() == u"alternate"
 

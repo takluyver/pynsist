@@ -17,7 +17,6 @@ requires = [
     "yarg",
     "win_cli_launchers"
 ]
-dev-requires = ["testpath"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
@@ -27,6 +26,9 @@ classifiers = [
     "Topic :: System :: Installation/Setup",
     "Topic :: System :: Software Distribution",
 ]
+
+[tool.flit.metadata.requires-extra]
+test = ["testpath"]
 
 [tool.flit.scripts]
 pynsist = "nsist:main"
