@@ -1,4 +1,5 @@
 import io
+import os
 from os.path import join as pjoin
 from testpath import assert_isfile
 
@@ -30,3 +31,38 @@ def test_prepare_shortcuts(tmpdir):
         preamble_contents = f.read().strip()
 
     assert preamble_contents in contents
+
+def test_copy_extra_files(tmpdir):
+    files = [
+        (pjoin(test_dir, 'data_files', 'dir1', 'eg-data.txt'), '$INSTDIR'),
+        (pjoin(test_dir, 'data_files', 'dir2', 'eg-data.txt'), '$INSTDIR\\foo'),
+        (pjoin(test_dir, 'data_files', 'dir1', 'subdir'), '$INSTDIR'),
+        (pjoin(test_dir, 'data_files', 'dir2', 'subdir'), '$INSTDIR\\foo'),
+    ]
+    ib = InstallerBuilder("Test App", "1.0", {}, extra_files=files,
+                          build_dir=tmpdir)
+    ib.copy_extra_files()
+
+    build_dir_files = set(os.listdir(tmpdir))
+    for file in ['eg-data.txt', 'eg-data.1.txt', 'subdir', 'subdir.1']:
+        assert file in build_dir_files
+
+    assert ib.install_dirs == [
+        ('subdir', '$INSTDIR'),
+        ('subdir.1', '$INSTDIR\\foo'),
+    ]
+    assert ib.install_files == [
+        ('eg-data.txt', '$INSTDIR'),
+        ('eg-data.1.txt', '$INSTDIR\\foo'),
+    ]
+
+def test_copy_installer_nsi(tmpdir):
+    files = [
+        (pjoin(test_dir, 'data_files', 'dir1', 'installer.nsi'), None),
+    ]
+    ib = InstallerBuilder("Test App", "1.0", {}, extra_files=files,
+                          build_dir=tmpdir)
+    ib.copy_extra_files()
+
+    assert_isfile(pjoin(tmpdir, 'installer.1.nsi'))
+    assert ib.install_files == [('installer.1.nsi', '$INSTDIR')]
