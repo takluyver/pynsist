@@ -1,0 +1,6 @@
+[run]
+omit = 
+    nsist/tests/*
+    nsist/_rewrite_shebangs.py
+    nsist/_system_path.py
+

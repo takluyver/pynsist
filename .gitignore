@@ -6,6 +6,8 @@ dist/
 doc/_build
 pynsist_pkgs
 .tox
+.coverage
+htmlcov/
 
 # This is a big file, so let it sit here after download
 examples/pygi_mpl_numpy/pygi.exe
