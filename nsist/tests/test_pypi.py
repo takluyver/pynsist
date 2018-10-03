@@ -3,8 +3,9 @@ from pathlib import Path
 import pytest
 from testpath import assert_isfile
 
-from nsist.pypi import (
+from nsist.wheels import (
     WheelLocator, extract_wheel, CachedRelease, merge_dir_to, NoWheelError,
+    CompatibilityScorer,
 )
 
 # To exclude tests requiring network on an unplugged machine, use: pytest -m "not network"
@@ -12,7 +13,7 @@ from nsist.pypi import (
 @pytest.mark.network
 def test_download(tmpdir):
     tmpdir = str(tmpdir)
-    wd = WheelLocator("astsearch==0.1.2", "3.5.1", 64)
+    wd = WheelLocator("astsearch==0.1.2", CompatibilityScorer("3.5.1", "win_amd64"))
     wheel = wd.fetch()
     assert_isfile(wheel)
 
@@ -41,16 +42,16 @@ def test_extra_sources(tmpdir):
     expected = (src1 / 'astsearch-0.1.2-py3-none-any.whl')
     expected.touch()
     (src2 / 'astsearch-0.1.2-py3-none-win_amd64.whl').touch()
-    wl = WheelLocator("astsearch==0.1.2", "3.5.1", 64,
-                      extra_sources=[src1, src2])
+    scorer = CompatibilityScorer("3.5.1", "win_amd64")
+    wl = WheelLocator("astsearch==0.1.2", scorer, extra_sources=[src1, src2])
     assert wl.check_extra_sources() == expected
 
-    wl = WheelLocator("astsearch==0.2.0", "3.5.1", 64,
-                      extra_sources=[src1, src2])
+    wl = WheelLocator("astsearch==0.2.0", scorer, extra_sources=[src1, src2])
     assert wl.check_extra_sources() is None
 
 def test_pick_best_wheel():
-    wd = WheelLocator("astsearch==0.1.2", "3.5.1", 64)
+    wd = WheelLocator("astsearch==0.1.2",
+                      CompatibilityScorer("3.5.1", "win_amd64"))
 
     # Some of the wheel filenames below are impossible combinations - they are
     # there to test the scoring and ranking machinery.

@@ -19,20 +19,19 @@ logger = logging.getLogger(__name__)
 
 class NoWheelError(Exception): pass
 
-class WheelLocator(object):
-    def __init__(self, requirement, py_version, bitness, extra_sources=None):
-        self.requirement = requirement
-        self.py_version = py_version
-        self.bitness = bitness
-        self.extra_sources = extra_sources or []
+class CompatibilityScorer:
+    """Score wheels for a given target platform
 
-        if requirement.count('==') != 1:
-            raise ValueError("Requirement {!r} did not match name==version".format(requirement))
-        self.name, self.version = requirement.split('==', 1)
+    0 for any score means incompatible.
+    Higher numbers are more platform specific.
+    """
+    def __init__(self, py_version, platform):
+        self.py_version = py_version
+        self.platform = platform
 
     def score_platform(self, platform):
-        target = 'win_amd64' if self.bitness == 64 else 'win32'
-        d = {target: 2, 'any': 1}
+        # target = 'win_amd64' if self.bitness == 64 else 'win32'
+        d = {self.platform: 2, 'any': 1}
         return max(d.get(p, 0) for p in platform.split('.'))
 
     def score_abi(self, abi):
@@ -52,6 +51,28 @@ class WheelLocator(object):
             }
         return max(d.get(i, 0) for i in interpreter.split('.'))
 
+    def score(self, whl_filename):
+        m = re.search(r'-([^-]+)-([^-]+)-([^-]+)\.whl$', whl_filename)
+        if not m:
+            raise ValueError("Failed to find wheel tag in %r" % whl_filename)
+
+        interpreter, abi, platform = m.group(1, 2, 3)
+        return (
+            self.score_platform(platform),
+            self.score_abi(abi),
+            self.score_interpreter(interpreter)
+        )
+
+class WheelLocator(object):
+    def __init__(self, requirement, scorer, extra_sources=None):
+        self.requirement = requirement
+        self.scorer = scorer
+        self.extra_sources = extra_sources or []
+
+        if requirement.count('==') != 1:
+            raise ValueError("Requirement {!r} did not match name==version".format(requirement))
+        self.name, self.version = requirement.split('==', 1)
+
     def pick_best_wheel(self, release_list):
         best_score = (0, 0, 0)
         best = None
@@ -59,15 +80,7 @@ class WheelLocator(object):
             if release.package_type != 'wheel':
                 continue
 
-            m = re.search(r'-([^-]+)-([^-]+)-([^-]+)\.whl', release.filename)
-            if not m:
-                continue
-
-            interpreter, abi, platform = m.group(1, 2, 3)
-            score = (self.score_platform(platform),
-                     self.score_abi(abi),
-                     self.score_interpreter(interpreter)
-                    )
+            score = self.scorer.score(release.filename)
             if any(s==0 for s in score):
                 # Incompatible
                 continue
@@ -251,59 +264,64 @@ def extract_wheel(whl_file, target_dir, exclude=None):
     # Clean up temporary directory
     shutil.rmtree(str(td))
 
+class WheelGetter:
+    def __init__(self, requirements, wheel_globs, target_dir,
+                 py_version, bitness, extra_sources=None, exclude=None):
+        self.requirements = requirements
+        self.wheel_globs = wheel_globs
+        self.target_dir = target_dir
+        target_platform = 'win_amd64' if bitness == 64 else 'win32'
+        self.scorer = CompatibilityScorer(py_version, target_platform)
+        self.extra_sources = extra_sources
+        self.exclude = exclude
 
-def fetch_pypi_wheels(wheels_requirements, wheels_paths, target_dir, py_version,
-                      bitness, extra_sources=None, exclude=None):
-    """
-    Gather wheels included explicitly by wheels_pypi parameter 
-    or matching glob paths given in local_wheels parameter.
-    """
-    distributions = []
-    # We try to get the wheels from wheels_pypi requirements parameter
-    for req in wheels_requirements:
-        wl = WheelLocator(req, py_version, bitness, extra_sources)
-        whl_file = wl.fetch() 
-        extract_wheel(whl_file, target_dir, exclude=exclude)
-        distributions.append(wl.name)
-    # Then from the local_wheels paths parameter
-    for glob_path in wheels_paths:
-        paths = glob.glob(glob_path)
-        if not paths:
-            raise ValueError('Error, glob path {0} does not match any wheel file'.format(glob_path))
-        for path in paths:
-            logger.info('Collecting wheel file: %s (from: %s)', os.path.basename(path), glob_path)
-            validate_wheel(path, distributions, py_version, bitness)
-            extract_wheel(path, target_dir, exclude=exclude)
+        self.got_distributions = {}
 
+    def get_all(self):
+        self.get_requirements()
+        self.get_globs()
 
-def extract_distribution_and_version(wheel_name):
-    """Extract distribution and version from a wheel file name"""
-    search = re.search(r'^([^-]+)-([^-]+)-.*\.whl$', wheel_name)
-    if not search:
-        raise ValueError('Invalid wheel file name: {0}'.format(wheel_name))
+    def get_requirements(self):
+        for req in self.requirements:
+            wl = WheelLocator(req, self.scorer, self.extra_sources)
+            whl_file = wl.fetch()
+            extract_wheel(whl_file, self.target_dir, exclude=self.exclude)
+            self.got_distributions[wl.name] = whl_file
 
-    return (search.group(1), search.group(2))
+    def get_globs(self):
+        for glob_path in self.wheel_globs:
+            paths = glob.glob(glob_path)
+            if not paths:
+                raise ValueError('Glob path {} does not match any files'
+                                 .format(glob_path))
+            for path in paths:
+                logger.info('Collecting wheel file: %s (from: %s)',
+                            os.path.basename(path), glob_path)
+                self.validate_wheel(path)
+                extract_wheel(path, self.target_dir, exclude=self.exclude)
 
+    def validate_wheel(self, whl_path):
+        """
+        Verify that the given wheel can safely be included in the current installer.
+        If so, the given wheel info will be included in the given wheel info array.
+        If not, an exception will be raised.
+        """
+        wheel_name = os.path.basename(whl_path)
+        distribution = wheel_name.split('-', 1)[0]
 
-def validate_wheel(whl_path, distributions, py_version, bitness):
-    """
-    Verify that the given wheel can safely be included in the current installer.
-    If so, the given wheel info will be included in the given wheel info array.
-    If not, an exception will be raised.
-    """
-    wheel_name = os.path.basename(whl_path)
-    (distribution, version) = extract_distribution_and_version(wheel_name)
+        # Check that a distribution of same name has not been included before
+        if distribution in self.got_distributions:
+            prev_path = self.got_distributions[distribution]
+            raise ValueError('Multiple wheels specified for {}:\n  {}\n  {}'.format(
+                             distribution, prev_path, whl_path))
 
-    # Check that a distribution of same name has not been included before
-    if distribution in distributions:
-        raise ValueError('Error, wheel distribution {0} already included'.format(distribution))
+        # Check that the wheel is compatible with the installer environment
+        scores = self.scorer.score(wheel_name)
+        if any(s == 0 for s in scores):
+            raise ValueError('Wheel {} is not compatible with Python {}, {}'
+                .format(wheel_name, self.scorer.py_version, self.scorer.platform))
 
-    # Check that the wheel is compatible with the installer environment
-    locator = WheelLocator('{0}=={1}'.format(distribution, version), py_version, bitness, [Path(os.path.dirname(whl_path))])
-    if not locator.check_extra_sources():
-        raise ValueError('Error, wheel {0} is not compatible with Python {1} for Windows'.format(wheel_name, py_version))
-
-    distributions.append(distribution)
+        self.got_distributions[distribution] = whl_path
 
 
 def is_excluded(path, exclude):

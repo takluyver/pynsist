@@ -23,7 +23,7 @@ from .configreader import get_installer_builder_args
 from .commands import prepare_bin_directory
 from .copymodules import copy_modules
 from .nsiswriter import NSISFileWriter
-from .pypi import fetch_pypi_wheels
+from .wheels import WheelGetter
 from .util import download, text_types, get_cache_dir, normalize_path
 
 __version__ = '2.1'
@@ -351,10 +351,11 @@ if __name__ == '__main__':
             os.mkdir(build_pkg_dir)
 
         # 2. Wheels specified in pypi_wheel_reqs or in paths of local_wheels
-        fetch_pypi_wheels(self.pypi_wheel_reqs, self.local_wheels, build_pkg_dir,
-                          py_version=self.py_version, bitness=self.py_bitness,
-                          extra_sources=self.extra_wheel_sources,
-                          exclude=self.exclude)
+        wg = WheelGetter(self.pypi_wheel_reqs, self.local_wheels, build_pkg_dir,
+                         py_version=self.py_version, bitness=self.py_bitness,
+                         extra_sources=self.extra_wheel_sources,
+                         exclude=self.exclude)
+        wg.get_all()
 
         # 3. Copy importable modules
         copy_modules(self.packages, build_pkg_dir,
