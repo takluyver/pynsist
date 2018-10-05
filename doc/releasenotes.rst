@@ -4,7 +4,13 @@ Release notes
 Version 2.2
 -----------
 
-
+* New ``local_wheels`` option to include packages from wheel ``.whl`` files
+  by path (:ghpull:`164`).
+* ``.dist-info`` directories from wheels are now installed alongside the
+  importable packages, allowing plugin discovery mechanisms based on *entry
+  points* to work (:ghpull:`161`).
+* Fixed including multiple files with the same name to be installed to different
+  folders (:ghpull:`162`).
 * The ``exclude`` option now works to exclude files extracted from wheels
   (:ghpull:`147`).
 * ``exclude`` patterns work with either slash ``/`` or backslash ``\`` as
@@ -16,6 +22,7 @@ Version 2.2
   variable to get the installation directory. This was already available for
   commands, so the change makes it easier to use a single preamble for both
   (:ghpull:`149`).
+* Test infrastructure switched to pytest and tox (:ghpull:`165`).
 * New FAQ entry on :ref:`faq-tkinter` (:ghpull:`146`).
 
 Version 2.1
