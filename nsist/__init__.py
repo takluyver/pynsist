@@ -433,19 +433,20 @@ if __name__ == '__main__':
 
         Returns the exit code.
         """
-        try:
-            if os.name == 'nt':
+        makensis = shutil.which('makensis')
+        if (makensis is None) and os.name == 'nt':
+            try:
                 makensis = find_makensis_win()
-            else:
-                makensis = 'makensis'
-            logger.info('\n~~~ Running makensis ~~~')
-            return call([makensis, self.nsi_file])
-        except OSError as e:
-            # This should catch either the registry key or makensis being absent
-            if e.errno == errno.ENOENT:
-                print("makensis was not found. Install NSIS and try again.")
-                print("http://nsis.sourceforge.net/Download")
-                return 1
+            except OSError:
+                pass
+
+        if makensis is None:
+            print("makensis was not found. Install NSIS and try again.")
+            print("http://nsis.sourceforge.net/Download")
+            return 1
+
+        logger.info('\n~~~ Running makensis ~~~')
+        return call([makensis, self.nsi_file])
 
     def run(self, makensis=True):
         """Run all the steps to build an installer.
@@ -480,6 +481,8 @@ if __name__ == '__main__':
 
             if not exitcode:
                 logger.info('Installer written to %s', pjoin(self.build_dir, self.installer_name))
+            return exitcode
+        return 0
 
 def main(argv=None):
     """Make an installer from the command line.
@@ -513,8 +516,10 @@ def main(argv=None):
     args = get_installer_builder_args(cfg)
 
     try:
-        InstallerBuilder(**args).run(makensis=(not options.no_makensis))
+        ec = InstallerBuilder(**args).run(makensis=(not options.no_makensis))
     except InputError as e:
         logger.error("Error in config values:")
         logger.error(str(e))
         sys.exit(1)
+
+    return ec
