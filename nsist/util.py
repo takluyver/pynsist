@@ -25,8 +25,14 @@ def download(url, target):
             if chunk:
                 f.write(chunk)
 
+CACHE_ENV_VAR = 'PYNSIST_CACHE_DIR'
+
 def get_cache_dir(ensure_existence=False):
-    if os.name == 'posix' and sys.platform != 'darwin':
+    specified = os.environ.get(CACHE_ENV_VAR, None)
+
+    if specified:
+        p = Path(specified)
+    elif os.name == 'posix' and sys.platform != 'darwin':
         # Linux, Unix, AIX, etc.
         # use ~/.cache if empty OR not set
         xdg = os.environ.get("XDG_CACHE_HOME", None) or (os.path.expanduser('~/.cache'))

@@ -3,20 +3,21 @@ from pathlib import Path
 import re
 import responses
 from shutil import copy
-from testpath import MockCommand, assert_isfile, assert_isdir
+from testpath import MockCommand, modified_env, assert_isfile, assert_isdir
 from testpath.tempdir import TemporaryWorkingDirectory
 from zipfile import ZipFile
 
 from nsist import main
+from nsist.util import CACHE_ENV_VAR
 from .utils import test_dir
 
 example_dir = Path(test_dir, 'console_example')
 
-def respond_python_zip():
+def respond_python_zip(req):
     buf = io.BytesIO()
     with ZipFile(buf, 'w') as zf:
         zf.writestr('python.exe', b'')
-    return 200, {}, buf
+    return 200, {}, buf.getvalue()
 
 @responses.activate
 def test_console_example():
@@ -29,7 +30,8 @@ def test_console_example():
             copy(str(src), td)
 
 
-        with MockCommand('makensis') as makensis:
+        with modified_env({CACHE_ENV_VAR: td}), \
+             MockCommand('makensis') as makensis:
             ec = main(['installer.cfg'])
 
         assert ec == 0
