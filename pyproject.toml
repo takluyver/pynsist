@@ -28,7 +28,10 @@ classifiers = [
 ]
 
 [tool.flit.metadata.requires-extra]
-test = ["testpath"]
+test = [
+    "testpath",
+    "responses",
+]
 
 [tool.flit.scripts]
 pynsist = "nsist:main"

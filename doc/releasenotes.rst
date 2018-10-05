@@ -4,6 +4,7 @@ Release notes
 Version 2.2
 -----------
 
+
 * The ``exclude`` option now works to exclude files extracted from wheels
   (:ghpull:`147`).
 * ``exclude`` patterns work with either slash ``/`` or backslash ``\`` as
