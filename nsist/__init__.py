@@ -26,7 +26,7 @@ from .nsiswriter import NSISFileWriter
 from .wheels import WheelGetter
 from .util import download, get_cache_dir, normalize_path
 
-__version__ = '2.1'
+__version__ = '2.2'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
