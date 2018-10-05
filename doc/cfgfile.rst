@@ -225,17 +225,27 @@ the line with the key:
 
 .. describe:: local_wheels (optional)
 
-   One or more glob paths that match one or more wheel files located on the
-   local filesystem. All matching wheel files will be included in the installer.
-   For instance ``wheels\*.whl`` will include all wheel files from the relative
-   folder ``wheels``. 
-   
-   Any included wheel corresponding to the same distribution
-   of a wheel specified in ``pypi_wheels`` will raise an error.
+   One or more paths to ``.whl`` wheel files on the local filesystem.
+   All matching wheel files will be included in the installer.
+   These paths can also use *glob* patterns to match multiple wheels,
+   e.g. ``wheels/*.whl`` will include all wheels from the folder ``wheels``.
 
-   Relative glob paths are from the directory containing the config file.
+   Pynsist checks that each pattern matches at least one file, that only
+   one wheel is being used for each distribution name, and that all wheels are
+   compatible with the target Python version.
+
+   Relative paths are from the directory containing the config file.
 
    .. versionadded:: 2.2
+
+.. note::
+
+   The ``local_wheels`` option is useful if you're using Pynsist as a step
+   in a larger build process: you can use another tool to prepare all your
+   application's dependencies as wheels, and then pass them to Pynsist.
+
+   For simpler build processes, ``pypi_wheels`` will search PyPI for compatible
+   wheels, and handle downloading and caching them.
 
 .. describe:: packages (optional)
 
