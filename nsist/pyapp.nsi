@@ -106,7 +106,8 @@ Section "!${PRODUCT_NAME}" sec_app
 
   [% block install_commands %]
   [% if has_commands %]
-    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_rewrite_shebangs.py" "$INSTDIR\bin"'
+    DetailPrint "Setting up command-line launchers..."
+    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_assemble_launchers.py" "$INSTDIR\bin"'
     nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_system_path.py" add "$INSTDIR\bin"'
   [% endif %]
   [% endblock install_commands %]

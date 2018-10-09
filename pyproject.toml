@@ -15,7 +15,7 @@ requires = [
     "requests_download",
     "jinja2",
     "yarg",
-    "win_cli_launchers"
+    "distlib"
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",

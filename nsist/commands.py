@@ -1,9 +1,11 @@
+import distlib.scripts
 import io
+import os.path as osp
 import shutil
-import win_cli_launchers
+from zipfile import ZipFile
 
 
-SCRIPT_TEMPLATE = u"""#!python
+SCRIPT_TEMPLATE = u"""# -*- coding: utf-8 -*-
 import sys, os
 import site
 installdir = os.path.dirname(os.path.dirname(__file__))
@@ -20,14 +22,20 @@ os.environ['PATH'] += ';' + os.path.dirname(sys.executable)
 
 if __name__ == '__main__':
     from {module} import {func}
-    {func}()
+    sys.exit({func}())
 """
 
-def prepare_bin_directory(target, commands, bitness=32):
-    exe_src = win_cli_launchers.find_exe('x64' if bitness == 64 else 'x86')
-    for name, command in commands.items():
-        shutil.copy(exe_src, str(target / (name+'.exe')))
+def find_exe(bitness=32):
+    distlib_dir = osp.dirname(distlib.scripts.__file__)
+    return osp.join(distlib_dir, 't%d.exe' % bitness)
 
+def prepare_bin_directory(target, commands, bitness=32):
+    # Give the base launcher a .dat extension so it doesn't show up as an
+    # executable command itself. During the installation it will be copied to
+    # each launcher name, and the necessary data appended to it.
+    shutil.copy(find_exe(bitness), str(target / 'launcher_exe.dat'))
+
+    for name, command in commands.items():
         specified_preamble = command.get('extra_preamble', None)
         if isinstance(specified_preamble, str):
             # Filename
@@ -38,8 +46,10 @@ def prepare_bin_directory(target, commands, bitness=32):
             # Passed a StringIO or similar object
             extra_preamble = specified_preamble
         module, func = command['entry_point'].split(':')
-        with (target / (name+'-script.py')).open('w') as f:
-            f.write(SCRIPT_TEMPLATE.format(
-                module=module, func=func,
-                extra_preamble=extra_preamble.read().rstrip(),
-            ))
+        script = SCRIPT_TEMPLATE.format(
+            module=module, func=func,
+            extra_preamble=extra_preamble.read().rstrip(),
+        )
+
+        with ZipFile(str(target / (name + '-append.zip')), 'w') as zf:
+            zf.writestr('__main__.py', script.encode('utf-8'))
