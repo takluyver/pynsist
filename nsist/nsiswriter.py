@@ -2,7 +2,6 @@ import itertools
 from operator import itemgetter
 import os
 import ntpath
-import re
 import sys
 
 import jinja2
