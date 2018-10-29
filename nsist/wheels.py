@@ -222,10 +222,9 @@ def extract_wheel(whl_file, target_dir, exclude=None):
     td = Path(mkdtemp())
     with zipfile.ZipFile(str(whl_file), mode='r') as zf:
         if exclude:
-            basename = Path(Path(target_dir).name)
+            exclude_regexen = make_exclude_regexen(exclude)
             for zpath in zf.namelist():
-                path = basename / zpath
-                if is_excluded(path, exclude):
+                if is_excluded('pkgs/' + zpath, exclude_regexen):
                     continue  # Skip excluded paths
                 zf.extract(zpath, path=str(td))
         else:
@@ -324,10 +323,27 @@ class WheelGetter:
         self.got_distributions[distribution] = whl_path
 
 
-def is_excluded(path, exclude):
+def make_exclude_regexen(exclude_patterns):
+    """Translate exclude glob patterns to regex pattern objects.
+
+    Handles matching files under a named directory.
+    """
+    re_pats = set()
+    for pattern in exclude_patterns:
+        re_pats.add(fnmatch.translate(pattern))
+        if not pattern.endswith('*'):
+            # Also use the pattern as a directory name and match anything
+            # under that directory.
+            suffix = '*' if pattern.endswith('/') else '/*'
+            re_pats.add(fnmatch.translate(pattern + suffix))
+
+    return [re.compile(p) for p in sorted(re_pats)]
+
+
+def is_excluded(path, exclude_regexen):
     """Return True if path matches an exclude pattern"""
     path = normalize_path(path)
-    for pattern in (exclude or ()):
-        if fnmatch.fnmatch(path, pattern):
+    for re_pattern in exclude_regexen:
+        if re_pattern.match(path):
             return True
     return False

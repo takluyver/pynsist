@@ -3,11 +3,12 @@ import os
 from pathlib import Path
 import platform
 import subprocess
+from zipfile import ZipFile
 
 import pytest
-from testpath import assert_isfile, assert_isdir
+from testpath import assert_isfile, assert_isdir, assert_not_path_exists
 
-from nsist.wheels import WheelGetter
+from nsist.wheels import WheelGetter, extract_wheel
 
 # To exclude tests requiring network on an unplugged machine, use: pytest -m "not network"
 
@@ -85,3 +86,16 @@ def test_useless_wheel_glob_path_raise(tmpdir):
 
     with pytest.raises(ValueError, match='does not match any files'):
         wg.get_globs()
+
+def test_extract_exclude_folder(tmpdir):
+    whl_file = str(tmpdir / 'foo.whl')
+    pkgs = tmpdir.mkdir('pkgs')
+
+    with ZipFile(whl_file, 'w') as zf:
+        zf.writestr('foo/bar.txt', b'blah')
+        zf.writestr('foo/bar/abc.txt', b'blah')
+
+    extract_wheel(whl_file, str(pkgs), exclude=['pkgs/foo/bar'])
+
+    assert_isfile(str(pkgs / 'foo' / 'bar.txt'))
+    assert_not_path_exists(str(pkgs / 'foo' / 'bar'))
