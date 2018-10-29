@@ -1,6 +1,15 @@
 Release notes
 =============
 
+Version 2.3
+-----------
+
+* Command line exes are now based on the launchers made by Vinay Sajip for
+  `distlib <https://distlib.readthedocs.io/en/latest/>`_, instead of the
+  launchers from setuptools. They should be more robust with spaces in paths
+  (:ghpull:`169`).
+* Fixed excluding entire folders extracted from wheels (:ghissue:`168`).
+
 Version 2.2
 -----------
 
