@@ -1,6 +1,6 @@
 jinja2
 requests
-win_cli_launchers
+distlib
 yarg
 requests_download
 sphinxcontrib_github_alt
