@@ -1,6 +1,5 @@
 """Build NSIS installers for Python applications.
 """
-import errno
 import io
 import logging
 import ntpath
