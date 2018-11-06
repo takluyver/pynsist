@@ -29,6 +29,8 @@ Real-world examples
 
 These may illustrate more complex uses of pynsist.
 
+- `Mu <https://codewith.mu/>`_ is a beginner-friendly code editor for Python,
+  written with PyQt5.
 - The author's own application, `Taxonome <https://bitbucket.org/taxonome/taxonome/src>`_,
   is a Python 3, PyQt4 application for working with scientific names for species.
 - `Spreads <https://github.com/jbaiter/spreads/tree/windows>`_ is a book scanning tool,
