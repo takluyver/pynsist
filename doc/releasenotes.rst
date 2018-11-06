@@ -9,6 +9,8 @@ Version 2.3
   launchers from setuptools. They should be more robust with spaces in paths
   (:ghpull:`169`).
 * Fixed excluding entire folders extracted from wheels (:ghissue:`168`).
+* When doing a per-user install of an application with commands, the ``PATH``
+  environment variable is modified just for that user (:ghpull:`170`).
 
 Version 2.2
 -----------
