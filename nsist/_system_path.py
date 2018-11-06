@@ -184,12 +184,21 @@ def broadcast_environment_settings_change():
 
 
 def main():
+    if len(sys.argv) < 3:
+        sys.exit("Too few arguments: {}".format(sys.argv))
+    elif len(sys.argv) > 3:
+        sys.exit("Too many arguments: {}".format(sys.argv))
+
     if sys.argv[1] == 'add':
         add_to_system_path(sys.argv[2])
-        broadcast_environment_settings_change()
+    elif sys.argv[1] == 'add_user':
+        add_to_system_path(sys.argv[2], allusers=False)
     elif sys.argv[1] == 'remove':
         remove_from_system_path(sys.argv[2])
-        broadcast_environment_settings_change()
+    elif sys.argv[1] == 'remove_user':
+        remove_from_system_path(sys.argv[2], allusers=False)
+
+    broadcast_environment_settings_change()
 
 if __name__ == '__main__':
     main()
