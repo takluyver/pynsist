@@ -243,6 +243,7 @@ def extract_wheel(whl_file, target_dir, exclude=None):
             # on the default installation layout. It doesn't look like it will
             # change, so in the best tradition of packaging, we'll work around
             # the workaround.
+            # https://github.com/takluyver/pynsist/issues/171
             # This is especially ugly because we do a case-insensitive match,
             # regardless of the filesystem.
             if (p / 'data').is_dir():
