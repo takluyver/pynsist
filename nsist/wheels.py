@@ -238,6 +238,20 @@ def extract_wheel(whl_file, target_dir, exclude=None):
             if (p / 'platlib').is_dir():
                 merge_dir_to(p / 'platlib', td)
 
+            # HACK: Some wheels from Christoph Gohlke's page have extra package
+            # files added in data/Lib/site-packages. This is a trick that relies
+            # on the default installation layout. It doesn't look like it will
+            # change, so in the best tradition of packaging, we'll work around
+            # the workaround.
+            # This is especially ugly because we do a case-insensitive match,
+            # regardless of the filesystem.
+            if (p / 'data').is_dir():
+                for sd in (p / 'data').iterdir():
+                    if sd.name.lower() == 'lib' and sd.is_dir():
+                        for sd2 in sd.iterdir():
+                            if sd2.name.lower() == 'site-packages' and sd2.is_dir():
+                                merge_dir_to(sd2, td)
+
     # Copy to target directory
     target = Path(target_dir)
     copied_something = False
