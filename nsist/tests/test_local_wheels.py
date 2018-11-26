@@ -99,3 +99,19 @@ def test_extract_exclude_folder(tmpdir):
 
     assert_isfile(str(pkgs / 'foo' / 'bar.txt'))
     assert_not_path_exists(str(pkgs / 'foo' / 'bar'))
+
+def test_extract_data_lib_sitepkg(tmpdir):
+    whl_file = str(tmpdir / 'foo.whl')
+    pkgs = tmpdir.mkdir('pkgs')
+
+    with ZipFile(whl_file, 'w') as zf:
+        zf.writestr('osgeo/bar.txt', b'blah')
+        # The case of 'Lib/site-packages' shouldn't matter
+        zf.writestr('foo-1.0.data/data/Lib/siTE-packages/osgeo/abc.txt', b'a')
+        zf.writestr('foo-1.0.data/data/lib/site-packages/osgeo/def.txt', b'd')
+
+    extract_wheel(whl_file, str(pkgs), exclude=['pkgs/foo/bar'])
+
+    assert_isfile(str(pkgs / 'osgeo' / 'bar.txt'))
+    assert_isfile(str(pkgs / 'osgeo' / 'abc.txt'))
+    assert_isfile(str(pkgs / 'osgeo' / 'def.txt'))
