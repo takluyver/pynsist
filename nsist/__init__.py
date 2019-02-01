@@ -221,10 +221,13 @@ class InstallerBuilder(object):
 
     SCRIPT_TEMPLATE = """#!python{qualifier}
 import sys, os
+import site
 scriptdir, script = os.path.split(__file__)
 installdir = scriptdir  # for compatibility with commands
 pkgdir = os.path.join(scriptdir, 'pkgs')
 sys.path.insert(0, pkgdir)
+# Ensure .pth files in pkgdir are handled properly
+site.addsitedir(pkgdir)
 os.environ['PYTHONPATH'] = pkgdir + os.pathsep + os.environ.get('PYTHONPATH', '')
 
 # APPDATA should always be set, but in case it isn't, try user home
