@@ -29,6 +29,13 @@ SetCompressor lzma
 !define MUI_ICON "[[icon]]"
 !define MUI_UNICON "[[icon]]"
 
+[% if ib.run_after_install is not none %]
+; Run an application shortcut after an install
+!define MUI_FINISHPAGE_RUN
+!define MUI_FINISHPAGE_RUN_TEXT "Start a shortcut"
+!define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
+[% endif %]
+
 ; UI pages
 [% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
@@ -144,6 +151,14 @@ Section "!${PRODUCT_NAME}" sec_app
   WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
                    "NoRepair" 1
 
+  [% if ib.run_on_windows_start is not none %]
+  ; Running a .exe file on Windows Start
+    [% for scname in ib.shortcuts %]
+      WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" \
+                       "${PRODUCT_NAME}" "$SMPROGRAMS\[[scname]].lnk"
+    [% endfor %]
+  [% endif %]
+
   ; Check if we need to reboot
   IfRebootFlag 0 noreboot
     MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" \
@@ -193,6 +208,9 @@ Section "Uninstall"
   [% endblock uninstall_shortcuts %]
   RMDir $INSTDIR
   DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
+  [% if ib.run_on_windows_start is not none %]
+    DeleteRegKey /ifempty HKLM "Software\Microsoft\Windows\CurrentVersion\Run"
+  [% endif %]
 SectionEnd
 
 [% endblock sections %]
@@ -225,5 +243,13 @@ Function correct_prog_files
   ; folder for 64-bit applications. Override the install dir it set.
   StrCmp $MultiUser.InstallMode AllUsers 0 +2
     StrCpy $INSTDIR "$PROGRAMFILES64\${MULTIUSER_INSTALLMODE_INSTDIR}"
+FunctionEnd
+[% endif %]
+
+[% if ib.run_after_install is not none %]
+Function LaunchLink
+  [% for scname in ib.shortcuts %]
+    ExecShell "" "$SMPROGRAMS\[[scname]].lnk"
+  [% endfor %]
 FunctionEnd
 [% endif %]
