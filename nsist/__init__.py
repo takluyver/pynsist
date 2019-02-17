@@ -450,6 +450,16 @@ if __name__ == '__main__':
             print("http://nsis.sourceforge.net/Download")
             return 1
 
+        nsis_dir = os.path.dirname(makensis)
+        nsis_inc_nsh = os.path.abspath(os.path.join(nsis_dir, "include", "nsProcess.nsh"))
+        nsis_plg_dll = os.path.abspath(os.path.join(nsis_dir, "Plugins", "x86-ansi", "nsProcess.dll"))
+        nsis_plg_dllw = os.path.abspath(os.path.join(nsis_dir, "Plugins", "x86-unicode", "nsProcess.dll"))
+
+        if not os.path.exists(nsis_inc_nsh) or not os.path.exists(nsis_plg_dll) or not os.path.exists(nsis_plg_dllw):
+            print("NsProcess plugin was not found. Install NsProcess plugin and try again.")
+            print("https://nsis.sourceforge.io/NsProcess_plugin")
+            return 2
+
         logger.info('\n~~~ Running makensis ~~~')
         return call([makensis, self.nsi_file])
 

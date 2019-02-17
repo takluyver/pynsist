@@ -36,6 +36,25 @@ SetCompressor lzma
 !define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
 [% endif %]
 
+!include "nsProcess.nsh"
+!define APP_EXE "python.exe"
+!define AppName "${PRODUCT_NAME}"
+
+!macro KillProcess
+  ${nsProcess::FindProcess} "${APP_EXE}" $R0
+
+  ${If} $R0 == 0
+    DetailPrint "${AppName} is running. Closing it down"
+    ${nsProcess::KillProcess} "${APP_EXE}" $R0
+    DetailPrint "Waiting for ${AppName} to close"
+    Sleep 2000
+  ${Else}
+    DetailPrint "${APP_EXE} was not found to be running"
+  ${EndIf}
+
+  ${nsProcess::Unload}
+!macroend
+
 ; UI pages
 [% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
@@ -168,6 +187,8 @@ Section "!${PRODUCT_NAME}" sec_app
 SectionEnd
 
 Section "Uninstall"
+  !insertmacro KillProcess
+
   SetRegView [[ib.py_bitness]]
   SetShellVarContext all
   IfFileExists "$INSTDIR\${USER_INSTALL_MARKER}" 0 +3
