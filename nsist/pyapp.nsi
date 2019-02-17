@@ -230,6 +230,24 @@ Function .onMouseOverSection
 FunctionEnd
 
 Function .onInit
+; https://nsis.sourceforge.io/Auto-uninstall_old_before_installing_new
+  ReadRegStr $R0 SHCTX \
+  "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
+  "UninstallString"
+  StrCmp $R0 "" done
+
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+  "${PRODUCT_NAME} is already installed. $\n$\nClick 'OK' to remove the \
+  previous version or 'Cancel' to cancel this upgrade." \
+  IDOK uninst
+  Abort
+
+; Run the uninstaller
+uninst:
+  ClearErrors
+  ExecWait $R0
+
+done:
   !insertmacro MULTIUSER_INIT
 FunctionEnd
 
