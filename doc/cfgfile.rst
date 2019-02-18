@@ -142,6 +142,12 @@ variable.
    As with shortcuts, this specifies the Python function to call, in the format
    ``module:function``.
 
+.. describe:: console (optional)
+
+   If ``true`` (default), the command will be using the ``py`` launcher, which
+   opens a console for the process. If ``false``, it will use the ``pyw``
+   launcher, which doesn't create a console.
+
 .. describe:: extra_preamble (optional)
 
    As for shortcuts, a file containing extra code to run before importing the

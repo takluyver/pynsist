@@ -107,7 +107,7 @@ Section "!${PRODUCT_NAME}" sec_app
   [% block install_commands %]
   [% if has_commands %]
     DetailPrint "Setting up command-line launchers..."
-    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_assemble_launchers.py" "$INSTDIR\bin"'
+    nsExec::ExecToLog '[[ python ]] -Es "$INSTDIR\_assemble_launchers.py" [[ python ]] "$INSTDIR\bin"'
 
     StrCmp $MultiUser.InstallMode CurrentUser 0 AddSysPathSystem
       ; Add to PATH for current user

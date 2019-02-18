@@ -25,15 +25,17 @@ if __name__ == '__main__':
     sys.exit({func}())
 """
 
-def find_exe(bitness=32):
+def find_exe(bitness=32, console=True):
     distlib_dir = osp.dirname(distlib.scripts.__file__)
-    return osp.join(distlib_dir, 't%d.exe' % bitness)
+    name = 't' if console else 'w'
+    return osp.join(distlib_dir, '{name}{bitness}.exe'.format(name=name, bitness=bitness))
 
 def prepare_bin_directory(target, commands, bitness=32):
     # Give the base launcher a .dat extension so it doesn't show up as an
     # executable command itself. During the installation it will be copied to
     # each launcher name, and the necessary data appended to it.
-    shutil.copy(find_exe(bitness), str(target / 'launcher_exe.dat'))
+    shutil.copy(find_exe(bitness, True), str(target / 'launcher_exe.dat'))
+    shutil.copy(find_exe(bitness, False), str(target / 'launcher_noconsole_exe.dat'))
 
     for name, command in commands.items():
         specified_preamble = command.get('extra_preamble', None)
@@ -51,5 +53,10 @@ def prepare_bin_directory(target, commands, bitness=32):
             extra_preamble=extra_preamble.read().rstrip(),
         )
 
-        with ZipFile(str(target / (name + '-append.zip')), 'w') as zf:
+        if command.get('console', True):
+            append = '-append.zip'
+        else:
+            append = '-append-noconsole.zip'
+
+        with ZipFile(str(target / (name + append)), 'w') as zf:
             zf.writestr('__main__.py', script.encode('utf-8'))
