@@ -95,6 +95,7 @@ CONFIG_VALIDATORS = {
     ]),
     'Command': SectionValidator([
         ('entry_point', True),
+        ('console', False),
         ('extra_preamble', False),
     ])
 }
@@ -200,6 +201,7 @@ def read_commands_config(cfg):
         if section.startswith("Command "):
             name = section[len("Command "):]
             commands[name] = cc = dict(cfg[section])
+            cc['console'] = cfg[section].getboolean('console', fallback=True)
             if ('extra_preamble' in cc) and \
                     not os.path.isfile(cc['extra_preamble']):
                 raise InvalidConfig('extra_preamble file %r does not exist' %
