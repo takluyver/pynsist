@@ -49,3 +49,31 @@ ways it can still help you:
   create command-line entry points, to find ``makensis.exe`` on Windows, and so
   on. You can take specific bits to reuse, or copy the whole thing and apply
   some changes.
+
+Specific non-goals
+------------------
+
+These are ideas that I've considered and decided not to do:
+
+- Concealing source code: I'm writing Free and Open Source Software (FOSS) and
+  I want to help other people do the same. A core FOSS principle is that the
+  user can inspect and understand the code they are running. I'm not interested
+  in anything that makes that harder.
+- Detecting dependencies by finding ``import`` statements: My experience is that
+  this doesn't work well. It misses dynamically loaded dependencies, and it
+  can have false positives where a module is only needed in some situations.
+  I think specifying all modules needed is clearer than specifying
+  corrections to what a tool detects.
+  I am interested in dynamically finding dependencies by running a program;
+  see my prototype `kartoffel <https://pypi.org/project/kartoffel/>`_ tool if
+  you want to investigate this.
+- Single-file executables: You could probably reuse a lot of Pynsist's code to
+  make single-file executables. They would 'install' to a temporary directory
+  and then run the application. But it's not a feature I'm planning to include.
+- MSI packages: They have some advantages, but they're much more complicated to
+  make than NSIS installers. I have `an experiment with using WiX
+  <https://github.com/takluyver/pynsist/tree/wixperiment/examples/_mu>`_ in a
+  branch; feel free to use it as a starting point.
+
+These aren't set in stone: I've changed my mind before, and it could well
+happen again.
