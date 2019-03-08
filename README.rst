@@ -45,3 +45,7 @@ Quickstart
 
 3. Run ``pynsist installer.cfg`` to generate your installer. If ``pynsist`` isn't
    found, you can use ``python -m nsist installer.cfg`` instead.
+
+This example illustrates how to use Pynsist by itself, for simple projects.
+There are other options which can make it easier to integrate as a step in
+a more complex build process. See the docs for more information.
