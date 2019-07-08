@@ -68,9 +68,10 @@ Application section
 
 .. describe:: console (optional)
 
-   If ``true``, shortcuts will be created using the ``py`` launcher, which opens
-   a console for the process. If ``false``, or not specified, they will use the
-   ``pyw`` launcher, which doesn't create a console.
+   If ``true``, shortcuts will be created using ``python.exe``, which opens
+   a console for the process. If ``false``, or not specified, they will use
+   ``pythonw.exe``, which doesn't create a console. In that case, stdout and
+   stderr from Python code will be redirected to a log file in :envvar:`APPDATA`.
 
 .. describe:: extra_preamble (optional)
 
@@ -144,9 +145,13 @@ variable.
 
 .. describe:: console (optional)
 
-   If ``true`` (default), the command will be using the ``py`` launcher, which
-   opens a console for the process. If ``false``, it will use the ``pyw``
-   launcher, which doesn't create a console.
+   If ``true`` (default), the ``.exe`` wrapper for the command will open a
+   console if it's not already inside one. If ``false``, it will be a GUI
+   application, which doesn't use a console.
+
+   If the user runs the command directly, they do so in a console anyway.
+   But commands with ``console=false`` can be useful if your GUI application
+   needs to run a subprocess without a console window popping up.
 
 .. describe:: extra_preamble (optional)
 
