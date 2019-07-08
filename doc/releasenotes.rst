@@ -1,6 +1,16 @@
 Release notes
 =============
 
+Version 2.4
+-----------
+
+* :ref:`command_config` can now include ``console=false`` to make a command on
+  :envvar:`PATH` which runs without a console window (:ghpull:`179`).
+* Fix for using ``pywin32`` in installed code launched from a command
+  (:ghpull:`175`).
+* Work around wheels where some package data files are shipped in a way that
+  assumes the default pip install layout (:ghpull:`172`).
+
 Version 2.3
 -----------
 
