@@ -9,8 +9,13 @@
 
 ; Marker file to tell the uninstaller that it's a user installation
 !define USER_INSTALL_MARKER _user_install_marker
- 
+
 SetCompressor lzma
+
+!if "${NSIS_PACKEDVERSION}" >= 0x03000000
+  Unicode true
+  ManifestDPIAware true
+!endif
 
 !define MULTIUSER_EXECUTIONLEVEL Highest
 !define MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER
@@ -23,7 +28,7 @@ SetCompressor lzma
 !include MultiUser.nsh
 
 [% block modernui %]
-; Modern UI installer stuff 
+; Modern UI installer stuff
 !include "MUI2.nsh"
 !define MUI_ABORTWARNING
 !define MUI_ICON "[[icon]]"
@@ -76,14 +81,14 @@ Section "!${PRODUCT_NAME}" sec_app
       File "[[ file ]]"
     [% endfor %]
   [% endfor %]
-  
+
   ; Install directories
   [% for dir, destination in ib.install_dirs %]
     SetOutPath "[[ pjoin(destination, dir) ]]"
     File /r "[[dir]]\*.*"
   [% endfor %]
   [% endblock install_files %]
-  
+
   [% block install_shortcuts %]
   ; Install shortcuts
   ; The output path becomes the working directory for shortcuts
@@ -119,7 +124,7 @@ Section "!${PRODUCT_NAME}" sec_app
     AddedSysPath:
   [% endif %]
   [% endblock install_commands %]
-  
+
   ; Byte-compile Python files.
   DetailPrint "Byte-compiling Python modules..."
   nsExec::ExecToLog '[[ python ]] -m compileall -q "$INSTDIR\pkgs"'
@@ -207,7 +212,7 @@ Function .onMouseOverSection
     [% block mouseover_messages %]
     StrCmp $0 ${sec_app} "" +2
       SendMessage $R0 ${WM_SETTEXT} 0 "STR:${PRODUCT_NAME}"
-    
+
     [% endblock mouseover_messages %]
 FunctionEnd
 
