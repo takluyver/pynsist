@@ -12,8 +12,9 @@
 
 SetCompressor lzma
 
-!if "${NSIS_PACKEDVERSION}" > 0x02ffffff
+!if "${NSIS_PACKEDVERSION}" >= 0x03000000
   Unicode true
+  ManifestDPIAware true
 !endif
 
 !define MULTIUSER_EXECUTIONLEVEL Highest
