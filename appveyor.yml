@@ -9,7 +9,7 @@ environment:
 
 install:
   - cinst nsis
-  - "%PYTHON%\\python.exe -m pip install tox --no-warn-script-location"
+  - "%PYTHON%\\python.exe -m pip install -U tox virtualenv --no-warn-script-location"
 
 build: off
 
