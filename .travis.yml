@@ -7,7 +7,7 @@ python:
 
 # Ensure dependencies are installed
 install:
-  - pip install --upgrade tox-travis tox pip
+  - pip install --upgrade tox-travis tox virtualenv
 
 # Command to run tests
 script: tox -e python -- -v
