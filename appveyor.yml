@@ -1,9 +1,11 @@
 environment:
   matrix:
     # For Python versions available on Appveyor, see
-    # http://www.appveyor.com/docs/installed-software#python
-    - PYTHON: "C:\\Python35-x64"
+    # https://www.appveyor.com/docs/windows-images-software/#python
+    - PYTHON: "C:\\Python38"
+    - PYTHON: "C:\\Python37-x64"
     - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python35-x64"
 
 install:
   - cinst nsis
