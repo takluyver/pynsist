@@ -66,6 +66,8 @@ def test_installer(console_eg_copy, tmp_path):
 
     # Run installer
     run([str(installer), '/S', '/D={}'.format(inst_dir)], check=True)
+    import os
+    print(os.listdir(str(inst_dir)))
     inst_python = inst_dir / 'Python' / 'python.exe'
     inst_launch_script = inst_dir / 'Sample_printer.launch.py'
 
