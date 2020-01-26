@@ -26,6 +26,7 @@ SetCompressor lzma
 !define MULTIUSER_INSTALLMODE_FUNCTION correct_prog_files
 [% endif %]
 !include MultiUser.nsh
+!include FileFunc.nsh
 
 [% block modernui %]
 ; Modern UI installer stuff
@@ -51,6 +52,8 @@ SetCompressor lzma
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${INSTALLER_NAME}"
 ShowInstDetails show
+
+Var cmdLineInstallDir
 
 Section -SETTINGS
   SetOutPath "$INSTDIR"
@@ -217,7 +220,20 @@ Function .onMouseOverSection
 FunctionEnd
 
 Function .onInit
+  ; Multiuser.nsh breaks /D command line parameter. Parse /INSTDIR instead.
+  ; Cribbing from https://nsis-dev.github.io/NSIS-Forums/html/t-299280.html
+  ${GetParameters} $0
+  ClearErrors
+  ${GetOptions} '$0' "/INSTDIR=" $1
+  IfErrors +2  ; Error means flag not found
+    StrCpy $cmdLineInstallDir $1
+  ClearErrors
+
   !insertmacro MULTIUSER_INIT
+
+  ; If cmd line included /INSTDIR, override the install dir set by MultiUser
+  StrCmp $cmdLineInstallDir "" +2
+    StrCpy $INSTDIR $cmdLineInstallDir
 FunctionEnd
 
 Function un.onInit

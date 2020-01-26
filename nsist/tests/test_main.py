@@ -65,7 +65,7 @@ def test_installer(console_eg_copy, tmp_path):
     inst_dir = tmp_path / 'inst'
 
     # Run installer
-    run([str(installer), '/S', '/D={}'.format(inst_dir)], check=True)
+    run([str(installer), '/S', '/INSTDIR={}'.format(inst_dir)], check=True)
     import os
     print(os.listdir(str(inst_dir)))
     inst_python = inst_dir / 'Python' / 'python.exe'
