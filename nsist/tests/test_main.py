@@ -92,3 +92,38 @@ def test_installer(console_eg_copy, tmp_path):
     res2 = run([str(inst_exe_wrapper)], check=True, stdout=PIPE)
     json_res2 = json.loads(res2.stdout.decode('utf-8', 'replace'))
     assert json_res2 == json_res
+
+    # Check command-line wrapper is on PATH
+    assert str(inst_exe_wrapper.parent) in get_registry_path()
+
+
+def get_registry_path():
+    """Read the PATH environment variable from the Windows registry"""
+    import winreg
+
+    res = []
+
+    # System-wide part of PATH
+    with winreg.CreateKey(
+        winreg.HKEY_LOCAL_MACHINE,
+        r"System\CurrentControlSet\Control\Session Manager\Environment"
+    ) as key:
+        try:
+            path = winreg.QueryValueEx(key, "PATH")[0]
+        except WindowsError:
+            # No value called PATH
+            pass
+        else:
+            res.extend(path.split(';'))
+
+    # User part of PATH
+    with winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Environment") as key:
+        try:
+            path = winreg.QueryValueEx(key, "PATH")[0]
+        except WindowsError:
+            # No value called PATH
+            pass
+        else:
+            res.extend(path.split(';'))
+
+    return res
