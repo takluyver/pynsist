@@ -10,4 +10,4 @@ install:
   - pip install tox-travis
 
 # Command to run tests
-script: tox -e python
+script: tox -e python -- -v
