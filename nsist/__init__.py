@@ -302,7 +302,7 @@ if __name__ == '__main__':
                 else:
                     shutil.copy2(sc['script'], self.build_dir)
 
-                target = '$INSTDIR\Python\python{}.exe'
+                target = '$INSTDIR\\Python\\python{}.exe'
                 sc['target'] = target.format('' if sc['console'] else 'w')
                 sc['parameters'] = '"%s"' % ntpath.join('$INSTDIR', sc['script'])
                 files.add(os.path.basename(sc['script']))
