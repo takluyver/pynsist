@@ -57,15 +57,15 @@ def test_installer(console_eg_copy, tmp_path):
     # Create installer
     run(
         [sys.executable, '-m', 'nsist', 'installer.cfg'],
-        cwd=console_eg_copy,
+        cwd=str(console_eg_copy),
         check=True,
     )
 
-    installer = Path(console_eg_copy, 'build', 'nsis', 'Guess_the_Number_1.0.exe')
+    installer = console_eg_copy / 'build' / 'nsis' / 'Guess_the_Number_1.0.exe'
     inst_dir = tmp_path / 'inst'
 
     # Run installer
-    run([installer, '/S', '/D={}'.format(inst_dir)], check=True)
+    run([str(installer), '/S', '/D={}'.format(inst_dir)], check=True)
     inst_python = inst_dir / 'Python' / 'python.exe'
     inst_launch_script = inst_dir / 'Sample_printer.launch.py'
 
@@ -75,7 +75,8 @@ def test_installer(console_eg_copy, tmp_path):
 
 
     # Run installed program
-    res = run([inst_python, inst_launch_script], check=True, stdout=PIPE)
+    res = run([str(inst_python), str(inst_launch_script)],
+              check=True, stdout=PIPE)
     json_res = json.loads(res.stdout)
 
     assert json_res['py_executable'] == str(inst_python)
