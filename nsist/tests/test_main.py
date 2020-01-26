@@ -61,7 +61,7 @@ def test_installer(console_eg_copy, tmp_path):
         check=True,
     )
 
-    installer = console_eg_copy / 'build' / 'nsis' / 'Guess_the_Number_1.0.exe'
+    installer = console_eg_copy / 'build' / 'nsis' / 'Sample_printer_1.0.exe'
     inst_dir = tmp_path / 'inst'
 
     # Run installer
