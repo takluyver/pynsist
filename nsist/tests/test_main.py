@@ -79,7 +79,7 @@ def test_installer(console_eg_copy, tmp_path):
     # Run installed program
     res = run([str(inst_python), str(inst_launch_script)],
               check=True, stdout=PIPE)
-    json_res = json.loads(res.stdout)
+    json_res = json.loads(res.stdout.decode('utf-8', 'replace'))
 
     assert json_res['py_executable'] == str(inst_python)
     assert json_res['py_version'].startswith('3.6.3')  # Set in installer.cfg
