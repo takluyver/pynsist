@@ -4,16 +4,16 @@ from zipfile import ZipFile
 
 from nsist import commands
 
-def test_prepare_bin_dir(tmpdir):
+def test_prepare_bin_dir(tmp_path):
     cmds = {
         'acommand': {
             'entry_point': 'somemod:somefunc',
             'extra_preamble': io.StringIO(u'import extra')
         }
     }
-    commands.prepare_bin_directory(tmpdir, cmds)
+    commands.prepare_bin_directory(tmp_path, cmds)
 
-    exe_file = str(tmpdir / 'acommand.exe')
+    exe_file = str(tmp_path / 'acommand.exe')
 
     assert_isfile(exe_file)
 
@@ -32,16 +32,16 @@ def test_prepare_bin_dir(tmpdir):
     assert 'import extra' in script_contents
     assert 'somefunc()' in script_contents
 
-def test_prepare_bin_dir_noconsole(tmpdir):
+def test_prepare_bin_dir_noconsole(tmp_path):
     cmds = {
         'acommand': {
             'entry_point': 'somemod:somefunc',
             'console': False
         }
     }
-    commands.prepare_bin_directory(tmpdir, cmds)
+    commands.prepare_bin_directory(tmp_path, cmds)
 
-    exe_file = str(tmpdir / 'acommand.exe')
+    exe_file = str(tmp_path / 'acommand.exe')
 
     assert_isfile(exe_file)
 

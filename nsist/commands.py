@@ -68,7 +68,7 @@ def prepare_bin_directory(target, commands, bitness=32):
             zf.writestr('__main__.py', script.encode('utf-8'))
 
         # Put the pieces together
-        with open(exe_path, 'wb') as f:
+        with exe_path.open('wb') as f:
             f.write(launcher_b)
             f.write(shebang)
             f.write(zip_bio.getvalue())
