@@ -31,13 +31,23 @@ def find_exe(bitness=32, console=True):
     return osp.join(distlib_dir, '{name}{bitness}.exe'.format(name=name, bitness=bitness))
 
 def prepare_bin_directory(target, commands, bitness=32):
-    # Give the base launcher a .dat extension so it doesn't show up as an
-    # executable command itself. During the installation it will be copied to
-    # each launcher name, and the necessary data appended to it.
-    shutil.copy(find_exe(bitness, True), str(target / 'launcher_exe.dat'))
-    shutil.copy(find_exe(bitness, False), str(target / 'launcher_noconsole_exe.dat'))
-
     for name, command in commands.items():
+        exe_path = target / (name + '.exe')
+        console = command.get('console', True)
+
+        # 1. Get the base launcher exe from distlib
+        with open(find_exe(bitness, console=console), 'rb') as f:
+            launcher_b = f.read()
+
+        # 2. Shebang: Python executable to run with
+        # shebangs relative to launcher location, according to
+        # https://bitbucket.org/vinay.sajip/simple_launcher/wiki/Launching%20an%20interpreter%20in%20a%20location%20relative%20to%20the%20launcher%20executable
+        if console:
+            shebang = b"#!<launcher_dir>\\..\\Python\\python.exe\r\n"
+        else:
+            shebang = b"#!<launcher_dir>\\..\\Python\\pythonw.exe\r\n"
+
+        # 3. The script to run, inside a zip file
         specified_preamble = command.get('extra_preamble', None)
         if isinstance(specified_preamble, str):
             # Filename
@@ -53,10 +63,13 @@ def prepare_bin_directory(target, commands, bitness=32):
             extra_preamble=extra_preamble.read().rstrip(),
         )
 
-        if command.get('console', True):
-            append = '-append.zip'
-        else:
-            append = '-append-noconsole.zip'
-
-        with ZipFile(str(target / (name + append)), 'w') as zf:
+        zip_bio = io.BytesIO()
+        with ZipFile(zip_bio, 'w') as zf:
             zf.writestr('__main__.py', script.encode('utf-8'))
+
+        # Put the pieces together
+        with open(exe_path, 'wb') as f:
+            f.write(launcher_b)
+            f.write(shebang)
+            f.write(zip_bio.getvalue())
+

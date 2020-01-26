@@ -356,7 +356,6 @@ if __name__ == '__main__':
         prepare_bin_directory(command_dir, self.commands, bitness=self.py_bitness)
         self.install_dirs.append((command_dir.name, '$INSTDIR'))
         self.extra_files.append((pjoin(_PKGDIR, '_system_path.py'), '$INSTDIR'))
-        self.extra_files.append((pjoin(_PKGDIR, '_assemble_launchers.py'), '$INSTDIR'))
 
     def copytree_ignore_callback(self, directory, files):
         """This is being called back by our shutil.copytree call to implement the
