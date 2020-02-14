@@ -1,6 +1,17 @@
 Release notes
 =============
 
+Version 2.5
+-----------
+
+* Make more modern installers, with unicode support and DPI awareness
+  (less blurry) when using NSIS version 3 (:ghpull:`189`).
+* Assemble wrapper executables for commands at build time, rather than on
+  installation. This is possible thanks to Vinay Sajip adding support for
+  paths from the launcher directory to the launcher bases (:ghpull:`191`).
+* An integration test checks creating an installer, installing and running a
+  simple program (:ghpull:`190`).
+
 Version 2.4
 -----------
 
