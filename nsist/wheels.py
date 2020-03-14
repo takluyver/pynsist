@@ -38,7 +38,14 @@ class CompatibilityScorer:
         py_version_nodot = ''.join(self.py_version.split('.')[:2])
         # Are there other valid options here?
         d = {'cp%sm' % py_version_nodot: 3,  # Is the m reliable?
-            'abi3': 2, 'none': 1}
+             'abi3': 2, 'none': 1}
+        try:
+            if int(py_version_nodot) >= 38: #The m is no longer used in Python 3.8+. Now ABI compatible with and without malloc.
+                additional_abi = 'cp%s' % py_version_nodot
+                d[additional_abi] = 4
+        except TypeError:
+            pass
+
         return max(d.get(a, 0) for a in abi.split('.'))
 
     def score_interpreter(self, interpreter):
