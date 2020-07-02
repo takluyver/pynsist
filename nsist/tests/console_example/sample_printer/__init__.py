@@ -10,8 +10,6 @@ def main():
     info = {
         'py_executable': sys.executable,
         'py_version': sys.version,
-        'sys_path': sys.path,
-        'main_file': sys.modules['__main__'].__file__,
         'data_file_path': data_file,
         'data_file_content': data_from_file,
     }
