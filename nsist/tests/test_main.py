@@ -82,11 +82,13 @@ def test_installer(console_eg_copy, tmp_path):
     res = run([str(inst_python), str(inst_launch_script)],
               check=True, stdout=PIPE)
     json_res = json.loads(res.stdout.decode('utf-8', 'replace'))
+    print(res.stdout.decode('utf-8', 'replace'))
 
     assert json_res['py_executable'] == str(inst_python)
     assert json_res['py_version'].startswith('3.8.3')  # Set in installer.cfg
     assert json_res['data_file_path'].endswith('data.txt')
     assert json_res['data_file_content'] == 'newt'
+    1/0
 
     # Run through command-line wrapper
     res2 = run([str(inst_exe_wrapper)], check=True, stdout=PIPE)
