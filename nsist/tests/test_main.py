@@ -88,11 +88,13 @@ def test_installer(console_eg_copy, tmp_path):
     assert json_res['py_version'].startswith('3.8.3')  # Set in installer.cfg
     assert json_res['data_file_path'].endswith('data.txt')
     assert json_res['data_file_content'] == 'newt'
-    1/0
 
     # Run through command-line wrapper
     res2 = run([str(inst_exe_wrapper)], check=True, stdout=PIPE)
+    print("Command line wrapper -----------------------------------------")
+    print(res2.stdout.decode('utf-8', 'replace'))
     json_res2 = json.loads(res2.stdout.decode('utf-8', 'replace'))
+
     assert json_res2 == json_res
 
     # Check command-line wrapper is on PATH
