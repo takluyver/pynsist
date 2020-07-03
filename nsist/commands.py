@@ -8,7 +8,7 @@ from zipfile import ZipFile
 SCRIPT_TEMPLATE = u"""# -*- coding: utf-8 -*-
 import sys, os
 import site
-installdir = os.path.dirname(os.path.dirname(__file__))
+installdir = os.path.dirname(os.path.dirname(sys.executable))
 pkgdir = os.path.join(installdir, 'pkgs')
 sys.path.insert(0, pkgdir)
 # Ensure .pth files in pkgdir are handled properly
