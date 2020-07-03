@@ -1,6 +1,12 @@
 Release notes
 =============
 
+Version 2.5.1
+-------------
+
+* Fix locating the ``pkgs`` subdirectory in command-line launchers
+  (:ghpull:`200`).
+
 Version 2.5
 -----------
 
