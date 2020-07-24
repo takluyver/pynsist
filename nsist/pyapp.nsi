@@ -1,5 +1,6 @@
 !define PRODUCT_NAME "[[ib.appname]]"
 !define PRODUCT_VERSION "[[ib.version]]"
+!define PRODUCT_PUBLISHER "[[ib.publisher]"
 !define PY_VERSION "[[ib.py_version]]"
 !define PY_MAJOR_VERSION "[[ib.py_major_version]]"
 !define BITNESS "[[ib.py_bitness]]"
