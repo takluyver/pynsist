@@ -44,7 +44,6 @@ Application section
        import site
 
        scriptdir, script = os.path.split(__file__)
-       installdir = scriptdir  # for compatibility with commands
        pkgdir = os.path.join(scriptdir, 'pkgs')
        # Ensure .pth files in pkgdir are handled properly
        site.addsitedir(pkgdir)
