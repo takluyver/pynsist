@@ -40,8 +40,14 @@ Application section
    Ensure that this boilerplate code is at the top of your script::
 
        #!python3.6
-       import sys
-       sys.path.insert(0, 'pkgs')
+       import sys, os
+       import site
+
+       scriptdir, script = os.path.split(__file__)
+       pkgdir = os.path.join(scriptdir, 'pkgs')
+       # Ensure .pth files in pkgdir are handled properly
+       site.addsitedir(pkgdir)
+       sys.path.insert(0, pkgdir)
 
    The first line tells it which version of Python to run with. If you use
    binary packages, packages compiled for Python 3.3 won't work with Python 3.4.
