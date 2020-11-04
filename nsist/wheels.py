@@ -27,6 +27,7 @@ class CompatibilityScorer:
     """
     def __init__(self, py_version, platform):
         self.py_version = py_version
+        self.py_version_tuple = tuple(map(int, py_version.split('.')[:2]))
         self.platform = platform
 
     def score_platform(self, platform):
@@ -35,15 +36,17 @@ class CompatibilityScorer:
         return max(d.get(p, 0) for p in platform.split('.'))
 
     def score_abi(self, abi):
-        py_version_nodot = ''.join(self.py_version.split('.')[:2])
+        py_version_nodot = '%s%s' % (self.py_version_tuple[0], self.py_version_tuple[1])
+        abi_suffix = 'm' if self.py_version_tuple < (3, 8) else ''
         # Are there other valid options here?
-        d = {'cp%sm' % py_version_nodot: 3,  # Is the m reliable?
-            'abi3': 2, 'none': 1}
+        d = {'cp%s%s' % (py_version_nodot, abi_suffix): 3,
+             'abi3': 2,
+             'none': 1}
         return max(d.get(a, 0) for a in abi.split('.'))
 
     def score_interpreter(self, interpreter):
-        py_version_nodot = ''.join(self.py_version.split('.')[:2])
-        py_version_major = self.py_version.split('.')[0]
+        py_version_nodot = '%s%s' % (self.py_version_tuple[0], self.py_version_tuple[1])
+        py_version_major = str(self.py_version_tuple[0])
         d = {'cp'+py_version_nodot: 4,
              'cp'+py_version_major: 3,
              'py'+py_version_nodot: 2,
