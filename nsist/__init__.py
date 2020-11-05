@@ -57,6 +57,19 @@ class InputError(ValueError):
     def __str__(self):
         return "{e.value!r} is not valid for {e.param}, expected {e.expected}".format(e=self)
 
+
+def split_entry_point(ep: str):
+    """Like ep.split(':'), but with extra checks and helpful errors"""
+    module, _, func = ep.partition(':')
+    if all([s.isidentifier() for s in module.split('.')]) and func.isidentifier():
+        return module, func
+
+    raise InputError(
+        'entry point', ep, "'mod:func', so 'from mod import func' works"
+    )
+
+
+
 class InstallerBuilder(object):
     """Controls building an installer. This includes three main steps:
 
@@ -262,7 +275,7 @@ if __name__ == '__main__':
         py_version and py_bitness are used to write an appropriate shebang line
         for the PEP 397 Windows launcher.
         """
-        module, func = entrypt.split(":")
+        module, func = split_entry_point(entrypt)
         with open(target, 'w') as f:
             f.write(self.SCRIPT_TEMPLATE.format(qualifier=self.py_qualifier,
                     module=module, func=func, extra_preamble=extra_preamble))
@@ -351,6 +364,8 @@ if __name__ == '__main__':
                      py_version=self.py_version, exclude=self.exclude)
 
     def prepare_commands(self):
+        for cmd in self.commands.values():
+            split_entry_point(cmd['entry_point'])  # Check entry point format
         command_dir = Path(self.build_dir) / 'bin'
         command_dir.mkdir()
         prepare_bin_directory(command_dir, self.commands, bitness=self.py_bitness)
@@ -509,12 +524,11 @@ def main(argv=None):
     from . import configreader
     try:
         cfg = configreader.read_and_validate(config_file)
+        args = get_installer_builder_args(cfg)
     except configreader.InvalidConfig as e:
         logger.error('Error parsing configuration file:')
         logger.error(str(e))
         sys.exit(1)
-
-    args = get_installer_builder_args(cfg)
 
     try:
         ec = InstallerBuilder(**args).run(makensis=(not options.no_makensis))
