@@ -1,6 +1,13 @@
 Release notes
 =============
 
+Version 2.6
+-----------
+
+* Fix finding binary wheels for Python 3.8 and above (:ghpull:`210`).
+* Better error messages when entry points for shortcuts or commands are invalid
+  (:ghpull:`213`).
+
 Version 2.5.1
 -------------
 
