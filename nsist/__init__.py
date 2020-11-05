@@ -69,7 +69,6 @@ def split_entry_point(ep: str):
     )
 
 
-
 class InstallerBuilder(object):
     """Controls building an installer. This includes three main steps:
 
