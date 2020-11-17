@@ -9,8 +9,10 @@ with different frameworks:
 
 - `A console application <https://github.com/takluyver/pynsist/tree/master/examples/console>`_
 - `A PyQt5 application <https://github.com/takluyver/pynsist/tree/master/examples/pyqt5>`_
+
   - `PyQt5 with QML <https://github.com/takluyver/pynsist/tree/master/examples/pyqt5_qml>`_
   - `PyQt5 with OpenCV <https://github.com/takluyver/pynsist/tree/master/examples/pyqt5_opencv>`_
+
 - `A PyGI (or PyGObject) application with Numpy and Matplotlib (64 bit, Python 3.4) <https://github.com/takluyver/pynsist/tree/master/examples/pygi_mpl_numpy>`_
 - `A pygame application <https://github.com/takluyver/pynsist/tree/master/examples/pygame>`_
 - `A pyglet application <https://github.com/takluyver/pynsist/tree/master/examples/pyglet>`_
