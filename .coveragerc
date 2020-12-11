@@ -1,5 +1,5 @@
 [run]
 omit = 
-    nsist/tests/*
-    nsist/_system_path.py
+    */tests/*
+    */nsist/_system_path.py
 
