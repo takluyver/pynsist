@@ -9,9 +9,10 @@ environment:
 
 install:
   - cinst nsis
-  - "%PYTHON%\\python.exe -m pip install -U tox virtualenv --no-warn-script-location"
+  - "%PYTHON%\\python.exe -m pip install -U tox virtualenv codecov --no-warn-script-location"
 
 build: off
 
 test_script:
   - "%PYTHON%\\python.exe -m tox -e python -- -v"
+  - "%PYTHON%\\python.exe -m codecov"
