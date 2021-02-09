@@ -17,7 +17,9 @@ from .util import get_cache_dir, normalize_path
 
 logger = logging.getLogger(__name__)
 
+
 class NoWheelError(Exception): pass
+
 
 class CompatibilityScorer:
     """Score wheels for a given target platform
@@ -41,7 +43,8 @@ class CompatibilityScorer:
         # Are there other valid options here?
         d = {'cp%s%s' % (py_version_nodot, abi_suffix): 3,
              'abi3': 2,
-             'none': 1}
+             'none': 1,
+             }
         return max(d.get(a, 0) for a in abi.split('.'))
 
     def score_interpreter(self, interpreter):
@@ -50,9 +53,25 @@ class CompatibilityScorer:
         d = {'cp'+py_version_nodot: 4,
              'cp'+py_version_major: 3,
              'py'+py_version_nodot: 2,
-             'py'+py_version_major: 1
-            }
+             'py'+py_version_major: 1,
+             }
         return max(d.get(i, 0) for i in interpreter.split('.'))
+
+    def score_interpreter_abi3(self, interpreter):
+        match = re.match(r'^cp(\d)(\d+)$', interpreter)
+
+        if not match:
+            return 0
+
+        declared_version = (int(match.group(1)), int(match.group(2)))
+
+        if declared_version > (self.py_version_tuple[0], self.py_version_tuple[1]):
+            return 0
+
+        declared_version = float("{}.{}".format(declared_version[0], declared_version[1]))
+        current_version = float("{}.{}".format(self.py_version_tuple[0], self.py_version_tuple[1]))
+
+        return 1 + declared_version / current_version
 
     def score(self, whl_filename):
         m = re.search(r'-([^-]+)-([^-]+)-([^-]+)\.whl$', whl_filename)
@@ -60,11 +79,20 @@ class CompatibilityScorer:
             raise ValueError("Failed to find wheel tag in %r" % whl_filename)
 
         interpreter, abi, platform = m.group(1, 2, 3)
+
+        if abi == "abi3":
+            interpreter_score = self.score_interpreter_abi3(interpreter)
+        else:
+            interpreter_score = self.score_interpreter(interpreter)
+
+        print(interpreter_score)
+
         return (
             self.score_platform(platform),
             self.score_abi(abi),
-            self.score_interpreter(interpreter)
+            interpreter_score,
         )
+
 
 class WheelLocator(object):
     def __init__(self, requirement, scorer, extra_sources=None):
@@ -84,7 +112,7 @@ class WheelLocator(object):
                 continue
 
             score = self.scorer.score(release.filename)
-            if any(s==0 for s in score):
+            if any(s == 0 for s in score):
                 # Incompatible
                 continue
 
@@ -192,6 +220,7 @@ class CachedRelease(object):
         self.filename = filename
         self.package_type = 'wheel' if filename.endswith('.whl') else ''
 
+
 def merge_dir_to(src, dst):
     """Merge all files from one directory into another.
 
@@ -280,6 +309,7 @@ def extract_wheel(whl_file, target_dir, exclude=None):
 
     # Clean up temporary directory
     shutil.rmtree(str(td))
+
 
 class WheelGetter:
     def __init__(self, requirements, wheel_globs, target_dir,
