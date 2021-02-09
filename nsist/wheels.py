@@ -85,8 +85,6 @@ class CompatibilityScorer:
         else:
             interpreter_score = self.score_interpreter(interpreter)
 
-        print(interpreter_score)
-
         return (
             self.score_platform(platform),
             self.score_abi(abi),
@@ -97,6 +95,7 @@ class CompatibilityScorer:
 class WheelLocator(object):
     def __init__(self, requirement, scorer, extra_sources=None):
         self.requirement = requirement
+        self.scorer = scorer
         self.scorer = scorer
         self.extra_sources = extra_sources or []
 
