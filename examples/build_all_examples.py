@@ -3,13 +3,13 @@ import nsist
 
 example_cfgs = [
     'console/installer.cfg',
-    'pyqt/installer.cfg',
-    'tkinter/installer.cfg',
     'pygame/installer.cfg',
-    'pygtk/installer.cfg',
-    'pygtk_mpl_numpy/installer.cfg',
-    'pygi_mpl_numpy/installer.cfg',
+    # 'pygi_mpl_numpy/installer.cfg',  # this example does not currently work
+    'pyglet/installer.cfg',
+    'pyqt5/installer.cfg',
     'pyqt5_opencv/installer.cfg',
+    'pyqt5_qml/installer.cfg',
+    'pywebview/installer.cfg',
 ]
 
 examples_dir = os.path.dirname(os.path.abspath(__file__))
