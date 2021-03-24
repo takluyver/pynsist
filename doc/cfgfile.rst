@@ -43,7 +43,7 @@ Application section
        import sys, os
        import site
 
-       scriptdir, script = os.path.split(__file__)
+       scriptdir, script = os.path.split(os.path.abspath(__file__))
        pkgdir = os.path.join(scriptdir, 'pkgs')
        # Ensure .pth files in pkgdir are handled properly
        site.addsitedir(pkgdir)
