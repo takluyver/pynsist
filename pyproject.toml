@@ -1,16 +1,15 @@
 [build-system]
-requires = ["flit_core >=2,<4"]
+requires = ["flit_core >=3.2.0,<3.3"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "nsist"
-author = "Thomas Kluyver"
-author-email = "thomas@kluyver.me.uk"
-dist-name = "pynsist"
-home-page = "https://pynsist.readthedocs.io/en/latest/"
-description-file = "README.rst"
+[project]
+name = "pynsist"
+authors = [
+    {name = "Thomas Kluyver", email = "thomas@kluyver.me.uk"},
+]
+readme = "README.rst"
 requires-python = ">=3.6"
-requires = [
+dependencies = [
     "requests",
     "requests_download",
     "jinja2",
@@ -26,12 +25,20 @@ classifiers = [
     "Topic :: System :: Installation/Setup",
     "Topic :: System :: Software Distribution",
 ]
+dynamic = ['version', 'description']
 
-[tool.flit.metadata.requires-extra]
+[tool.flit.module]
+name = "nsist"
+
+[project.optional-dependencies]
 test = [
     "testpath",
     "responses",
 ]
 
-[tool.flit.scripts]
+[project.scripts]
 pynsist = "nsist:main"
+
+[project.urls]
+Documentation = "https://pynsist.readthedocs.io/en/latest/"
+Source = "https://github.com/takluyver/pynsist"
