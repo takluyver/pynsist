@@ -72,8 +72,8 @@ def test_pick_best_wheel():
 
     # Prefer more specific Python version
     releases = [
-        CachedRelease('astsearch-0.1.2-cp37-none-any.whl'),
-        CachedRelease('astsearch-0.1.2-py3-none-any.whl'),
+        CachedRelease('astsearch-0.1.2-cp37-none-win_amd64.whl'),
+        CachedRelease('astsearch-0.1.2-py3-none-win_amd64.whl'),
     ]
     assert wd37.pick_best_wheel(releases) == releases[0]
 
@@ -93,22 +93,22 @@ def test_pick_best_wheel():
 
     # Prefer more specific ABI version
     releases = [
-        CachedRelease('astsearch-0.1.2-py3-abi3-any.whl'),
-        CachedRelease('astsearch-0.1.2-py3-none-any.whl'),
+        CachedRelease('astsearch-0.1.2-cp37-abi3-win_amd64.whl'),
+        CachedRelease('astsearch-0.1.2-cp37-none-win_amd64.whl'),
     ]
     assert wd37.pick_best_wheel(releases) == releases[0]
 
     # ABI suffix on Python <3.8
     releases = [
-        CachedRelease('astsearch-0.1.2-cp37-cp37-any.whl'),
-        CachedRelease('astsearch-0.1.2-cp37-cp37m-any.whl'),
+        CachedRelease('astsearch-0.1.2-cp37-cp37-win_amd64.whl'),
+        CachedRelease('astsearch-0.1.2-cp37-cp37m-win_amd64.whl'),
     ]
     assert wd37.pick_best_wheel(releases) == releases[1]
 
     # No ABI suffix on Python >=3.8
     releases = [
-        CachedRelease('astsearch-0.1.2-cp38-cp38-any.whl'),
-        CachedRelease('astsearch-0.1.2-cp38-cp38m-any.whl'),
+        CachedRelease('astsearch-0.1.2-cp38-cp38-win_amd64.whl'),
+        CachedRelease('astsearch-0.1.2-cp38-cp38m-win_amd64.whl'),
     ]
     assert wd38.pick_best_wheel(releases) == releases[0]
 
@@ -121,10 +121,17 @@ def test_pick_best_wheel():
 
     # Platform has priority over other attributes
     releases = [
-        CachedRelease('astsearch-0.1.2-cp37-abi3-any.whl'),
+        CachedRelease('astsearch-0.1.2-py37-none-any.whl'),
         CachedRelease('astsearch-0.1.2-py2.py3-none-win_amd64.whl'),
     ]
     assert wd37.pick_best_wheel(releases) == releases[1]
+
+    # Older cp3x tags are compatible when used with abi3
+    releases = [
+        CachedRelease('cryptography-3.4.7-cp36-cp36m-win_amd64.whl'),
+        CachedRelease('cryptography-3.4.7-cp36-abi3-win_amd64.whl'),
+    ]
+    assert wd38.pick_best_wheel(releases) == releases[1]
 
 def test_merge_dir_to(tmpdir):
     td1 = Path(str(tmpdir.mkdir('one')))
