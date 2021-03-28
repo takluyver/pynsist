@@ -1,6 +1,17 @@
 Release notes
 =============
 
+Version 2.7
+-----------
+
+* Fix checking compatibility of wheels with ``abi3`` tags, e.g. cryptography
+  (:ghpull:`227`).
+* Ensure that the local packages directory is added to ``sys.path`` as an
+  absolute path, not a relative one (:ghpull:`226`).
+* Pynsist now requires Python 3.6 or above, although it can still build
+  installers with Python 3.5 or above.
+* Update details of available examples (:ghpull:`215`, :ghpull:`223`).
+
 Version 2.6
 -----------
 
