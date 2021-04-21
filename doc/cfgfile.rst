@@ -40,8 +40,14 @@ Application section
    Ensure that this boilerplate code is at the top of your script::
 
        #!python3.6
-       import sys
-       sys.path.insert(0, 'pkgs')
+       import sys, os
+       import site
+
+       scriptdir, script = os.path.split(os.path.abspath(__file__))
+       pkgdir = os.path.join(scriptdir, 'pkgs')
+       # Ensure .pth files in pkgdir are handled properly
+       site.addsitedir(pkgdir)
+       sys.path.insert(0, pkgdir)
 
    The first line tells it which version of Python to run with. If you use
    binary packages, packages compiled for Python 3.3 won't work with Python 3.4.
@@ -68,9 +74,10 @@ Application section
 
 .. describe:: console (optional)
 
-   If ``true``, shortcuts will be created using the ``py`` launcher, which opens
-   a console for the process. If ``false``, or not specified, they will use the
-   ``pyw`` launcher, which doesn't create a console.
+   If ``true``, shortcuts will be created using ``python.exe``, which opens
+   a console for the process. If ``false``, or not specified, they will use
+   ``pythonw.exe``, which doesn't create a console. In that case, stdout and
+   stderr from Python code will be redirected to a log file in :envvar:`APPDATA`.
 
 .. describe:: extra_preamble (optional)
 
@@ -141,6 +148,16 @@ variable.
 
    As with shortcuts, this specifies the Python function to call, in the format
    ``module:function``.
+
+.. describe:: console (optional)
+
+   If ``true`` (default), the ``.exe`` wrapper for the command will open a
+   console if it's not already inside one. If ``false``, it will be a GUI
+   application, which doesn't use a console.
+
+   If the user runs the command directly, they do so in a console anyway.
+   But commands with ``console=false`` can be useful if your GUI application
+   needs to run a subprocess without a console window popping up.
 
 .. describe:: extra_preamble (optional)
 

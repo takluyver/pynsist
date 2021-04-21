@@ -25,7 +25,7 @@ from .nsiswriter import NSISFileWriter
 from .wheels import WheelGetter
 from .util import download, get_cache_dir, normalize_path
 
-__version__ = '2.3'
+__version__ = '2.7'
 
 pjoin = os.path.join
 logger = logging.getLogger(__name__)
@@ -56,6 +56,18 @@ class InputError(ValueError):
 
     def __str__(self):
         return "{e.value!r} is not valid for {e.param}, expected {e.expected}".format(e=self)
+
+
+def split_entry_point(ep: str):
+    """Like ep.split(':'), but with extra checks and helpful errors"""
+    module, _, func = ep.partition(':')
+    if all([s.isidentifier() for s in module.split('.')]) and func.isidentifier():
+        return module, func
+
+    raise InputError(
+        'entry point', ep, "'mod:func', so 'from mod import func' works"
+    )
+
 
 class InstallerBuilder(object):
     """Controls building an installer. This includes three main steps:
@@ -225,7 +237,7 @@ class InstallerBuilder(object):
     SCRIPT_TEMPLATE = """#!python{qualifier}
 import sys, os
 import site
-scriptdir, script = os.path.split(__file__)
+scriptdir, script = os.path.split(os.path.abspath(__file__))
 installdir = scriptdir  # for compatibility with commands
 pkgdir = os.path.join(scriptdir, 'pkgs')
 sys.path.insert(0, pkgdir)
@@ -265,7 +277,7 @@ if __name__ == '__main__':
         py_version and py_bitness are used to write an appropriate shebang line
         for the PEP 397 Windows launcher.
         """
-        module, func = entrypt.split(":")
+        module, func = split_entry_point(entrypt)
         with open(target, 'w') as f:
             f.write(self.SCRIPT_TEMPLATE.format(qualifier=self.py_qualifier,
                     module=module, func=func, extra_preamble=extra_preamble))
@@ -354,12 +366,13 @@ if __name__ == '__main__':
                      py_version=self.py_version, exclude=self.exclude)
 
     def prepare_commands(self):
+        for cmd in self.commands.values():
+            split_entry_point(cmd['entry_point'])  # Check entry point format
         command_dir = Path(self.build_dir) / 'bin'
         command_dir.mkdir()
         prepare_bin_directory(command_dir, self.commands, bitness=self.py_bitness)
         self.install_dirs.append((command_dir.name, '$INSTDIR'))
         self.extra_files.append((pjoin(_PKGDIR, '_system_path.py'), '$INSTDIR'))
-        self.extra_files.append((pjoin(_PKGDIR, '_assemble_launchers.py'), '$INSTDIR'))
 
     def copytree_ignore_callback(self, directory, files):
         """This is being called back by our shutil.copytree call to implement the
@@ -523,12 +536,11 @@ def main(argv=None):
     from . import configreader
     try:
         cfg = configreader.read_and_validate(config_file)
+        args = get_installer_builder_args(cfg)
     except configreader.InvalidConfig as e:
         logger.error('Error parsing configuration file:')
         logger.error(str(e))
         sys.exit(1)
-
-    args = get_installer_builder_args(cfg)
 
     try:
         ec = InstallerBuilder(**args).run(makensis=(not options.no_makensis))

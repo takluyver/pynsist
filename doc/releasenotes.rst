@@ -1,6 +1,51 @@
 Release notes
 =============
 
+Version 2.7
+-----------
+
+* Fix checking compatibility of wheels with ``abi3`` tags, e.g. cryptography
+  (:ghpull:`227`).
+* Ensure that the local packages directory is added to ``sys.path`` as an
+  absolute path, not a relative one (:ghpull:`226`).
+* Pynsist now requires Python 3.6 or above, although it can still build
+  installers with Python 3.5 or above.
+* Update details of available examples (:ghpull:`215`, :ghpull:`223`).
+
+Version 2.6
+-----------
+
+* Fix finding binary wheels for Python 3.8 and above (:ghpull:`210`).
+* Better error messages when entry points for shortcuts or commands are invalid
+  (:ghpull:`213`).
+
+Version 2.5.1
+-------------
+
+* Fix locating the ``pkgs`` subdirectory in command-line launchers
+  (:ghpull:`200`).
+
+Version 2.5
+-----------
+
+* Make more modern installers, with unicode support and DPI awareness
+  (less blurry) when using NSIS version 3 (:ghpull:`189`).
+* Assemble wrapper executables for commands at build time, rather than on
+  installation. This is possible thanks to Vinay Sajip adding support for
+  paths from the launcher directory to the launcher bases (:ghpull:`191`).
+* An integration test checks creating an installer, installing and running a
+  simple program (:ghpull:`190`).
+
+Version 2.4
+-----------
+
+* :ref:`command_config` can now include ``console=false`` to make a command on
+  :envvar:`PATH` which runs without a console window (:ghpull:`179`).
+* Fix for using ``pywin32`` in installed code launched from a command
+  (:ghpull:`175`).
+* Work around wheels where some package data files are shipped in a way that
+  assumes the default pip install layout (:ghpull:`172`).
+
 Version 2.3
 -----------
 

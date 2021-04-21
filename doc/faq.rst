@@ -38,6 +38,8 @@ Python by default, though you can override this :ref:`in the config file <cfg_py
 Whichever method you use, compiled libraries must have the same bit-ness as
 the version of Python that's installed.
 
+.. _faq-data-files:
+
 Using data files
 ----------------
 
@@ -114,6 +116,28 @@ application.
 
    A future version of Pynsist might automate some of this procedure to make
    distributing tkinter applications easier.
+
+``DLL load failed`` errors
+--------------------------
+
+Importing compiled extension modules in your application may fail with errors
+like this::
+
+    ImportError: DLL load failed: The specified module could not be found.
+
+This means that the Python module it's trying to load needs a DLL which isn't
+there. Unfortunately, the error message doesn't say which DLL is missing, and
+there's no simple way to identify it.
+
+The traceback should show which import failed. The module that was being
+imported should be a file with a ``.pyd`` extension. You can use a program
+called `Dependency Walker <https://www.dependencywalker.com/>`_ on this file
+to work out what DLLs it needs and which are missing, though you may need to
+adjust the 'module search order' to avoid some false negatives.
+
+Once you've worked out what is missing, you'll need to make it available.
+This may mean bundling extra DLLs as :ref:`data files <faq-data-files>`.
+If you do this, it's up to you to ensure you have the right to redistribute them.
 
 Code signing
 ------------

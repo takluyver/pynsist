@@ -1,6 +1,7 @@
 """Find, download and unpack wheels."""
 import fnmatch
 import hashlib
+import itertools
 import logging
 import glob
 import os
@@ -27,41 +28,33 @@ class CompatibilityScorer:
     """
     def __init__(self, py_version, platform):
         self.py_version = py_version
+        py_version_tuple = tuple(map(int, py_version.split('.')[:2]))
         self.platform = platform
+        # {('cp38', 'none', 'any'): N}  (higher N for more specific tags)
+        self.tag_prio = {
+            tag: i for i, tag in enumerate(reversed(
+                list(compatible_tags(py_version_tuple, platform))
+            ), start=1)
+        }
 
-    def score_platform(self, platform):
-        # target = 'win_amd64' if self.bitness == 64 else 'win32'
-        d = {self.platform: 2, 'any': 1}
-        return max(d.get(p, 0) for p in platform.split('.'))
+    def score(self, whl_filename: str) -> int:
+        """Return a number for how suitable a wheel is for the target Python
 
-    def score_abi(self, abi):
-        py_version_nodot = ''.join(self.py_version.split('.')[:2])
-        # Are there other valid options here?
-        d = {'cp%sm' % py_version_nodot: 3,  # Is the m reliable?
-            'abi3': 2, 'none': 1}
-        return max(d.get(a, 0) for a in abi.split('.'))
-
-    def score_interpreter(self, interpreter):
-        py_version_nodot = ''.join(self.py_version.split('.')[:2])
-        py_version_major = self.py_version.split('.')[0]
-        d = {'cp'+py_version_nodot: 4,
-             'cp'+py_version_major: 3,
-             'py'+py_version_nodot: 2,
-             'py'+py_version_major: 1
-            }
-        return max(d.get(i, 0) for i in interpreter.split('.'))
-
-    def score(self, whl_filename):
+        Higher numbers mean more specific (preferred) tags. 0 -> incompatible.
+        """
         m = re.search(r'-([^-]+)-([^-]+)-([^-]+)\.whl$', whl_filename)
         if not m:
             raise ValueError("Failed to find wheel tag in %r" % whl_filename)
 
         interpreter, abi, platform = m.group(1, 2, 3)
-        return (
-            self.score_platform(platform),
-            self.score_abi(abi),
-            self.score_interpreter(interpreter)
+        # Expand compressed tags ('cp38.cp39' indicates compatibility w/ both)
+        expanded_tags = itertools.product(
+            interpreter.split('.'), abi.split('.'), platform.split('.')
         )
+        return max(self.tag_prio.get(whl_tag, 0) for whl_tag in expanded_tags)
+
+    def is_compatible(self, whl_filename: str) -> bool:
+        return self.score(whl_filename) > 0
 
 class WheelLocator(object):
     def __init__(self, requirement, scorer, extra_sources=None):
@@ -74,14 +67,18 @@ class WheelLocator(object):
         self.name, self.version = requirement.split('==', 1)
 
     def pick_best_wheel(self, release_list):
-        best_score = (0, 0, 0)
+        """Return the most specific compatible wheel
+
+        Returns None if none of the supplied
+        """
+        best_score = 0
         best = None
         for release in release_list:
             if release.package_type != 'wheel':
                 continue
 
             score = self.scorer.score(release.filename)
-            if any(s==0 for s in score):
+            if score == 0:
                 # Incompatible
                 continue
 
@@ -330,8 +327,7 @@ class WheelGetter:
                              distribution, prev_path, whl_path))
 
         # Check that the wheel is compatible with the installer environment
-        scores = self.scorer.score(wheel_name)
-        if any(s == 0 for s in scores):
+        if not self.scorer.is_compatible(wheel_name):
             raise ValueError('Wheel {} is not compatible with Python {}, {}'
                 .format(wheel_name, self.scorer.py_version, self.scorer.platform))
 
@@ -362,3 +358,68 @@ def is_excluded(path, exclude_regexen):
         if re_pattern.match(path):
             return True
     return False
+
+# The function below is based on the packaging.tags module, used with
+# modification following the BSD 2 clause license:
+
+# Copyright (c) Donald Stufft and individual contributors.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#     1. Redistributions of source code must retain the above copyright notice,
+#        this list of conditions and the following disclaimer.
+#
+#     2. Redistributions in binary form must reproduce the above copyright
+#        notice, this list of conditions and the following disclaimer in the
+#        documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+def compatible_tags(python_version : tuple =None, platform : str =None):
+    """Iterate through compatible tags for our target Python
+
+    Tags are yielded in order from the most specific to the most general.
+
+    Based on packaging.tags module, but simplified for Pynsist's use case,
+    and avoiding getting any details from the currently running Python.
+    """
+    interpreter = "cp{}{}".format(python_version[0], python_version[1])
+
+    cpython_abi = interpreter
+    # Python is normally built with the pymalloc (m) option, and most wheels
+    # are published for this ABI. The flag is dropped in Python 3.8.
+    if python_version < (3, 8):
+        cpython_abi += 'm'
+
+    yield interpreter, cpython_abi, platform
+    yield interpreter, "abi3", platform
+    yield interpreter, "none", platform
+
+    # cp3x-abi3 down to cp32 (Python 3.2 was the first version to have ABI3)
+    for minor_version in range(python_version[1] - 1, 1, -1):
+        interpreter = "cp{}{}".format(python_version[0], minor_version)
+        yield interpreter, "abi3", platform
+
+    py_interps = [
+        f"py{python_version[0]}{python_version[1]}",  # e.g. py38
+        f"py{python_version[0]}",                     # py3
+    ] + [
+        f"py{python_version[0]}{minor}"               # py37 ... py30
+        for minor in range(python_version[1] - 1, -1, -1)
+    ]
+
+    for version in py_interps:
+        yield version, "none", platform
+    for version in py_interps:
+        yield version, "none", "any"
