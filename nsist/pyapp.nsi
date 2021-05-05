@@ -35,6 +35,32 @@ SetCompressor lzma
 !define MUI_ICON "[[icon]]"
 !define MUI_UNICON "[[icon]]"
 
+[% if ib.run_after_install is not none %]
+; Run an application shortcut after an install
+!define MUI_FINISHPAGE_RUN
+!define MUI_FINISHPAGE_RUN_TEXT "Start a shortcut"
+!define MUI_FINISHPAGE_RUN_FUNCTION "LaunchLink"
+[% endif %]
+
+!include "nsProcess.nsh"
+!define APP_EXE "python.exe"
+!define AppName "${PRODUCT_NAME}"
+
+!macro KillProcess
+  ${nsProcess::FindProcess} "${APP_EXE}" $R0
+
+  ${If} $R0 == 0
+    DetailPrint "${AppName} is running. Closing it down"
+    ${nsProcess::KillProcess} "${APP_EXE}" $R0
+    DetailPrint "Waiting for ${AppName} to close"
+    Sleep 2000
+  ${Else}
+    DetailPrint "${APP_EXE} was not found to be running"
+  ${EndIf}
+
+  ${nsProcess::Unload}
+!macroend
+
 ; UI pages
 [% block ui_pages %]
 !insertmacro MUI_PAGE_WELCOME
@@ -151,6 +177,14 @@ Section "!${PRODUCT_NAME}" sec_app
   WriteRegDWORD SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
                    "NoRepair" 1
 
+  [% if ib.run_on_windows_start is not none %]
+  ; Running a .exe file on Windows Start
+    [% for scname in ib.shortcuts %]
+      WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Run" \
+                       "${PRODUCT_NAME}" "$SMPROGRAMS\[[scname]].lnk"
+    [% endfor %]
+  [% endif %]
+
   ; Check if we need to reboot
   IfRebootFlag 0 noreboot
     MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" \
@@ -160,6 +194,8 @@ Section "!${PRODUCT_NAME}" sec_app
 SectionEnd
 
 Section "Uninstall"
+  !insertmacro KillProcess
+
   SetRegView [[ib.py_bitness]]
   SetShellVarContext all
   IfFileExists "$INSTDIR\${USER_INSTALL_MARKER}" 0 +3
@@ -200,6 +236,9 @@ Section "Uninstall"
   [% endblock uninstall_shortcuts %]
   RMDir $INSTDIR
   DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
+  [% if ib.run_on_windows_start is not none %]
+    DeleteRegKey /ifempty HKLM "Software\Microsoft\Windows\CurrentVersion\Run"
+  [% endif %]
 SectionEnd
 
 [% endblock sections %]
@@ -219,6 +258,24 @@ Function .onMouseOverSection
 FunctionEnd
 
 Function .onInit
+; https://nsis.sourceforge.io/Auto-uninstall_old_before_installing_new
+  ReadRegStr $R0 SHCTX \
+  "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" \
+  "UninstallString"
+  StrCmp $R0 "" done
+
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+  "${PRODUCT_NAME} is already installed. $\n$\nClick 'OK' to remove the \
+  previous version or 'Cancel' to cancel this upgrade." \
+  IDOK uninst
+  Abort
+
+; Run the uninstaller
+uninst:
+  ClearErrors
+  ExecWait $R0
+
+done:
   ; Multiuser.nsh breaks /D command line parameter. Parse /INSTDIR instead.
   ; Cribbing from https://nsis-dev.github.io/NSIS-Forums/html/t-299280.html
   ${GetParameters} $0
@@ -245,5 +302,13 @@ Function correct_prog_files
   ; folder for 64-bit applications. Override the install dir it set.
   StrCmp $MultiUser.InstallMode AllUsers 0 +2
     StrCpy $INSTDIR "$PROGRAMFILES64\${MULTIUSER_INSTALLMODE_INSTDIR}"
+FunctionEnd
+[% endif %]
+
+[% if ib.run_after_install is not none %]
+Function LaunchLink
+  [% for scname in ib.shortcuts %]
+    ExecShell "" "$SMPROGRAMS\[[scname]].lnk"
+  [% endfor %]
 FunctionEnd
 [% endif %]
