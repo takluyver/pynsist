@@ -67,6 +67,43 @@ application (``sys.modules['__main__'].__file__``).
 
        writable_file = os.path.join(os.environ['LOCALAPPDATA'], 'MyApp', 'file.dat')
 
+.. _faq-subprocess:
+
+Running subprocesses
+--------------------
+
+There are a few things to be aware of if your code needs to run a subprocess:
+
+* The ``python`` command may not be found, or may be another version of Python.
+  Use :data:`sys.executable` to get the path of the Python executable running
+  your application.
+* Commands which are normally installed by your Python dependencies, such as
+  ``sphinx-build`` or ``pygmentize``, won't be available when your app is
+  installed. You can often launch the same thing from an importable
+  module by running something like ``{sys.executable} -m sphinx``.
+* When your application runs as a GUI (without a console), subprocesses launched
+  with :data:`sys.executable` don't have anywhere to write output. This makes
+  debugging harder, and the subprocess can get stuck trying to write output.
+  You can capture output in your code and print it (sending it to the log file
+  described under :ref:`log-file`)::
+
+    res = subprocess.run([sys.executable, "-c", "print('hello')"],
+                         text=True, capture_output=True)
+    print(res.stdout)
+    print(res.stderr)
+
+  If you want a console window to appear for your subprocess, check if
+  :data:`sys.executable` points to ``pythonw.exe``, and use ``python.exe`` in
+  the same folder instead::
+
+    python = sys.executable
+    if python.endswith('pythonw.exe'):
+        python = python.removesuffix('pythonw.exe') + 'python.exe'
+    subprocess.run([python, "-c", "print('hello'); input('Press enter')"])
+
+  The console will close as soon as the subprocess finishes, so the example
+  above uses :func:`input` to wait for input and give the user time to see it.
+
 .. _faq-tkinter:
 
 Packaging with tkinter
