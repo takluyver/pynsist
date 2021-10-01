@@ -26,13 +26,28 @@ The installers pynsist builds do a number of things:
 The installer (and uninstaller) is produced using `NSIS
 <http://nsis.sourceforge.net/Main_Page>`_, with the Modern UI.
 
+.. _log-file:
+
+Logging output
+--------------
+
+When your installed application is run in GUI mode (without a console), any
+output from ``print()`` (and anything else that writes to stdout or stderr
+from Python) will be written to a file :file:`%APPDATA%\\\\{scriptname}.log`.
+On Windows 7, :envvar:`APPDATA` defaults to
+:file:`C:\\Users\\{username}\\AppData\\Roaming`.
+
+This file is recreated each time your application is launched, so it shouldn't
+keep growing larger.
+
+You can override this by setting :data:`sys.stdout` and :data:`sys.stderr`.
+
 Uncaught exceptions
 -------------------
 
 If there is an uncaught exception in your application - for instance if it fails
-to start because a package is missing - the traceback will be written to
-:file:`%APPDATA%\\{scriptname}.log`. On Windows 7, :envvar:`APPDATA` defaults to
-:file:`C:\\Users\\{username}\\AppData\\Roaming`. If users report crashes, details
+to start because a package is missing - the traceback will be written to the
+same log file described in :ref:`log-file`. If users report crashes, details
 of the problem will probably be found there.
 
 You can override this by setting :func:`sys.excepthook`.
