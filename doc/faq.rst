@@ -104,6 +104,40 @@ There are a few things to be aware of if your code needs to run a subprocess:
   The console will close as soon as the subprocess finishes, so the example
   above uses :func:`input` to wait for input and give the user time to see it.
 
+.. _faq-no-wheels:
+
+Bundling packages which don't have wheels on PyPI
+-------------------------------------------------
+
+Most modern Python packages release packages in the 'wheel' format, which
+Pynsist can download and use automatically (``pypi_wheels`` in the config file).
+But some older packages and packages with certain kinds of complexity don't do
+this.
+
+If you need to include a package which doesn't release wheels, you can build
+your own wheels and :ref:`include them <cfg_include>` with either the
+``extra_wheel_sources`` or the ``local_wheels`` config options.
+
+Run :samp:`pip wheel {package-name}` to build a wheel of a package on PyPI.
+If the package contains only Python code, this should always work.
+
+If the package contains compiled extensions (typically C code), and does not
+publish wheels on PyPI, you will need to build the wheels on Windows, and you
+will need a suitable compiler installed. See `Packaging binary extensions
+<https://packaging.python.org/guides/packaging-binary-extensions/>`_ in the
+Python packaging user guide for more details. If you're not familiar with
+building Python extension modules, this can be difficult, so you might want to
+think about whether you can solve the problem without that package.
+
+.. note::
+
+   If a package is maintained but doesn't publish wheels, you could ask its
+   maintainers to consider doing so. But be considerate! They may have reasons
+   not to publish wheels, it may mean a lot of work for them, and they may have
+   been asked before. Don't assume that it's their responsibility to build
+   wheels, and do look for existing discussions on the topic before starting a
+   new one.
+
 .. _faq-tkinter:
 
 Packaging with tkinter

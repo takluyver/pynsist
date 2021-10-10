@@ -225,7 +225,10 @@ the line with the key:
    A list of packages in the format ``name==version`` to download from PyPI or
    extract from the directories in ``extra_wheel_sources``.
    These must be available as wheels; Pynsist will not try to use sdists
-   or eggs.
+   or eggs (see :ref:`faq-no-wheels`).
+
+   You need to list all the packages needed to run your application, including
+   dependencies of the packages you use directly.
 
    .. versionadded:: 1.7
 
@@ -262,7 +265,8 @@ the line with the key:
    application's dependencies as wheels, and then pass them to Pynsist.
 
    For simpler build processes, ``pypi_wheels`` will search PyPI for compatible
-   wheels, and handle downloading and caching them.
+   wheels, and handle downloading and caching them. Use ``extra_wheel_sources``
+   if you need to add some wheels which aren't available on PyPI.
 
 .. describe:: packages (optional)
 
