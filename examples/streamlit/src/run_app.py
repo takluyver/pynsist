@@ -1,9 +1,8 @@
 import os
-import subprocess
+from subprocess import Popen, PIPE, STDOUT
 import sys
+import time
 import webbrowser
-
-from src.config import EnvironmentalVariableNames as EnvVar, get_env
 
 
 def main():
@@ -11,25 +10,37 @@ def main():
     # Getting path to python executable (full path of deployed python on Windows)
     executable = sys.executable
 
-    # Open browser tab. May temporarily display error until streamlit server is started.
-    command = 'import time; import webbrowser; time.sleep(3); webbrowser.open("http://localhost:8501")'
-    subprocess.run(f"{executable} -c '{command}'", shell=True)
+    path_to_main = os.path.join(os.path.dirname(__file__), "app.py")
 
-    # Run streamlit server
-    path_to_main = os.path.join(
-        get_env(EnvVar.WORKING_DIR), "src", "app.py"
-    )
-    result = subprocess.run(
-        f"{executable} -m streamlit run {path_to_main} --server.headless=true --global.developmentMode=false",
-        shell=True,
-        capture_output=True,
+    # Running streamlit server in a subprocess and writing to log file
+    proc = Popen(
+        [
+            executable,
+            "-m",
+            "streamlit",
+            "run",
+            path_to_main,
+            "--server.headless=true",
+            "--global.developmentMode=false",
+        ],
+        stdin=PIPE,
+        stdout=PIPE,
+        stderr=STDOUT,
         text=True,
     )
+    proc.stdin.close()
 
-    # These are printed only when server is stopped.
-    # NOTE: you have to manually stop streamlit server killing process.
-    print(result.stdout)
-    print(result.stderr)
+    # Force the opening of the browser tab after a brief delay to let the the streamlit server start.
+    time.sleep(3)
+    webbrowser.open("http://localhost:8501")
+
+    while True:
+        s = proc.stdout.read()
+        if not s:
+            break
+        print(s, end="")
+
+    proc.wait()
 
 
 if __name__ == "__main__":
