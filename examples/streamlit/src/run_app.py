@@ -20,6 +20,8 @@ def main():
             "streamlit",
             "run",
             path_to_main,
+            # The following option appears to be necessary to correctly start the streamlit server,
+            # but it should start without it. More investigations should be carried out.
             "--server.headless=true",
             "--global.developmentMode=false",
         ],
@@ -30,7 +32,8 @@ def main():
     )
     proc.stdin.close()
 
-    # Force the opening of the browser tab after a brief delay to let the the streamlit server start.
+    # Force the opening (does not open automatically) of the browser tab after a brief delay to let
+    # the streamlit server start.
     time.sleep(3)
     webbrowser.open("http://localhost:8501")
 
