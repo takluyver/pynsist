@@ -17,6 +17,7 @@ with different frameworks:
 - `A pygame application <https://github.com/takluyver/pynsist/tree/master/examples/pygame>`_
 - `A pyglet application <https://github.com/takluyver/pynsist/tree/master/examples/pyglet>`_
 - `A pywebview application <https://github.com/takluyver/pynsist/tree/master/examples/pywebview>`_
+- `A streamlit application <https://github.com/takluyver/pynsist/tree/master/examples/streamlit>`_
 
 Real-world examples
 -------------------

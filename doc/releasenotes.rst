@@ -1,6 +1,15 @@
 Release notes
 =============
 
+Version 2.8
+-----------
+
+* The NSIS installer template now has an ``install_pkgs`` block around the
+  instructions to install the ``pkgs`` folder, allowing it to be overridden
+  (:ghpull:`245`).
+* New example for streamlit (:ghpull:`237`).
+* Added a couple of :doc:`faq` entries (:ghpull:`233`, :ghpull:`235`).
+
 Version 2.7
 -----------
 
