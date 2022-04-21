@@ -236,17 +236,6 @@ optional = false
 python-versions = ">=2.7"
 
 [[package]]
-name = "fpdf2"
-version = "2.4.5"
-description = "Simple PDF generation for Python"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-Pillow = "*"
-
-[[package]]
 name = "gitdb"
 version = "4.0.8"
 description = "Git Object Database"
