@@ -14,7 +14,6 @@ toml = "^0.10.2"
 blinker = "^1.4"
 click = "<8.0"
 Jinja2 = "^3.0.1"
-fpdf2 = "^2.4.5"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
