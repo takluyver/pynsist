@@ -123,7 +123,7 @@ class WheelLocator(object):
 
         return release_dir / rel.filename
 
-    def get_from_extra_index_url(self):
+    def get_from_extra_index_urls(self):
         """Find a compatible wheel in the specified extra_sources directories.
 
         Returns a Path or None.
@@ -142,9 +142,9 @@ class WheelLocator(object):
         Downloads to the cache directory and returns the destination as a Path.
         Raises NoWheelError if no compatible wheel is found.
         """
-        self.get_from_package_index()
+        return self.get_from_package_index()
 
-    def get_from_package_index(self, index_url=None):
+    def get_from_package_index(self, index_url):
         """Download a compatible wheel from a package index at 'index_url'.
 
         Downloads to the cache directory and returns the destination as a Path.
@@ -152,13 +152,13 @@ class WheelLocator(object):
 
         The 'index_url' defaults to PyPI (https://pypi.python.org/pypi/). 
         When supplying another package index, it must support the PyPI protocol
-        (a simple directory listing won't do).
+        and provide a json description (such as https://pypi.org/pypi/numpy/json)!
+        A simple directory listing won't do.
         """
+        if index_url is None:
+            index_url = 'https://pypi.python.org/pypi/'
         try:
-            if index_url is None:
-                pypi_pkg = yarg.get(self.name)
-            else:
-                pypi_pkg = yarg.get(self.name, index_url)
+            pypi_pkg = yarg.get(self.name, index_url)
         except yarg.HTTPError as e:
             if e.status_code == 404:
                 raise NoWheelError("No package named {0} found on {1}".format(self.name, index_url))
@@ -206,6 +206,11 @@ class WheelLocator(object):
         p = self.check_cache()
         if p is not None:
             logger.info('Using cached wheel: %s', p)
+            return p
+
+        p = self.get_from_extra_index_urls()
+        if p is not None:
+            logger.info('Using wheel from package index: %s', p)
             return p
 
         return self.get_from_pypi()
