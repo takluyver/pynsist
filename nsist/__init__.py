@@ -358,7 +358,7 @@ if __name__ == '__main__':
         wg = WheelGetter(self.pypi_wheel_reqs, self.local_wheels, build_pkg_dir,
                          py_version=self.py_version, bitness=self.py_bitness,
                          extra_sources=self.extra_wheel_sources,
-                         extra_index_urls=self.extra_index_urls,
+                         extra_indexes=self.extra_index_urls,
                          exclude=self.exclude)
         wg.get_all()
 
