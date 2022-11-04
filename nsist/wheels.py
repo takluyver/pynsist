@@ -327,7 +327,7 @@ class WheelGetter:
 
     def get_requirements(self):
         for req in self.requirements:
-            wl = WheelLocator(req, self.scorer, self.extra_sources, self.extra_indexes))
+            wl = WheelLocator(req, self.scorer, self.extra_sources, self.extra_indexes)
             whl_file = wl.fetch()
             extract_wheel(whl_file, self.target_dir, exclude=self.exclude)
             self.got_distributions[wl.name] = whl_file

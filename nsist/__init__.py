@@ -111,7 +111,7 @@ class InstallerBuilder(object):
                 py_format='bundled', inc_msvcrt=True, build_dir=DEFAULT_BUILD_DIR,
                 installer_name=None, nsi_template=None,
                 exclude=None, pypi_wheel_reqs=None, extra_wheel_sources=None,
-                local_wheels=None, commands=None, license_file=None):
+                extra_index_urls=None, local_wheels=None, commands=None, license_file=None):
         self.appname = appname
         self.version = version
         self.publisher = publisher
@@ -122,6 +122,7 @@ class InstallerBuilder(object):
         self.extra_files = extra_files or []
         self.pypi_wheel_reqs = pypi_wheel_reqs or []
         self.extra_wheel_sources = extra_wheel_sources or []
+        self.extra_index_urls = extra_index_urls or []
         self.local_wheels = local_wheels or []
         self.commands = commands or {}
         self.license_file = license_file
@@ -357,6 +358,7 @@ if __name__ == '__main__':
         wg = WheelGetter(self.pypi_wheel_reqs, self.local_wheels, build_pkg_dir,
                          py_version=self.py_version, bitness=self.py_bitness,
                          extra_sources=self.extra_wheel_sources,
+                         extra_index_urls=self.extra_index_urls,
                          exclude=self.exclude)
         wg.get_all()
 
