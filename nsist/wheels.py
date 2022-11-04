@@ -144,7 +144,7 @@ class WheelLocator(object):
         """
         return self.get_from_package_index()
 
-    def get_from_package_index(self, index_url):
+    def get_from_package_index(self, index_url=None):
         """Download a compatible wheel from a package index at 'index_url'.
 
         Downloads to the cache directory and returns the destination as a Path.
