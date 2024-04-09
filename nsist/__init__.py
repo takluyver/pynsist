@@ -316,8 +316,9 @@ if __name__ == '__main__':
 
                 target = '$INSTDIR\\Python\\python{}.exe'
                 sc['target'] = target.format('' if sc['console'] else 'w')
+                sc['script'] = os.path.basename(sc['script'])
                 sc['parameters'] = '"%s"' % ntpath.join('$INSTDIR', sc['script'])
-                files.add(os.path.basename(sc['script']))
+                files.add(sc['script'])
 
             shutil.copy2(sc['icon'], self.build_dir)
             sc['icon'] = os.path.basename(sc['icon'])
