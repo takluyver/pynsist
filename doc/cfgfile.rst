@@ -293,7 +293,8 @@ the line with the key:
      <http://nsis.sourceforge.net/Docs/Chapter4.html#4.2.3>`_, e.g. ``$SYSDIR``.
 
    The destination can also include ``${PRODUCT_NAME}``, which will be expanded
-   to the name of your application.
+   to the name of your application, and ``${PRODUCT_PUBLISHER}``, which will be expanded
+   to the publisher of your application.
 
    For instance, to put a data file in the (32 bit) common files directory:
 
