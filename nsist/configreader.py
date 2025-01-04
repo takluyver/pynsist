@@ -131,7 +131,7 @@ def read_extra_files(cfg):
     Returns a list of 2-tuples: (file, destination_directory), which can be
     passed as the ``extra_files`` parameter to :class:`nsist.InstallerBuilder`.
     """
-    lines = cfg.get('Include', 'files', fallback='').splitlines()
+    lines = cfg.get('Include', 'files', fallback='').strip().splitlines()
     pairs = []
     for line in lines:
         if '>' in line:
