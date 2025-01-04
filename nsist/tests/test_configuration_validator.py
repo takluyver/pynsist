@@ -55,8 +55,7 @@ def test_valid_config_with_values_starting_on_new_line():
     assert args['packages'] == ['requests', 'bs4']
     assert args['pypi_wheel_reqs'] == ['html5lib']
     assert args['exclude'] == ['something']
-    assert args['extra_files'] == [('', '$INSTDIR'),
-                                   ('LICENSE', '$INSTDIR'),
+    assert args['extra_files'] == [('LICENSE', '$INSTDIR'),
                                    ('data_files/', '$INSTDIR')]
 
 def test_invalid_config_keys():
