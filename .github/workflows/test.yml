@@ -22,7 +22,7 @@ jobs:
           pip install tox tox-gh-actions
 
       - name: Run tests
-        run: tox -- -v
+        run: tox -- -v --cov-report=xml
 
       - name: Codecov upload
         uses: codecov/codecov-action@v3
