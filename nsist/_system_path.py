@@ -58,7 +58,7 @@ def sz_expand(value, value_type):
         return value
 
 def remove_from_system_path(pathname, allusers=True, path_env_var='PATH'):
-    """Removes all entries from the path which match the value in 'pathname'
+    r"""Removes all entries from the path which match the value in 'pathname'
 
        You must call broadcast_environment_settings_change() after you are finished
        manipulating the environment with this and other functions.
