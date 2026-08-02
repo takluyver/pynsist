@@ -1,13 +1,15 @@
+image: Visual Studio 2022
 environment:
   matrix:
     # For Python versions available on Appveyor, see
     # https://www.appveyor.com/docs/windows-images-software/#python
+    - PYTHON: "C:\\Python314"
+    - PYTHON: "C:\\Python313-x64"
     - PYTHON: "C:\\Python38"
-    - PYTHON: "C:\\Python37-x64"
-    - PYTHON: "C:\\Python36"
 
 install:
-  - cinst nsis
+  - choco install nsis
+  - dir %PYTHON%
   - "%PYTHON%\\python.exe -m pip install -U tox virtualenv codecov --no-warn-script-location"
 
 build: off
