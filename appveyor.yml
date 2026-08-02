@@ -1,3 +1,4 @@
+image: Visual Studio 2022
 environment:
   matrix:
     # For Python versions available on Appveyor, see
@@ -8,6 +9,7 @@ environment:
 
 install:
   - cinst nsis
+  - dir %PYTHON%
   - "%PYTHON%\\python.exe -m pip install -U tox virtualenv codecov --no-warn-script-location"
 
 build: off
