@@ -8,7 +8,7 @@ environment:
     - PYTHON: "C:\\Python38"
 
 install:
-  - cinst nsis
+  - choco install nsis
   - dir %PYTHON%
   - "%PYTHON%\\python.exe -m pip install -U tox virtualenv codecov --no-warn-script-location"
 
