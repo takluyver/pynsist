@@ -57,10 +57,11 @@ class CompatibilityScorer:
         return self.score(whl_filename) > 0
 
 class WheelLocator(object):
-    def __init__(self, requirement, scorer, extra_sources=None):
+    def __init__(self, requirement, scorer, extra_sources=None, extra_indexes=None):
         self.requirement = requirement
         self.scorer = scorer
         self.extra_sources = extra_sources or []
+        self.extra_indexes = extra_indexes or []
 
         if requirement.count('==') != 1:
             raise ValueError("Requirement {!r} did not match name==version".format(requirement))
@@ -122,17 +123,45 @@ class WheelLocator(object):
 
         return release_dir / rel.filename
 
+    def get_from_extra_index_urls(self):
+        """Find a compatible wheel in the specified extra_sources directories.
+
+        Returns a Path or None.
+        """
+        for url in self.extra_indexes:
+            try:
+                return self.get_from_package_index(index_url=url)
+            except NoWheelError:
+                continue
+
+        return None
+
     def get_from_pypi(self):
         """Download a compatible wheel from PyPI.
 
         Downloads to the cache directory and returns the destination as a Path.
         Raises NoWheelError if no compatible wheel is found.
         """
+        return self.get_from_package_index()
+
+    def get_from_package_index(self, index_url=None):
+        """Download a compatible wheel from a package index at 'index_url'.
+
+        Downloads to the cache directory and returns the destination as a Path.
+        Raises NoWheelError if no compatible wheel is found.
+
+        The 'index_url' defaults to PyPI (https://pypi.python.org/pypi/). 
+        When supplying another package index, it must support the PyPI protocol
+        and provide a json description (such as https://pypi.org/pypi/numpy/json)!
+        A simple directory listing won't do.
+        """
+        if index_url is None:
+            index_url = 'https://pypi.python.org/pypi/'
         try:
-            pypi_pkg = yarg.get(self.name)
+            pypi_pkg = yarg.get(self.name, index_url)
         except yarg.HTTPError as e:
             if e.status_code == 404:
-                raise NoWheelError("No package named {} found on PyPI".format(self.name))
+                raise NoWheelError("No package named {0} found on {1}".format(self.name, index_url))
             raise
 
         release_list = pypi_pkg.release(self.version)
@@ -165,7 +194,10 @@ class WheelLocator(object):
         return target
 
     def fetch(self):
-        """Find and return a compatible wheel (main interface)"""
+        """Find and return a compatible wheel (main interface).
+
+        Checks extra sources first, cache second and PyPI as last resort.
+        """
         p = self.check_extra_sources()
         if p is not None:
             logger.info('Using wheel from extra directory: %s', p)
@@ -174,6 +206,11 @@ class WheelLocator(object):
         p = self.check_cache()
         if p is not None:
             logger.info('Using cached wheel: %s', p)
+            return p
+
+        p = self.get_from_extra_index_urls()
+        if p is not None:
+            logger.info('Using wheel from package index: %s', p)
             return p
 
         return self.get_from_pypi()
@@ -277,13 +314,14 @@ def extract_wheel(whl_file, target_dir, exclude=None):
 
 class WheelGetter:
     def __init__(self, requirements, wheel_globs, target_dir,
-                 py_version, bitness, extra_sources=None, exclude=None):
+                 py_version, bitness, extra_sources=None, extra_indexes=None, exclude=None):
         self.requirements = requirements
         self.wheel_globs = wheel_globs
         self.target_dir = target_dir
         target_platform = 'win_amd64' if bitness == 64 else 'win32'
         self.scorer = CompatibilityScorer(py_version, target_platform)
         self.extra_sources = extra_sources
+        self.extra_indexes = extra_indexes
         self.exclude = exclude
 
         self.got_distributions = {}
@@ -294,7 +332,7 @@ class WheelGetter:
 
     def get_requirements(self):
         for req in self.requirements:
-            wl = WheelLocator(req, self.scorer, self.extra_sources)
+            wl = WheelLocator(req, self.scorer, self.extra_sources, self.extra_indexes)
             whl_file = wl.fetch()
             extract_wheel(whl_file, self.target_dir, exclude=self.exclude)
             self.got_distributions[wl.name] = whl_file

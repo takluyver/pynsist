@@ -74,6 +74,7 @@ CONFIG_VALIDATORS = {
         ('packages', False),
         ('pypi_wheels', False),
         ('extra_wheel_sources', False),
+        ('extra_index_urls', False),
         ('files', False),
         ('exclude', False),
         ('local_wheels', False)
@@ -230,6 +231,7 @@ def get_installer_builder_args(config):
     args['extra_wheel_sources'] = [Path(p) for p in
         config.get('Include', 'extra_wheel_sources', fallback='').strip().splitlines()
     ]
+    args['extra_index_urls'] = config.get('Include', 'extra_index_urls', fallback='').strip().splitlines()
     args['extra_files'] = read_extra_files(config)
     args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION)
     args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)
