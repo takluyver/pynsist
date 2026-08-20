@@ -183,6 +183,8 @@ work check the bitness and Python version associated with these assets and
 make sure they're the same as the version of Python installed with your
 application.
 
+With python 3.14.6 we also need an extra DLL ``zlib1.dll`` it is in the same DLL folder as the other required DDL's
+
 .. note::
 
    A future version of Pynsist might automate some of this procedure to make
