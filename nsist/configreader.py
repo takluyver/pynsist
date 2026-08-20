@@ -64,6 +64,8 @@ CONFIG_VALIDATORS = {
         ('console', False),
         ('extra_preamble', False),
         ('license_file', False),
+        ('run_after_install', False),
+        ('run_on_windows_start', False),
     ]),
     'Build': SectionValidator([
         ('directory', False),
@@ -239,4 +241,6 @@ def get_installer_builder_args(config):
     args['nsi_template'] = config.get('Build', 'nsi_template', fallback=None)
     args['exclude'] = config.get('Include', 'exclude', fallback='').strip().splitlines()
     args['local_wheels'] = config.get('Include', 'local_wheels', fallback='').strip().splitlines()
+    args['run_after_install'] = appcfg.get('run_after_install', None)
+    args['run_on_windows_start'] = appcfg.get('run_on_windows_start', None)
     return args
