@@ -227,6 +227,17 @@ def extract_wheel(whl_file, target_dir, exclude=None):
         else:
             zf.extractall(str(td))
 
+    # This is a ugly HACK to copy Kivy DLL to Python directory
+    target = Path(target_dir)
+    python_target_dir = target / ".." / "Python"
+    copied_something = False
+
+    try:
+        python_target_dir.mkdir()
+    except OSError:
+        if not python_target_dir.is_dir():
+            raise
+
     # Move extra lib files out of the .data subdirectory
     for p in td.iterdir():
         if p.suffix == '.data':
@@ -243,16 +254,24 @@ def extract_wheel(whl_file, target_dir, exclude=None):
             # https://github.com/takluyver/pynsist/issues/171
             # This is especially ugly because we do a case-insensitive match,
             # regardless of the filesystem.
+            #
+            # HACK Similar hack for Kivy but directly copying DLLs to target
+            # Python directory
             if (p / 'data').is_dir():
                 for sd in (p / 'data').iterdir():
                     if sd.name.lower() == 'lib' and sd.is_dir():
                         for sd2 in sd.iterdir():
                             if sd2.name.lower() == 'site-packages' and sd2.is_dir():
                                 merge_dir_to(sd2, td)
+                    elif sd.name.lower() == 'share' and sd.is_dir():
+                        for sd2 in sd.iterdir():
+                            if sd2.is_dir():
+                                for sd3 in sd2.iterdir():
+                                    if sd3.is_dir():
+                                        merge_dir_to(sd3, python_target_dir)
+                                        copied_something = True
 
     # Copy to target directory
-    target = Path(target_dir)
-    copied_something = False
     for p in td.iterdir():
         if p.suffix not in {'.data'}:
             if p.is_dir():
