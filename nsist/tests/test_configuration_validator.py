@@ -77,3 +77,17 @@ def test_invalid_config_file():
     with pytest.raises(configparser.Error):
         configfile = os.path.join(DATA_FILES, 'not_a_config.cfg')
         configreader.read_and_validate(configfile)
+
+def test_invalid_bitness_value():
+    # a non-integer bitness is a clean InvalidConfig, not a raw ValueError
+    configfile = os.path.join(DATA_FILES, 'invalid_bitness.cfg')
+    config = configreader.read_and_validate(configfile)
+    with pytest.raises(configreader.InvalidConfig):
+        configreader.get_installer_builder_args(config)
+
+def test_invalid_console_value():
+    # a non-boolean console value is a clean InvalidConfig, not a raw ValueError
+    configfile = os.path.join(DATA_FILES, 'invalid_console.cfg')
+    config = configreader.read_and_validate(configfile)
+    with pytest.raises(configreader.InvalidConfig):
+        configreader.get_installer_builder_args(config)

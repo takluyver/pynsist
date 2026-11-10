@@ -168,7 +168,11 @@ def read_shortcuts_config(cfg):
         if 'icon' not in sc2:
             from . import DEFAULT_ICON
             sc2['icon'] = DEFAULT_ICON
-        sc2['console'] = sc.getboolean('console', fallback=False)
+        try:
+            sc2['console'] = sc.getboolean('console', fallback=False)
+        except ValueError:
+            raise InvalidConfig(
+                "'console' in section [{}] must be a boolean (true/false)".format(section))
         sc2['parameters'] = sc.get('parameters', fallback='')
         if 'extra_preamble' in sc2:
             if 'entry_point' not in sc2:
@@ -201,7 +205,11 @@ def read_commands_config(cfg):
         if section.startswith("Command "):
             name = section[len("Command "):]
             commands[name] = cc = dict(cfg[section])
-            cc['console'] = cfg[section].getboolean('console', fallback=True)
+            try:
+                cc['console'] = cfg[section].getboolean('console', fallback=True)
+            except ValueError:
+                raise InvalidConfig(
+                    "'console' in section [{}] must be a boolean (true/false)".format(section))
             if ('extra_preamble' in cc) and \
                     not os.path.isfile(cc['extra_preamble']):
                 raise InvalidConfig('extra_preamble file %r does not exist' %
@@ -232,8 +240,14 @@ def get_installer_builder_args(config):
     ]
     args['extra_files'] = read_extra_files(config)
     args['py_version'] = config.get('Python', 'version', fallback=DEFAULT_PY_VERSION)
-    args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)
-    args['inc_msvcrt'] = config.getboolean('Python', 'include_msvcrt', fallback=True)
+    try:
+        args['py_bitness'] = config.getint('Python', 'bitness', fallback=DEFAULT_BITNESS)
+    except ValueError:
+        raise InvalidConfig("'bitness' in section [Python] must be an integer (32 or 64)")
+    try:
+        args['inc_msvcrt'] = config.getboolean('Python', 'include_msvcrt', fallback=True)
+    except ValueError:
+        raise InvalidConfig("'include_msvcrt' in section [Python] must be a boolean (true/false)")
     args['build_dir'] = config.get('Build', 'directory', fallback=DEFAULT_BUILD_DIR)
     args['installer_name'] = config.get('Build', 'installer_name', fallback=None)
     args['nsi_template'] = config.get('Build', 'nsi_template', fallback=None)
